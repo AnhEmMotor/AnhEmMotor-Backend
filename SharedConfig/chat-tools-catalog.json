@@ -1,891 +1,1788 @@
 [
-  {
-    "name": "search_products",
-    "path": "products/search",
-    "label": "Tìm sản phẩm",
-    "module": "product",
-    "required_permissions": ["Permissions.Order.ProductManagement.View"],
-    "is_write": false,
-    "description": "Tìm kiếm sản phẩm trong hệ thống theo từ khóa (có thể gồm tên thương hiệu/danh mục trong từ khóa). DÙNG KHI người dùng hỏi 'có sản phẩm nào...', 'tìm giúp tôi...', 'shop có bán... không'. KHÔNG dùng để tra tồn kho hay giá của MỘT sản phẩm cụ thể đã biết ID — dùng get_product_stock cho việc đó (kết quả search_products trả về product_id để dùng tiếp cho get_product_stock). Ví dụ: 'Shop có nhớt Motul không?', 'Tìm phụ tùng Honda Wave'.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": false, "default": "", "label": "Từ khóa", "description": "Từ khóa tìm kiếm tên sản phẩm dạng CHUỖI VĂN BẢN đơn giản (không phải object), có thể gồm cả tên thương hiệu/danh mục trong câu, ví dụ 'nhớt Motul', 'lốp Michelin', 'phụ tùng Honda Wave'. Để trống '' nếu không lọc theo từ khóa." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng kết quả tối đa muốn trả về." }
-    ]
-  },
-  {
-    "name": "get_product_stock",
-    "path": "products/stock",
-    "label": "Tra tồn kho",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.ProductManagement.View"],
-    "is_write": false,
-    "description": "Tra số lượng tồn kho hiện tại của một sản phẩm cụ thể, theo product_id. DÙNG KHI người dùng hỏi 'còn hàng không', 'còn bao nhiêu cái', 'tồn kho sản phẩm X' VÀ đã biết product_id (nếu chưa biết, gọi search_products trước để tìm product_id rồi mới gọi tool này). KHÔNG dùng để tìm danh sách nhiều sản phẩm — dùng search_products cho việc đó. Ví dụ: 'Lốp Michelin còn tồn kho không?' → gọi search_products trước, rồi get_product_stock.",
-    "args": [
-      { "name": "product_id", "type": "integer", "required": true, "label": "Mã sản phẩm", "description": "ID sản phẩm cần tra tồn kho. Nếu chưa biết ID, gọi search_products trước để lấy product_id." }
-    ]
-  },
-  {
-    "name": "get_low_stock_products",
-    "path": "products/low-stock",
-    "label": "Tra sản phẩm sắp hết hàng",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.ProductManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách sản phẩm sắp hết hàng (tồn kho thấp) để cảnh báo nhập thêm hàng. DÙNG KHI người dùng hỏi 'sản phẩm nào sắp hết hàng', 'cần nhập thêm gì', 'kiểm tra hàng tồn thấp'. KHÔNG dùng khi người dùng hỏi tồn kho của MỘT sản phẩm cụ thể — dùng get_product_stock cho việc đó. Ví dụ: 'Có sản phẩm nào sắp hết hàng không?', 'Danh sách hàng cần nhập thêm'.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng sản phẩm tối đa muốn trả về. Ngưỡng 'sắp hết hàng' do hệ thống quyết định, không tự đặt được." }
-    ]
-  },
-  {
-    "name": "get_order_status",
-    "path": "orders/status",
-    "label": "Tra đơn hàng",
-    "module": "sales",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "Tra cứu trạng thái và thông tin của (các) đơn hàng khớp tên khách hàng hoặc số điện thoại (tối đa 5 đơn gần nhất). DÙNG KHI người dùng hỏi 'đơn hàng của anh A tới đâu rồi', 'đơn của SĐT 09xx đã giao chưa'. KHÔNG dùng cho câu hỏi về doanh thu hay thống kê nhiều đơn — dùng get_sales_summary cho việc đó. Ví dụ: 'Đơn hàng của Nguyễn Văn A đang ở trạng thái nào?'.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc số điện thoại của đơn hàng cần tra cứu." }
-    ]
-  },
-  {
-    "name": "get_sales_summary",
-    "path": "analytics/sales",
-    "label": "Tra doanh thu",
-    "module": "sales",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "Lấy tổng doanh thu và số lượng đơn hàng trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'doanh thu tháng này', 'bán được bao nhiêu đơn trong tuần qua'. KHÔNG dùng để tra một đơn hàng cụ thể hoặc top sản phẩm bán chạy — dùng get_order_status hoặc get_top_selling cho việc đó. Ví dụ: 'Doanh thu từ 01/07 đến 28/07 là bao nhiêu?'.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "default": "", "label": "Từ ngày", "description": "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' khi người dùng hỏi 'hôm nay'/'tháng này' — tool tự tính đúng theo giờ Việt Nam, KHÔNG tự đoán ngày." },
-      { "name": "to_date", "type": "string", "required": false, "default": "", "label": "Đến ngày", "description": "Ngày kết thúc khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' để tính đến hôm nay theo giờ Việt Nam." }
-    ]
-  },
-  {
-    "name": "get_top_selling",
-    "path": "analytics/top-selling",
-    "label": "Tra sản phẩm bán chạy",
-    "module": "sales",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách các sản phẩm bán chạy nhất (top N) trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'sản phẩm nào bán chạy nhất', 'top 5 sản phẩm bán tốt tháng này'. KHÔNG dùng cho tổng doanh thu chung — dùng get_sales_summary cho việc đó. Ví dụ: 'Top 5 sản phẩm bán chạy nhất tháng 7 là gì?'.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "default": "", "label": "Từ ngày", "description": "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' để lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "default": "", "label": "Đến ngày", "description": "Ngày kết thúc khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' để tính đến hôm nay." },
-      { "name": "limit", "type": "integer", "required": false, "default": 5, "label": "Top N", "description": "Số lượng sản phẩm bán chạy nhất muốn trả về (top N)." }
-    ]
-  },
-  {
-    "name": "list_booking_appointments",
-    "path": "bookings/appointments",
-    "label": "Danh sách lịch hẹn",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.BookingAppointmentManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về lịch hẹn đặt trước dịch vụ (đặt hẹn bảo dưỡng/sửa xe qua form/website), cần xem danh sách theo khoảng ngày hẹn, trạng thái xác nhận, showroom. KHÔNG DÙNG KHI người dùng hỏi về đơn đặt hàng sản phẩm/bán hàng (dùng list_bookings) hoặc phiếu sửa chữa đã lên lịch làm việc thực tế (dùng list_repair_orders).",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd)." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_product_detail",
-    "path": "products/detail",
-    "label": "Chi tiết sản phẩm",
-    "module": "product",
-    "required_permissions": ["Permissions.Order.ProductManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi chi tiết MỘT sản phẩm cụ thể đã biết mã (product_id) — ví dụ 'sản phẩm mã 45 có giá bao nhiêu, có mấy biến thể'. KHÔNG DÙNG KHI người dùng muốn tìm kiếm hoặc liệt kê nhiều sản phẩm theo từ khóa/danh mục (dùng search_products cho trường hợp đó).",
-    "args": [
-      { "name": "product_id", "type": "integer", "required": true, "label": "Mã sản phẩm", "description": "ID sản phẩm cần xem chi tiết." }
-    ]
-  },
-  {
-    "name": "get_inventory_report",
-    "path": "inventory/report",
-    "label": "Báo cáo tồn kho",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.InventoryReportManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về tồn kho tổng hợp theo sản phẩm/biến thể/màu (số lượng đầu kỳ, nhập, xuất, tồn cuối kỳ), có thể lọc theo tên sản phẩm, tháng, năm. KHÔNG DÙNG KHI chỉ cần danh sách sản phẩm sắp hết hàng (dùng get_low_stock_products) hoặc chỉ cần tra tồn kho của 1 sản phẩm/biến thể cụ thể theo ID (dùng get_product_stock).",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." },
-      { "name": "search_term", "type": "string", "required": false, "label": "Tìm kiếm", "description": "Lọc theo tên sản phẩm." },
-      { "name": "month", "type": "integer", "required": false, "label": "Tháng", "description": "Lọc theo tháng báo cáo." },
-      { "name": "year", "type": "integer", "required": false, "label": "Năm", "description": "Lọc theo năm báo cáo." }
-    ]
-  },
-  {
-    "name": "list_orders",
-    "path": "orders/list",
-    "label": "Danh sách đơn hàng",
-    "module": "sales",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi danh sách/tổng quan nhiều đơn hàng gần đây, lọc theo khoảng ngày và/hoặc trạng thái (ví dụ: 'các đơn hàng tuần này', 'đơn hàng đang chờ xử lý'). KHÔNG DÙNG KHI người dùng hỏi về 1 đơn hàng cụ thể theo mã/ID (dùng get_order_status trong trường hợp đó).",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd)." },
-      { "name": "status_id", "type": "string", "required": false, "label": "Trạng thái", "description": "Mã trạng thái đơn hàng để lọc, bỏ trống lấy tất cả trạng thái." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_order_statistics",
-    "path": "orders/statistics",
-    "label": "Thống kê đơn hàng",
-    "module": "sales",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi số lượng/tỷ trọng đơn hàng theo trạng thái (ví dụ: có bao nhiêu đơn đang chờ xử lý, đã hoàn thành, đã huỷ...). KHÔNG DÙNG KHI cần danh sách chi tiết từng đơn hàng (mã đơn, khách hàng, sản phẩm...) — dùng list_orders. KHÔNG DÙNG KHI hỏi về doanh thu/lợi nhuận bằng tiền — dùng get_sales_summary. Lưu ý: số liệu hiện là tổng toàn bộ đơn hàng, chưa lọc chính xác theo khoảng ngày do hạn chế của nguồn dữ liệu.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd)." }
-    ]
-  },
-  {
-    "name": "get_customer_profile",
-    "path": "customers/profile",
-    "label": "Hồ sơ khách hàng",
-    "module": "customer",
-    "required_permissions": ["Permissions.Order.CustomerManagement.View"],
-    "is_write": false,
-    "description": "Trả thông tin cá nhân và tổng quan giao dịch của MỘT khách hàng cụ thể (họ tên, số điện thoại, tổng số đơn, tổng chi tiêu, hạng thành viên). DÙNG KHI đã biết mã khách hàng cụ thể (customer_id). KHÔNG DÙNG KHI chỉ có tên/số điện thoại và cần tìm khách hàng — hãy dùng search_customers trước để lấy customer_id.",
-    "args": [
-      { "name": "customer_id", "type": "integer", "required": true, "label": "Mã khách hàng", "description": "ID khách hàng cần xem hồ sơ." }
-    ]
-  },
-  {
-    "name": "search_customers",
-    "path": "customers/search",
-    "label": "Tìm khách hàng",
-    "module": "customer",
-    "required_permissions": ["Permissions.Order.CustomerManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần tìm nhanh khách hàng theo tên hoặc số điện thoại để lấy customer_id. KHÔNG DÙNG KHI đã biết customer_id và cần xem chi tiết đầy đủ — khi đó gọi get_customer_profile với ID vừa tìm được.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên hoặc số điện thoại khách hàng cần tìm." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "list_repair_orders",
-    "path": "repair-orders/list",
-    "label": "Danh sách phiếu sửa chữa",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về danh sách/nhiều phiếu sửa chữa xe gần đây. KHÔNG DÙNG KHI người dùng hỏi chi tiết MỘT phiếu sửa chữa cụ thể theo ID/mã phiếu — khi đó dùng get_repair_order_detail. Lưu ý: dữ liệu phiếu sửa chữa hiện không có trường trạng thái (status), nên tool này không hỗ trợ lọc theo trạng thái.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_repair_order_detail",
-    "path": "repair-orders/detail",
-    "label": "Chi tiết phiếu sửa chữa",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần xem chi tiết phiếu sửa chữa (hạng mục sửa chữa, phụ tùng, chi phí, kỹ thuật viên) theo TÊN KHÁCH HÀNG hoặc BIỂN SỐ XE, không cần biết mã phiếu (tối đa 5 kết quả khớp gần nhất). KHÔNG DÙNG KHI cần liệt kê nhiều phiếu sửa chữa không lọc theo khách/xe cụ thể — dùng list_repair_orders cho trường hợp đó.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc biển số xe (hoặc VIN) cần tìm phiếu sửa chữa." }
-    ]
-  },
-  {
-    "name": "list_warranty_claims",
-    "path": "warranty/claims",
-    "label": "Danh sách yêu cầu bảo hành",
-    "module": "warranty",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần danh sách nhiều yêu cầu bảo hành (có thể lọc theo trạng thái). KHÔNG DÙNG KHI cần chi tiết 1 yêu cầu cụ thể theo ID (dùng get_warranty_claim_detail) hoặc khi hỏi về điều khoản/chính sách bảo hành chung, không phải yêu cầu thực tế (dùng get_warranty_terms).",
-    "args": [
-      { "name": "status_id", "type": "string", "required": false, "label": "Trạng thái", "description": "Lọc theo trạng thái yêu cầu bảo hành (mã số: 1 Tiếp nhận, 2 Chờ hãng thẩm định, 3 Đã duyệt bồi hoàn, 4 Thợ thay thế, 5 Hoàn tất, 6 Từ chối), bỏ trống lấy tất cả." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_pnl_report",
-    "path": "finance/pnl",
-    "label": "Báo cáo lãi lỗ",
-    "module": "finance",
-    "required_permissions": ["Permissions.Accountant.DashboardManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi rõ ràng về báo cáo lãi/lỗ (P&L), lợi nhuận gộp, lợi nhuận ròng theo tháng. KHÔNG DÙNG KHI câu hỏi chỉ cần doanh thu đơn thuần (dùng get_sales_summary). Đây là dữ liệu tài chính rất nhạy cảm — chỉ gọi khi người hỏi thực sự cần báo cáo lãi/lỗ. Lưu ý: dữ liệu tính theo tháng dương lịch chứa 'Đến ngày', chưa hỗ trợ khoảng ngày tuỳ ý chính xác.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd)." }
-    ]
-  },
-  {
-    "name": "get_suppliers_with_debt",
-    "path": "finance/suppliers-with-debt",
-    "label": "Công nợ nhà cung cấp",
-    "module": "finance",
-    "required_permissions": ["Permissions.Accountant.DebtPaymentManagement.View"],
-    "is_write": false,
-    "description": "Trả về danh sách nhà cung cấp còn công nợ (dư nợ > 0), sắp xếp giảm dần theo số tiền nợ. DÙNG KHI người dùng hỏi tổng quan/danh sách nhiều nhà cung cấp đang nợ. KHÔNG DÙNG KHI người dùng hỏi chi tiết công nợ của MỘT nhà cung cấp cụ thể — trường hợp đó dùng get_supplier_debt_detail.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_shipment_tracking",
-    "path": "logistics/shipment-tracking",
-    "label": "Tra vận đơn",
-    "module": "logistics",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về tình trạng vận chuyển, đơn vị vận chuyển hoặc thời gian giao hàng của (các) đơn hàng khớp tên khách hàng hoặc số điện thoại (tối đa 5 vận đơn gần nhất, bỏ qua đơn chưa có vận đơn). KHÔNG DÙNG KHI người dùng chỉ hỏi trạng thái đơn hàng nói chung (thanh toán, tổng tiền) — trường hợp đó dùng get_order_status.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc số điện thoại của đơn hàng cần tra vận đơn." }
-    ]
-  },
-  {
-    "name": "get_dashboard_overview",
-    "path": "admin/dashboard-overview",
-    "label": "Tổng quan dashboard",
-    "module": "admin",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi tổng quan toàn hệ thống dành cho Admin (doanh thu, lợi nhuận, số đơn chờ xử lý/quá hạn, khách hàng mới, số xe bán ra, tồn kho hiện tại, công nợ quá hạn) trong một lệnh duy nhất. KHÔNG DÙNG KHI chỉ cần riêng doanh thu theo ngày/kỳ (dùng get_sales_summary thay thế).",
-    "args": []
-  },
-  {
-    "name": "get_product_price_list",
-    "path": "products/price-list",
-    "label": "Danh sách giá sản phẩm",
-    "module": "product",
-    "required_permissions": ["Permissions.Order.ProductManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách sản phẩm kèm giá bán hiện tại, có thể lọc theo từ khóa tên sản phẩm. DÙNG KHI người dùng hỏi 'giá các sản phẩm là bao nhiêu', 'liệt kê giá nhớt Motul', 'bảng giá sản phẩm'. KHÔNG dùng để tra tồn kho một sản phẩm cụ thể — dùng get_product_stock cho việc đó.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": false, "default": "", "label": "Từ khóa", "description": "Từ khóa lọc theo tên sản phẩm, ví dụ 'nhớt Motul'. Để trống '' nếu không lọc." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng sản phẩm tối đa trả về." }
-    ]
-  },
-  {
-    "name": "list_brands",
-    "path": "products/brands",
-    "label": "Danh sách thương hiệu",
-    "module": "product",
-    "required_permissions": ["Permissions.Warehouse.ProductManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách các thương hiệu sản phẩm hiện có trong hệ thống. DÙNG KHI người dùng hỏi 'shop bán những thương hiệu nào', 'có hãng nào', 'liệt kê brand'. KHÔNG dùng để tìm sản phẩm cụ thể của một hãng — dùng search_products cho việc đó.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng thương hiệu tối đa trả về." }
-    ]
-  },
-  {
-    "name": "list_categories",
-    "path": "products/categories",
-    "label": "Danh sách danh mục sản phẩm",
-    "module": "product",
-    "required_permissions": ["Permissions.Warehouse.ProductManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách danh mục sản phẩm kèm số lượng sản phẩm trong mỗi danh mục. DÙNG KHI người dùng hỏi 'shop có những danh mục gì'. KHÔNG dùng để tìm sản phẩm cụ thể — dùng search_products cho việc đó.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng danh mục tối đa trả về." }
-    ]
-  },
-  {
-    "name": "get_supplier_prices_for_variant",
-    "path": "suppliers/variant-prices",
-    "label": "Giá báo giá của NCC theo biến thể sản phẩm",
-    "module": "supplier",
-    "required_permissions": ["Permissions.Warehouse.SupplierManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần tra cứu các mức giá báo giá (quotation) mà các nhà cung cấp đã đưa ra cho một biến thể sản phẩm cụ thể, để so sánh giá nhập giữa các NCC. KHÔNG DÙNG KHI cần giá bán lẻ cho khách hàng — dùng get_product_detail/search_products.",
-    "args": [
-      { "name": "variant_id", "type": "integer", "required": true, "label": "Mã biến thể sản phẩm", "description": "Id của ProductVariant cần xem báo giá NCC." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số báo giá tối đa trả về (mặc định 10, tối đa 25)." }
-    ]
-  },
-  {
-    "name": "search_suppliers",
-    "path": "suppliers/search",
-    "label": "Tìm kiếm nhà cung cấp",
-    "module": "supplier",
-    "required_permissions": ["Permissions.Warehouse.SupplierManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần tìm nhà cung cấp theo tên (một phần hoặc gần đúng) để lấy thông tin liên hệ cơ bản. KHÔNG DÙNG KHI cần thống kê tổng quan (dùng get_supplier_statistics) hoặc cần công nợ (dùng get_suppliers_with_debt/get_supplier_debt_detail).",
-    "args": [
-      { "name": "keyword", "type": "string", "required": false, "label": "Từ khóa", "description": "Tên hoặc một phần tên nhà cung cấp cần tìm." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số kết quả tối đa trả về (mặc định 10, tối đa 25)." }
-    ]
-  },
-  {
-    "name": "get_supplier_statistics",
-    "path": "suppliers/statistics",
-    "label": "Thống kê tổng quan nhà cung cấp",
-    "module": "supplier",
-    "required_permissions": ["Permissions.Warehouse.SupplierManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần số liệu tổng quan toàn hệ thống về nhà cung cấp: tổng số NCC, số NCC theo loại. KHÔNG DÙNG KHI cần thông tin chi tiết một NCC cụ thể (dùng search_suppliers) hoặc công nợ theo từng NCC (dùng get_suppliers_with_debt).",
-    "args": []
-  },
-  {
-    "name": "get_inventory_ledger",
-    "path": "inventory/ledger",
-    "label": "Sổ xuất nhập kho",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.LedgerManagement.View"],
-    "is_write": false,
-    "description": "Trả về các dòng ghi sổ xuất/nhập/điều chỉnh kho (số lượng nhập, xuất, tồn sau giao dịch) trong một khoảng thời gian, có thể lọc theo sản phẩm hoặc biến thể. DÙNG KHI người dùng hỏi 'lịch sử xuất nhập kho của sản phẩm X'. KHÔNG DÙNG KHI chỉ cần số tồn hiện tại (dùng get_product_stock) hoặc danh sách phiếu nhập kho (dùng list_inventory_receipts).",
-    "args": [
-      { "name": "product_id", "type": "integer", "required": false, "label": "Mã sản phẩm", "description": "Lọc theo ID sản phẩm, bỏ trống để không lọc." },
-      { "name": "variant_id", "type": "integer", "required": false, "label": "Mã biến thể", "description": "Lọc theo ID biến thể sản phẩm, bỏ trống để không lọc." },
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd)." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "list_inventory_receipts",
-    "path": "inventory/receipts",
-    "label": "Danh sách phiếu nhập kho",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.ReceiptManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi danh sách/nhiều phiếu nhập kho gần đây, có thể lọc theo khoảng ngày tạo phiếu. KHÔNG DÙNG KHI người dùng hỏi chi tiết MỘT phiếu nhập cụ thể theo ID — dùng get_inventory_receipt_detail.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày tạo phiếu bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày tạo phiếu kết thúc (yyyy-MM-dd)." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_inventory_receipt_detail",
-    "path": "inventory/receipts/detail",
-    "label": "Chi tiết phiếu nhập kho",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.ReceiptManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi chi tiết phiếu nhập kho theo TÊN NHÀ CUNG CẤP (nhà cung cấp, trạng thái, danh sách sản phẩm, số lượng, đơn giá, tổng tiền). Trả về tối đa 5 phiếu khớp gần nhất. KHÔNG DÙNG KHI cần liệt kê nhiều phiếu nhập kho không lọc theo NCC — dùng list_inventory_receipts.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Tên nhà cung cấp", "description": "Tên (hoặc một phần tên) nhà cung cấp cần tìm phiếu nhập kho." }
-    ]
-  },
-  {
-    "name": "list_purchase_requests",
-    "path": "inventory/purchase-requests",
-    "label": "Danh sách yêu cầu mua hàng",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.PurchaseRequestManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi danh sách/tổng quan nhiều yêu cầu mua hàng (PR) gần đây, có thể lọc theo trạng thái. KHÔNG DÙNG KHI người dùng hỏi về 1 yêu cầu mua hàng cụ thể theo ID — dùng get_purchase_request_detail.",
-    "args": [
-      { "name": "status_id", "type": "string", "required": false, "label": "Trạng thái", "description": "Lọc theo trạng thái yêu cầu mua hàng, bỏ trống lấy tất cả." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_purchase_request_detail",
-    "path": "inventory/purchase-requests/detail",
-    "label": "Chi tiết yêu cầu mua hàng",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.PurchaseRequestManagement.View"],
-    "is_write": false,
-    "description": "Tìm chi tiết yêu cầu mua hàng (PR) theo TÊN NHÀ CUNG CẤP, không cần biết ID. Trả về tối đa 5 yêu cầu khớp gần nhất, mới nhất trước. KHÔNG DÙNG KHI cần danh sách nhiều PR không lọc theo NCC — dùng list_purchase_requests.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Tên nhà cung cấp", "description": "Tên (hoặc một phần tên) nhà cung cấp cần tìm yêu cầu mua hàng." }
-    ]
-  },
-  {
-    "name": "get_revenue_by_category",
-    "path": "analytics/revenue-by-category",
-    "label": "Doanh thu theo danh mục sản phẩm",
-    "module": "sales",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "Trả về doanh thu và tỷ trọng (%) theo TỪNG DANH MỤC sản phẩm trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'danh mục nào bán tốt nhất', 'cơ cấu doanh thu theo loại sản phẩm'. KHÔNG DÙNG KHI hỏi tổng doanh thu theo ngày (dùng get_sales_summary) hoặc xếp hạng SẢN PHẨM cụ thể (dùng get_top_selling).",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số danh mục", "description": "Số danh mục tối đa trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_sales_report",
-    "path": "sales/report",
-    "label": "Báo cáo danh sách đơn hàng bán ra",
-    "module": "sales",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "Trả về DANH SÁCH các đơn hàng (order id, khách hàng, trạng thái, tổng tiền, ngày tạo) trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'liệt kê đơn hàng gần đây', 'xem báo cáo đơn hàng tháng này'. KHÔNG DÙNG KHI chỉ cần TỔNG doanh thu theo ngày (dùng get_sales_summary) hoặc lọc nâng cao theo trạng thái (dùng list_orders).",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số đơn hàng tối đa trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_recent_transactions",
-    "path": "analytics/recent-transactions",
-    "label": "Giao dịch gần đây",
-    "module": "sales",
-    "required_permissions": ["Permissions.Accountant.DashboardManagement.View"],
-    "is_write": false,
-    "description": "Trả về nhật ký các GIAO DỊCH tiền gần nhất (thời gian, khách hàng, sản phẩm, số tiền, thu/chi, trạng thái, nhân viên). DÙNG KHI người dùng hỏi 'giao dịch gần đây', 'các khoản thu chi mới nhất'. KHÔNG DÙNG KHI cần tổng hợp doanh thu theo ngày/danh mục (dùng get_sales_summary/get_revenue_by_category) hoặc danh sách đơn hàng đầy đủ (dùng get_sales_report/list_orders).",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số giao dịch tối đa trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "list_sales_contracts",
-    "path": "contracts/sales",
-    "label": "Danh sách hợp đồng bán hàng",
-    "module": "contract",
-    "required_permissions": ["Permissions.Order.ContractManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách hợp đồng bán xe mới nhất, có thể lọc theo trạng thái. DÙNG KHI người dùng hỏi 'các hợp đồng bán hàng gần đây', 'hợp đồng nào đang chờ ký'. KHÔNG DÙNG KHI hỏi về hợp đồng tài chính/vay ngân hàng (dùng list_finance_contracts) hoặc hợp đồng với nhà cung cấp (dùng list_supplier_contracts).",
-    "args": [
-      { "name": "status_id", "type": "string", "required": false, "default": "", "label": "Trạng thái", "description": "Lọc theo trạng thái hợp đồng bán hàng. Để trống '' nếu không lọc." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng hợp đồng tối đa muốn trả về." }
-    ]
-  },
-  {
-    "name": "list_finance_contracts",
-    "path": "contracts/finance",
-    "label": "Danh sách hợp đồng tài chính",
-    "module": "contract",
-    "required_permissions": ["Permissions.Admin.FinanceContractManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách hợp đồng vay tài chính/trả góp mới nhất, có thể lọc theo trạng thái giải ngân. DÙNG KHI người dùng hỏi 'các hợp đồng vay đang xử lý'. KHÔNG DÙNG KHI hỏi về hợp đồng bán xe (dùng list_sales_contracts) hoặc hợp đồng nhà cung cấp (dùng list_supplier_contracts).",
-    "args": [
-      { "name": "status_id", "type": "string", "required": false, "default": "", "label": "Trạng thái giải ngân", "description": "Lọc theo trạng thái giải ngân. Để trống '' nếu không lọc." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng hợp đồng tối đa muốn trả về." }
-    ]
-  },
-  {
-    "name": "list_supplier_contracts",
-    "path": "contracts/supplier",
-    "label": "Danh sách hợp đồng nhà cung cấp",
-    "module": "contract",
-    "required_permissions": ["Permissions.Accountant.SupplierContractManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách hợp đồng với nhà cung cấp mới nhất, có thể lọc theo trạng thái. DÙNG KHI người dùng hỏi 'hợp đồng với nhà cung cấp nào còn hiệu lực'. KHÔNG DÙNG KHI hỏi về hợp đồng bán xe (dùng list_sales_contracts) hoặc hợp đồng vay tài chính (dùng list_finance_contracts).",
-    "args": [
-      { "name": "status_id", "type": "string", "required": false, "default": "", "label": "Trạng thái", "description": "Lọc theo trạng thái hợp đồng nhà cung cấp. Để trống '' nếu không lọc." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng hợp đồng tối đa muốn trả về." }
-    ]
-  },
-  {
-    "name": "list_vouchers",
-    "path": "marketing/vouchers",
-    "label": "Danh sách voucher",
-    "module": "marketing",
-    "required_permissions": ["Permissions.Marketing.CustomerVoucherManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách voucher/mã giảm giá mới nhất trong hệ thống. DÙNG KHI người dùng hỏi 'đang có voucher nào', 'mã giảm giá nào còn hiệu lực'.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng voucher tối đa muốn trả về." }
-    ]
-  },
-  {
-    "name": "get_lead_pipeline",
-    "path": "leads/pipeline",
-    "label": "Tra pipeline lead",
-    "module": "customer",
-    "required_permissions": ["Permissions.Marketing.LeadManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách lead theo từng giai đoạn pipeline (Mới, Đang tư vấn, Đang lái thử, Đã đặt cọc, Đang chờ giấy tờ, Đã giao xe). DÙNG KHI người dùng hỏi 'pipeline lead hiện tại thế nào', 'có bao nhiêu lead đang đặt cọc'. KHÔNG dùng để tra chi tiết một lead cụ thể theo tên/SĐT — dùng get_lead_detail.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng", "description": "Số lead tối đa trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_lead_detail",
-    "path": "leads/detail",
-    "label": "Tra chi tiết lead",
-    "module": "customer",
-    "required_permissions": ["Permissions.Marketing.LeadManagement.View"],
-    "is_write": false,
-    "description": "Tìm chi tiết lead (khách hàng tiềm năng) theo tên hoặc số điện thoại: trạng thái, nguồn, xe quan tâm, điểm số, người phụ trách. Trả về tối đa 5 lead khớp gần nhất. KHÔNG dùng cho danh sách nhiều lead theo giai đoạn pipeline — dùng get_lead_pipeline.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên hoặc số điện thoại của lead cần tìm." }
-    ]
-  },
-  {
-    "name": "list_contacts",
-    "path": "contacts/list",
-    "label": "Tra danh sách liên hệ",
-    "module": "customer",
-    "required_permissions": ["Permissions.Marketing.ContactManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách các liên hệ gần nhất gửi tới (hỗ trợ, phản hồi, ứng tuyển), sắp xếp mới nhất trước. DÙNG KHI người dùng hỏi 'có liên hệ mới nào không'.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng", "description": "Số liên hệ tối đa trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_loyalty_members",
-    "path": "loyalty/members",
-    "label": "Tra thành viên thân thiết",
-    "module": "customer",
-    "required_permissions": ["Permissions.Marketing.CustomerCareManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách thành viên chương trình khách hàng thân thiết, sắp xếp theo điểm tích lũy giảm dần. DÙNG KHI người dùng hỏi 'ai đang có điểm cao nhất', 'danh sách khách hàng thân thiết'.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng", "description": "Số thành viên tối đa trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_product_view_history",
-    "path": "marketing/product-view-history",
-    "label": "Lịch sử xem sản phẩm",
-    "module": "customer",
-    "required_permissions": ["Permissions.Marketing.CustomerCareManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách sản phẩm/biến thể mà MỘT khách hàng đã ĐĂNG NHẬP tài khoản cụ thể đã XEM gần đây trên website (khác với sản phẩm đã MUA). DÙNG KHI người dùng hỏi 'khách này đang xem/quan tâm sản phẩm nào', 'khách hay xem gì trên web'. KHÔNG DÙNG cho lịch sử đơn hàng/mua sắm — dùng get_order_status/get_customer_profile cho việc đó. LƯU Ý: customer_keyword tra trên TÀI KHOẢN ĐĂNG NHẬP của khách hàng (email/SĐT đăng ký), KHÔNG PHẢI customer_id lấy từ search_customers/get_customer_profile (đó là mã lead/CRM khác, KHÔNG dùng được ở đây) — truyền thẳng email hoặc số điện thoại người dùng cung cấp, không cần tra cứu ID trước. Cần MỘT trong hai: customer_keyword (khách đã đăng nhập) hoặc visitor_key (khách vãng lai chưa đăng nhập, thường không có sẵn trừ khi được cung cấp). Nếu thiếu cả hai hoặc không tìm thấy tài khoản khớp, tool trả về danh sách rỗng kèm cảnh báo.",
-    "args": [
-      { "name": "customer_keyword", "type": "string", "required": false, "default": "", "label": "Email/SĐT khách hàng", "description": "Email hoặc số điện thoại tài khoản đăng nhập của khách hàng. Để trống '' nếu tra theo visitor_key thay vì customer_keyword." },
-      { "name": "visitor_key", "type": "string", "required": false, "default": "", "label": "Mã khách vãng lai", "description": "Khóa định danh khách vãng lai chưa đăng nhập. Để trống '' nếu tra theo customer_keyword thay vì visitor_key." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượt xem sản phẩm tối đa muốn trả về, mặc định 10, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_warranty_claim_detail",
-    "path": "warranty/claims/detail",
-    "label": "Chi tiết yêu cầu bảo hành",
-    "module": "warranty",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần chi tiết đầy đủ 1 hoặc vài yêu cầu bảo hành, tìm theo tên khách hàng hoặc biển số xe (mô tả lỗi, phụ tùng thay, chi phí, quyết định hãng). Trả tối đa 5 kết quả khớp gần nhất. KHÔNG DÙNG KHI cần danh sách nhiều yêu cầu không theo khách/xe cụ thể (dùng list_warranty_claims) hoặc điều khoản/chính sách bảo hành chung (dùng get_warranty_terms).",
-    "args": [
-      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc biển số xe cần tìm yêu cầu bảo hành." }
-    ]
-  },
-  {
-    "name": "get_warranty_terms",
-    "path": "warranty/terms",
-    "label": "Điều khoản bảo hành",
-    "module": "warranty",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về điều khoản/chính sách bảo hành chung của hãng (thời hạn, phạm vi), KHÔNG phải một yêu cầu bảo hành thực tế đang xử lý. KHÔNG DÙNG KHI cần danh sách yêu cầu bảo hành thực tế (dùng list_warranty_claims) hoặc chi tiết 1 yêu cầu cụ thể (dùng get_warranty_claim_detail).",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "list_workshop_payments",
-    "path": "workshop/payments",
-    "label": "Danh sách phiếu thu xưởng",
-    "module": "warranty",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI cần danh sách các phiếu thu tiền từ xưởng sửa chữa/bảo hành. KHÔNG DÙNG KHI hỏi về yêu cầu bảo hành (dùng list_warranty_claims/get_warranty_claim_detail) hoặc doanh thu bán hàng chung (dùng get_sales_summary).",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "list_bookings",
-    "path": "bookings/list",
-    "label": "Danh sách đặt lịch lái thử",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.BookingManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về các lượt đặt lịch lái thử xe / đặt xe tại showroom. KHÔNG DÙNG KHI người dùng hỏi về lịch hẹn dịch vụ sửa chữa/bảo dưỡng đã xác nhận với khách hàng — dùng list_booking_appointments.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số lượng đặt lịch tối đa trả về, mặc định 10." }
-    ]
-  },
-  {
-    "name": "list_services",
-    "path": "services/list",
-    "label": "Danh sách dịch vụ",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về danh mục các dịch vụ sửa chữa/bảo dưỡng đang cung cấp và giá cơ bản. KHÔNG DÙNG KHI người dùng hỏi về một phiếu sửa chữa cụ thể đã lập cho khách — dùng list_repair_orders.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số lượng dịch vụ tối đa trả về, mặc định 10." }
-    ]
-  },
-  {
-    "name": "get_workshop_dashboard",
-    "path": "workshop/dashboard",
-    "label": "Tổng quan xưởng dịch vụ",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.DashboardManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi tổng quan tình hình xưởng dịch vụ trong một khoảng thời gian. KHÔNG DÙNG KHI người dùng hỏi chi tiết một phiếu sửa chữa/lịch hẹn cụ thể — dùng list_repair_orders hoặc list_booking_appointments.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày trước." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay." }
-    ]
-  },
-  {
-    "name": "get_vehicle_portfolio",
-    "path": "vehicles/portfolio",
-    "label": "Danh mục xe",
-    "module": "service",
-    "required_permissions": ["Permissions.Factory.CustomerManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi danh sách xe của khách hàng đang quản lý trong hệ thống. KHÔNG DÙNG KHI người dùng hỏi lịch sử sửa chữa/bảo dưỡng chi tiết của MỘT xe cụ thể theo biển số/VIN.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số lượng xe tối đa trả về, mặc định 10." }
-    ]
-  },
-  {
-    "name": "list_employees",
-    "path": "hr/employees",
-    "label": "Danh sách nhân viên",
-    "module": "hr",
-    "required_permissions": ["Permissions.Admin.EmployeeManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách nhân viên (tên, chức vụ, trạng thái tài khoản), có thể lọc theo từ khóa. DÙNG KHI người dùng hỏi 'có nhân viên nào tên...', 'danh sách nhân viên'. KHÔNG DÙNG KHI hỏi KPI hay hiệu suất (dùng get_employee_kpi/get_staff_performance). KHÔNG trả lương/hoa hồng/thông tin ngân hàng.",
-    "args": [
-      { "name": "keyword", "type": "string", "required": false, "default": "", "label": "Từ khóa", "description": "Từ khóa tìm theo tên hoặc chức vụ nhân viên. Để trống '' để lấy tất cả." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số bản ghi tối đa muốn trả về, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_employee_kpi",
-    "path": "hr/employee-kpi",
-    "label": "KPI nhân viên",
-    "module": "hr",
-    "required_permissions": ["Permissions.Admin.EmployeeManagement.View"],
-    "is_write": false,
-    "description": "Lấy các chỉ số KPI (theo từng kỳ) của một nhân viên cụ thể, theo employee_id. DÙNG KHI đã biết employee_id (nếu chưa biết, gọi list_employees trước). KHÔNG DÙNG KHI hỏi tổng quan hiệu suất nhiều nhân viên — dùng get_staff_performance. KHÔNG trả lương/hoa hồng.",
-    "args": [
-      { "name": "employee_id", "type": "integer", "required": true, "label": "Mã nhân viên", "description": "ID nhân viên cần tra KPI." }
-    ]
-  },
-  {
-    "name": "get_staff_performance",
-    "path": "hr/staff-performance",
-    "label": "Hiệu suất nhân viên",
-    "module": "hr",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "Lấy bảng hiệu suất bán hàng của nhân viên (doanh số, chỉ tiêu, trạng thái KPI) trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'nhân viên nào bán tốt nhất'. KHÔNG DÙNG KHI hỏi KPI chi tiết của MỘT nhân viên cụ thể — dùng get_employee_kpi. KHÔNG trả hoa hồng/lương.",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "default": "", "label": "Từ ngày", "description": "Để trống '' để lấy 30 ngày gần nhất." },
-      { "name": "to_date", "type": "string", "required": false, "default": "", "label": "Đến ngày", "description": "Để trống '' để tính đến hôm nay." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số nhân viên tối đa muốn trả về, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_warehouse_report",
-    "path": "admin/warehouse-report",
-    "label": "Báo cáo kho toàn hệ thống",
-    "module": "admin",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi sâu về tình trạng tồn kho toàn hệ thống: tổng tồn, tổng giá trị tồn kho, số sản phẩm sắp hết/hết hàng, phân bổ theo hãng xe. KHÔNG DÙNG KHI chỉ cần tổng quan chung (dùng get_dashboard_overview) hoặc doanh thu (dùng get_revenue_analysis).",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày trước." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay." }
-    ]
-  },
-  {
-    "name": "get_revenue_analysis",
-    "path": "admin/revenue-analysis",
-    "label": "Phân tích doanh thu",
-    "module": "admin",
-    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng muốn phân tích sâu doanh thu: xu hướng theo ngày, top sản phẩm theo doanh thu, phân bổ theo hãng xe. KHÔNG DÙNG KHI chỉ cần số tổng quan nhanh (dùng get_dashboard_overview), tồn kho (dùng get_warehouse_report), hoặc báo cáo lãi/lỗ (dùng get_pnl_report).",
-    "args": [
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày trước." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay." }
-    ]
-  },
-  {
-    "name": "get_supplier_debt_detail",
-    "path": "finance/supplier-debt-detail",
-    "label": "Chi tiết công nợ nhà cung cấp",
-    "module": "finance",
-    "required_permissions": ["Permissions.Accountant.DebtPaymentManagement.View"],
-    "is_write": false,
-    "description": "Trả về lịch sử các lần trả nợ (log công nợ) của MỘT nhà cung cấp cụ thể theo supplier_id, sắp xếp giảm dần theo ngày thanh toán. DÙNG KHI người dùng hỏi chi tiết/lịch sử công nợ của một NCC cụ thể. KHÔNG DÙNG KHI người dùng hỏi tổng quan/danh sách nhiều NCC đang nợ — dùng get_suppliers_with_debt.",
-    "args": [
-      { "name": "supplier_id", "type": "integer", "required": true, "label": "Mã nhà cung cấp", "description": "ID nhà cung cấp cần xem chi tiết công nợ." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "list_expenses",
-    "path": "finance/expenses",
-    "label": "Danh sách chi phí",
-    "module": "finance",
-    "required_permissions": ["Permissions.Accountant.DashboardManagement.View"],
-    "is_write": false,
-    "description": "Trả về danh sách các khoản chi phí gần nhất (tên, số tiền, ngày chi, loại chi phí), sắp xếp giảm dần theo ngày. DÙNG KHI người dùng hỏi 'các khoản chi phí gần đây'. KHÔNG DÙNG KHI cần báo cáo lãi/lỗ tổng hợp — dùng get_pnl_report.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "list_purchase_invoices",
-    "path": "finance/purchase-invoices",
-    "label": "Danh sách hóa đơn nhập hàng",
-    "module": "finance",
-    "required_permissions": ["Permissions.Warehouse.ReceiptManagement.View"],
-    "is_write": false,
-    "description": "Trả về danh sách hóa đơn nhập hàng gần nhất (số hóa đơn, nhà cung cấp, tổng tiền, trạng thái, trạng thái thanh toán), sắp xếp giảm dần theo ngày hóa đơn. DÙNG KHI người dùng hỏi 'các hóa đơn nhập hàng gần đây'. KHÔNG DÙNG KHI cần công nợ NCC — dùng get_suppliers_with_debt/get_supplier_debt_detail.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa, mặc định 10, trần 25." }
-    ]
-  },
-  {
-    "name": "get_active_shipments",
-    "path": "logistics/active-shipments",
-    "label": "Vận đơn đang giao",
-    "module": "logistics",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi danh sách các vận đơn đang trong quá trình giao hàng (chưa giao xong). KHÔNG DÙNG KHI người dùng hỏi tình trạng vận chuyển của MỘT đơn hàng cụ thể theo mã đơn — dùng get_shipment_tracking.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số vận đơn tối đa trả về (mặc định 10, tối đa 25)." }
-    ]
-  },
-  {
-    "name": "get_logistics_dashboard",
-    "path": "logistics/dashboard",
-    "label": "Tổng quan logistics",
-    "module": "logistics",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi tổng quan tình hình vận chuyển/logistics (khối lượng đơn đang xử lý, COD chưa đối soát, tỉ lệ giao đúng hạn, số sự cố) trong một lệnh duy nhất. KHÔNG DÙNG KHI chỉ cần danh sách vận đơn hoặc đơn hàng cụ thể — dùng get_active_shipments hoặc get_fulfillment_orders.",
-    "args": [
-      { "name": "range", "type": "string", "required": false, "default": "today", "label": "Khoảng thời gian", "description": "'today', 'month' hoặc 'year'." }
-    ]
-  },
-  {
-    "name": "get_fulfillment_orders",
-    "path": "logistics/fulfillment-orders",
-    "label": "Đơn cần xử lý",
-    "module": "logistics",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng cần danh sách vận đơn có thể lọc theo trạng thái (đang giao/hoàn tất/hoàn hàng), đơn vị vận chuyển hoặc khoảng ngày tạo. KHÔNG DÙNG KHI chỉ cần các đơn ĐANG GIAO (dùng get_active_shipments) hoặc tra MỘT đơn cụ thể theo mã (dùng get_shipment_tracking).",
-    "args": [
-      { "name": "status", "type": "string", "required": false, "label": "Trạng thái", "description": "'Shipping', 'Completed' hoặc 'Returned'. Để trống nếu không lọc." },
-      { "name": "carrier", "type": "string", "required": false, "label": "Đơn vị vận chuyển", "description": "Tên đơn vị vận chuyển để lọc, ví dụ 'GHN'." },
-      { "name": "from_date", "type": "string", "required": false, "label": "Từ ngày", "description": "Ngày bắt đầu (yyyy-MM-dd)." },
-      { "name": "to_date", "type": "string", "required": false, "label": "Đến ngày", "description": "Ngày kết thúc (yyyy-MM-dd)." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số vận đơn tối đa trả về (mặc định 10, tối đa 25)." }
-    ]
-  },
-  {
-    "name": "calculate_shipping_fee",
-    "path": "logistics/shipping-fee",
-    "label": "Tính phí vận chuyển",
-    "module": "logistics",
-    "required_permissions": ["Permissions.Order.OrderManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng muốn tính trước phí vận chuyển cho một sản phẩm/số lượng cụ thể đến một địa chỉ (phường/xã). KHÔNG DÙNG KHI người dùng hỏi phí ship thực tế đã phát sinh của một đơn đã tạo — dùng get_shipment_tracking hoặc get_fulfillment_orders.",
-    "args": [
-      { "name": "province_id", "type": "integer", "required": true, "label": "Mã tỉnh/thành", "description": "ID tỉnh/thành giao đến." },
-      { "name": "ward_id", "type": "string", "required": true, "label": "Mã phường/xã", "description": "Mã phường/xã giao đến (theo chuẩn GHN)." },
-      { "name": "product_variant_id", "type": "integer", "required": true, "label": "Mã biến thể sản phẩm", "description": "ID biến thể sản phẩm cần tính phí ship." },
-      { "name": "quantity", "type": "integer", "required": false, "default": 1, "label": "Số lượng", "description": "Số lượng sản phẩm (mặc định 1)." }
-    ]
-  },
-  {
-    "name": "create_purchase_request",
-    "path": "inventory/purchase-requests/create",
-    "label": "Tạo yêu cầu mua hàng",
-    "module": "inventory",
-    "required_permissions": ["Permissions.Warehouse.PurchaseRequestManagement.Create"],
-    "is_write": true,
-    "description": "DÙNG KHI người dùng đã XÁC NHẬN RÕ RÀNG ý định tạo một yêu cầu mua hàng (PR) mới, sau khi đã báo lại danh sách sản phẩm/số lượng và người dùng xác nhận 'đúng, tạo đi'. Đây là hành động GHI dữ liệu — KHÔNG được gọi khi người dùng chỉ đang hỏi thông tin hoặc còn cân nhắc. KHÔNG DÙNG KHI: chỉ tra cứu PR đã có (dùng list_purchase_requests/get_purchase_request_detail) hoặc thiếu variant_id/quantity xác định.",
-    "args": [
-      { "name": "items_json", "type": "string", "required": true, "label": "Danh sách sản phẩm (JSON)", "description": "Chuỗi JSON dạng mảng, mỗi phần tử gồm variant_id (số nguyên) và quantity (số nguyên > 0). Ví dụ: '[{\"variant_id\":123,\"quantity\":50}]'." },
-      { "name": "note", "type": "string", "required": false, "label": "Ghi chú", "description": "Ghi chú cho yêu cầu mua hàng (tùy chọn)." }
-    ]
-  },
-  {
-    "name": "list_news",
-    "path": "marketing/news",
-    "label": "Danh sách bài viết tin tức",
-    "module": "marketing",
-    "required_permissions": ["Permissions.Marketing.NewsManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách bài viết tin tức đã xuất bản, mới nhất trước. DÙNG KHI người dùng hỏi 'có bài viết nào mới', 'danh sách tin tức gần đây'. KHÔNG dùng để tra chi tiết một bài viết cụ thể.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng bài viết tối đa muốn trả về, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_debt_logs_missing_proofs",
-    "path": "finance/debt-logs-missing-proofs",
-    "label": "Công nợ thiếu chứng từ",
-    "module": "finance",
-    "required_permissions": ["Permissions.Accountant.DebtPaymentManagement.View"],
-    "is_write": false,
-    "description": "Lấy danh sách các lần thanh toán công nợ nhà cung cấp chưa có ảnh chứng từ đính kèm, mới nhất trước. DÙNG KHI người dùng hỏi 'khoản thanh toán nào thiếu chứng từ'. KHÔNG dùng để tra toàn bộ lịch sử công nợ của một nhà cung cấp — dùng get_supplier_debt_detail.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng bản ghi tối đa muốn trả về, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_conversion_tools",
-    "path": "knowledge/conversion-tools",
-    "label": "Danh sách công cụ chuyển đổi",
-    "module": "knowledge",
-    "required_permissions": [],
-    "is_write": false,
-    "description": "Lấy danh sách các công cụ chuyển đổi (popup, banner...) đang cấu hình trên website, sắp xếp theo lượt xem giảm dần. DÙNG KHI người dùng hỏi 'đang có popup/công cụ chuyển đổi nào'. KHÔNG dùng để chỉnh sửa hoặc tạo công cụ mới.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng công cụ tối đa muốn trả về, tối đa 25." }
-    ]
-  },
-  {
-    "name": "get_payroll_summary",
-    "path": "hr/payroll-summary",
-    "label": "Tra cứu tổng hợp lương nhân viên",
-    "module": "hr",
-    "required_permissions": ["Permissions.Admin.PayrollManagement.View"],
-    "is_write": false,
-    "description": "⚠️ CẢNH BÁO: Đây là dữ liệu LƯƠNG — cực kỳ nhạy cảm. DÙNG KHI người hỏi có thẩm quyền rõ ràng (quản lý/HR/kế toán) và câu hỏi trực tiếp về lương cơ bản, hoa hồng đủ điều kiện tính lương, hoặc tổng lương thực nhận của một nhân viên/toàn công ty theo kỳ lương cụ thể. KHÔNG DÙNG KHI câu hỏi mơ hồ hoặc hỏi về thông tin ngân hàng/CCCD (tool không trả field đó).",
-    "args": [
-      { "name": "employee_id", "type": "integer", "required": false, "label": "Mã nhân viên", "description": "Mã nhân viên cần xem lương. Không truyền = tổng hợp toàn công ty." },
-      { "name": "month", "type": "integer", "required": false, "label": "Tháng", "description": "Tháng của kỳ lương (1-12). Không truyền = tháng hiện tại." },
-      { "name": "year", "type": "integer", "required": false, "label": "Năm", "description": "Năm của kỳ lương. Không truyền = năm hiện tại." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số dòng tối đa trả về (mặc định 10, tối đa 25)." }
-    ]
-  },
-  {
-    "name": "get_commission_records",
-    "path": "hr/commission-records",
-    "label": "Tra cứu bản ghi hoa hồng nhân viên",
-    "module": "hr",
-    "required_permissions": ["Permissions.Admin.PayrollManagement.View"],
-    "is_write": false,
-    "description": "⚠️ CẢNH BÁO: Đây là dữ liệu HOA HỒNG — nhạy cảm, liên quan trực tiếp đến thu nhập nhân viên. DÙNG KHI người hỏi có thẩm quyền rõ ràng và câu hỏi trực tiếp về các bản ghi hoa hồng cụ thể (số tiền, trạng thái, ngày) của một nhân viên hoặc toàn công ty. KHÔNG DÙNG KHI câu hỏi chung/mơ hồ không liên quan hoa hồng cụ thể.",
-    "args": [
-      { "name": "employee_id", "type": "integer", "required": false, "label": "Mã nhân viên", "description": "Mã nhân viên cần xem bản ghi hoa hồng. Không truyền = toàn công ty." },
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa trả về (mặc định 10, tối đa 25), sắp xếp mới nhất trước." }
-    ]
-  },
-  {
-    "name": "get_store_settings",
-    "path": "admin/store-settings",
-    "label": "Xem cấu hình cửa hàng",
-    "module": "admin",
-    "required_permissions": ["Permissions.Admin.SettingManagement.View"],
-    "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về các thông số cấu hình vận hành hiện tại của cửa hàng (tỷ lệ đặt cọc, ngưỡng giá trị đơn hàng cần cảnh báo). KHÔNG DÙNG KHI cần chỉnh sửa cấu hình, hoặc câu hỏi liên quan đến doanh thu/thống kê — dùng get_dashboard_overview.",
-    "args": []
-  },
-  {
-    "name": "list_users_and_roles",
-    "path": "admin/users-and-roles",
-    "label": "Danh sách người dùng và vai trò",
-    "module": "admin",
-    "required_permissions": ["Permissions.Admin.UserManagement.View"],
-    "is_write": false,
-    "description": "⚠️ Tool này lộ thông tin phân quyền hệ thống (tên người dùng và vai trò được gán) — CHỈ dùng khi thực sự cần thiết. DÙNG KHI người dùng có quyền quản trị cần xác minh ai đang giữ vai trò gì. KHÔNG DÙNG KHI câu hỏi chỉ cần thông tin nhân viên thông thường (dùng list_employees), hoặc cần chi tiết permission string cụ thể của từng role.",
-    "args": [
-      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số dòng", "description": "Số bản ghi tối đa trả về, mặc định 10, trần 25." }
-    ]
-  }
-]
+    {
+        "name":  "search_products",
+        "path":  "products/search",
+        "label":  "Tìm sản phẩm",
+        "module":  "product",
+        "required_permissions":  [
+                                     "Permissions.Order.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Tìm kiếm sản phẩm trong hệ thống theo từ khóa (có thể gồm tên thương hiệu/danh mục trong từ khóa). DÙNG KHI người dùng hỏi \u0027có sản phẩm nào...\u0027, \u0027tìm giúp tôi...\u0027, \u0027shop có bán... không\u0027. KHÔNG dùng để tra tồn kho hay giá của MỘT sản phẩm cụ thể đã biết ID — dùng get_product_stock cho việc đó (kết quả search_products trả về product_id để dùng tiếp cho get_product_stock). Ví dụ: \u0027Shop có nhớt Motul không?\u0027, \u0027Tìm phụ tùng Honda Wave\u0027.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ khóa",
+                         "description":  "Từ khóa tìm kiếm tên sản phẩm dạng CHUỖI VĂN BẢN đơn giản (không phải object), có thể gồm cả tên thương hiệu/danh mục trong câu, ví dụ \u0027nhớt Motul\u0027, \u0027lốp Michelin\u0027, \u0027phụ tùng Honda Wave\u0027. Để trống \u0027\u0027 nếu không lọc theo từ khóa."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng kết quả tối đa muốn trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_product_stock",
+        "path":  "products/stock",
+        "label":  "Tra tồn kho",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Tra số lượng tồn kho hiện tại của một sản phẩm cụ thể, theo product_id. DÙNG KHI người dùng hỏi \u0027còn hàng không\u0027, \u0027còn bao nhiêu cái\u0027, \u0027tồn kho sản phẩm X\u0027 VÀ đã biết product_id (nếu chưa biết, gọi search_products trước để tìm product_id rồi mới gọi tool này). KHÔNG dùng để tìm danh sách nhiều sản phẩm — dùng search_products cho việc đó. Ví dụ: \u0027Lốp Michelin còn tồn kho không?\u0027 → gọi search_products trước, rồi get_product_stock.",
+        "args":  [
+                     {
+                         "name":  "product_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã sản phẩm",
+                         "description":  "ID sản phẩm cần tra tồn kho. Nếu chưa biết ID, gọi search_products trước để lấy product_id."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_low_stock_products",
+        "path":  "products/low-stock",
+        "label":  "Tra sản phẩm sắp hết hàng",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách sản phẩm sắp hết hàng (tồn kho thấp) để cảnh báo nhập thêm hàng. DÙNG KHI người dùng hỏi \u0027sản phẩm nào sắp hết hàng\u0027, \u0027cần nhập thêm gì\u0027, \u0027kiểm tra hàng tồn thấp\u0027. KHÔNG dùng khi người dùng hỏi tồn kho của MỘT sản phẩm cụ thể — dùng get_product_stock cho việc đó. Ví dụ: \u0027Có sản phẩm nào sắp hết hàng không?\u0027, \u0027Danh sách hàng cần nhập thêm\u0027.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng sản phẩm tối đa muốn trả về. Ngưỡng \u0027sắp hết hàng\u0027 do hệ thống quyết định, không tự đặt được."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_order_status",
+        "path":  "orders/status",
+        "label":  "Tra đơn hàng",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Tra cứu trạng thái và thông tin của (các) đơn hàng khớp tên khách hàng hoặc số điện thoại (tối đa 5 đơn gần nhất). DÙNG KHI người dùng hỏi \u0027đơn hàng của anh A tới đâu rồi\u0027, \u0027đơn của SĐT 09xx đã giao chưa\u0027. KHÔNG dùng cho câu hỏi về doanh thu hay thống kê nhiều đơn — dùng get_sales_summary cho việc đó. Ví dụ: \u0027Đơn hàng của Nguyễn Văn A đang ở trạng thái nào?\u0027.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Từ khoá",
+                         "description":  "Tên khách hàng hoặc số điện thoại của đơn hàng cần tra cứu."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_sales_summary",
+        "path":  "analytics/sales",
+        "label":  "Tra doanh thu",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy tổng doanh thu và số lượng đơn hàng trong một khoảng thời gian. DÙNG KHI người dùng hỏi \u0027doanh thu tháng này\u0027, \u0027bán được bao nhiêu đơn trong tuần qua\u0027. KHÔNG dùng để tra một đơn hàng cụ thể hoặc top sản phẩm bán chạy — dùng get_order_status hoặc get_top_selling cho việc đó. Ví dụ: \u0027Doanh thu từ 01/07 đến 28/07 là bao nhiêu?\u0027.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống \u0027\u0027 khi người dùng hỏi \u0027hôm nay\u0027/\u0027tháng này\u0027 — tool tự tính đúng theo giờ Việt Nam, KHÔNG tự đoán ngày."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống \u0027\u0027 để tính đến hôm nay theo giờ Việt Nam."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_top_selling",
+        "path":  "analytics/top-selling",
+        "label":  "Tra sản phẩm bán chạy",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách các sản phẩm bán chạy nhất (top N) trong một khoảng thời gian. DÙNG KHI người dùng hỏi \u0027sản phẩm nào bán chạy nhất\u0027, \u0027top 5 sản phẩm bán tốt tháng này\u0027. KHÔNG dùng cho tổng doanh thu chung — dùng get_sales_summary cho việc đó. Ví dụ: \u0027Top 5 sản phẩm bán chạy nhất tháng 7 là gì?\u0027.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống \u0027\u0027 để lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống \u0027\u0027 để tính đến hôm nay."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  5,
+                         "label":  "Top N",
+                         "description":  "Số lượng sản phẩm bán chạy nhất muốn trả về (top N)."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_booking_appointments",
+        "path":  "bookings/appointments",
+        "label":  "Danh sách lịch hẹn",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.BookingAppointmentManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về lịch hẹn đặt trước dịch vụ (đặt hẹn bảo dưỡng/sửa xe qua form/website), cần xem danh sách theo khoảng ngày hẹn, trạng thái xác nhận, showroom. KHÔNG DÙNG KHI người dùng hỏi về đơn đặt hàng sản phẩm/bán hàng (dùng list_bookings) hoặc phiếu sửa chữa đã lên lịch làm việc thực tế (dùng list_repair_orders).",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd)."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_product_detail",
+        "path":  "products/detail",
+        "label":  "Chi tiết sản phẩm",
+        "module":  "product",
+        "required_permissions":  [
+                                     "Permissions.Order.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi chi tiết MỘT sản phẩm cụ thể đã biết mã (product_id) — ví dụ \u0027sản phẩm mã 45 có giá bao nhiêu, có mấy biến thể\u0027. KHÔNG DÙNG KHI người dùng muốn tìm kiếm hoặc liệt kê nhiều sản phẩm theo từ khóa/danh mục (dùng search_products cho trường hợp đó).",
+        "args":  [
+                     {
+                         "name":  "product_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã sản phẩm",
+                         "description":  "ID sản phẩm cần xem chi tiết."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_inventory_report",
+        "path":  "inventory/report",
+        "label":  "Báo cáo tồn kho",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.InventoryReportManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về tồn kho tổng hợp theo sản phẩm/biến thể/màu (số lượng đầu kỳ, nhập, xuất, tồn cuối kỳ), có thể lọc theo tên sản phẩm, tháng, năm. KHÔNG DÙNG KHI chỉ cần danh sách sản phẩm sắp hết hàng (dùng get_low_stock_products) hoặc chỉ cần tra tồn kho của 1 sản phẩm/biến thể cụ thể theo ID (dùng get_product_stock).",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     },
+                     {
+                         "name":  "search_term",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Tìm kiếm",
+                         "description":  "Lọc theo tên sản phẩm."
+                     },
+                     {
+                         "name":  "month",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Tháng",
+                         "description":  "Lọc theo tháng báo cáo."
+                     },
+                     {
+                         "name":  "year",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Năm",
+                         "description":  "Lọc theo năm báo cáo."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_orders",
+        "path":  "orders/list",
+        "label":  "Danh sách đơn hàng",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi danh sách/tổng quan nhiều đơn hàng gần đây, lọc theo khoảng ngày và/hoặc trạng thái (ví dụ: \u0027các đơn hàng tuần này\u0027, \u0027đơn hàng đang chờ xử lý\u0027). KHÔNG DÙNG KHI người dùng hỏi về 1 đơn hàng cụ thể theo mã/ID (dùng get_order_status trong trường hợp đó).",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd)."
+                     },
+                     {
+                         "name":  "status_id",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Trạng thái",
+                         "description":  "Mã trạng thái đơn hàng để lọc, bỏ trống lấy tất cả trạng thái."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_order_statistics",
+        "path":  "orders/statistics",
+        "label":  "Thống kê đơn hàng",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi số lượng/tỷ trọng đơn hàng theo trạng thái (ví dụ: có bao nhiêu đơn đang chờ xử lý, đã hoàn thành, đã huỷ...). KHÔNG DÙNG KHI cần danh sách chi tiết từng đơn hàng (mã đơn, khách hàng, sản phẩm...) — dùng list_orders. KHÔNG DÙNG KHI hỏi về doanh thu/lợi nhuận bằng tiền — dùng get_sales_summary. Lưu ý: số liệu hiện là tổng toàn bộ đơn hàng, chưa lọc chính xác theo khoảng ngày do hạn chế của nguồn dữ liệu.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd)."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_customer_profile",
+        "path":  "customers/profile",
+        "label":  "Hồ sơ khách hàng",
+        "module":  "customer",
+        "required_permissions":  [
+                                     "Permissions.Order.CustomerManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả thông tin cá nhân và tổng quan giao dịch của MỘT khách hàng cụ thể (họ tên, số điện thoại, tổng số đơn, tổng chi tiêu, hạng thành viên). DÙNG KHI đã biết mã khách hàng cụ thể (customer_id). KHÔNG DÙNG KHI chỉ có tên/số điện thoại và cần tìm khách hàng — hãy dùng search_customers trước để lấy customer_id.",
+        "args":  [
+                     {
+                         "name":  "customer_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã khách hàng",
+                         "description":  "ID khách hàng cần xem hồ sơ."
+                     }
+                 ]
+    },
+    {
+        "name":  "search_customers",
+        "path":  "customers/search",
+        "label":  "Tìm khách hàng",
+        "module":  "customer",
+        "required_permissions":  [
+                                     "Permissions.Order.CustomerManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần tìm nhanh khách hàng theo tên hoặc số điện thoại để lấy customer_id. KHÔNG DÙNG KHI đã biết customer_id và cần xem chi tiết đầy đủ — khi đó gọi get_customer_profile với ID vừa tìm được.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Từ khoá",
+                         "description":  "Tên hoặc số điện thoại khách hàng cần tìm."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_repair_orders",
+        "path":  "repair-orders/list",
+        "label":  "Danh sách phiếu sửa chữa",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về danh sách/nhiều phiếu sửa chữa xe gần đây. KHÔNG DÙNG KHI người dùng hỏi chi tiết MỘT phiếu sửa chữa cụ thể theo ID/mã phiếu — khi đó dùng get_repair_order_detail. Lưu ý: dữ liệu phiếu sửa chữa hiện không có trường trạng thái (status), nên tool này không hỗ trợ lọc theo trạng thái.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_repair_order_detail",
+        "path":  "repair-orders/detail",
+        "label":  "Chi tiết phiếu sửa chữa",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần xem chi tiết phiếu sửa chữa (hạng mục sửa chữa, phụ tùng, chi phí, kỹ thuật viên) theo TÊN KHÁCH HÀNG hoặc BIỂN SỐ XE, không cần biết mã phiếu (tối đa 5 kết quả khớp gần nhất). KHÔNG DÙNG KHI cần liệt kê nhiều phiếu sửa chữa không lọc theo khách/xe cụ thể — dùng list_repair_orders cho trường hợp đó.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Từ khoá",
+                         "description":  "Tên khách hàng hoặc biển số xe (hoặc VIN) cần tìm phiếu sửa chữa."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_warranty_claims",
+        "path":  "warranty/claims",
+        "label":  "Danh sách yêu cầu bảo hành",
+        "module":  "warranty",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần danh sách nhiều yêu cầu bảo hành (có thể lọc theo trạng thái). KHÔNG DÙNG KHI cần chi tiết 1 yêu cầu cụ thể theo ID (dùng get_warranty_claim_detail) hoặc khi hỏi về điều khoản/chính sách bảo hành chung, không phải yêu cầu thực tế (dùng get_warranty_terms).",
+        "args":  [
+                     {
+                         "name":  "status_id",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Trạng thái",
+                         "description":  "Lọc theo trạng thái yêu cầu bảo hành (mã số: 1 Tiếp nhận, 2 Chờ hãng thẩm định, 3 Đã duyệt bồi hoàn, 4 Thợ thay thế, 5 Hoàn tất, 6 Từ chối), bỏ trống lấy tất cả."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_pnl_report",
+        "path":  "finance/pnl",
+        "label":  "Báo cáo lãi lỗ",
+        "module":  "finance",
+        "required_permissions":  [
+                                     "Permissions.Accountant.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi rõ ràng về báo cáo lãi/lỗ (P\u0026L), lợi nhuận gộp, lợi nhuận ròng theo tháng. KHÔNG DÙNG KHI câu hỏi chỉ cần doanh thu đơn thuần (dùng get_sales_summary). Đây là dữ liệu tài chính rất nhạy cảm — chỉ gọi khi người hỏi thực sự cần báo cáo lãi/lỗ. Lưu ý: dữ liệu tính theo tháng dương lịch chứa \u0027Đến ngày\u0027, chưa hỗ trợ khoảng ngày tuỳ ý chính xác.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd)."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_suppliers_with_debt",
+        "path":  "finance/suppliers-with-debt",
+        "label":  "Công nợ nhà cung cấp",
+        "module":  "finance",
+        "required_permissions":  [
+                                     "Permissions.Accountant.DebtPaymentManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về danh sách nhà cung cấp còn công nợ (dư nợ \u003e 0), sắp xếp giảm dần theo số tiền nợ. DÙNG KHI người dùng hỏi tổng quan/danh sách nhiều nhà cung cấp đang nợ. KHÔNG DÙNG KHI người dùng hỏi chi tiết công nợ của MỘT nhà cung cấp cụ thể — trường hợp đó dùng get_supplier_debt_detail.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_shipment_tracking",
+        "path":  "logistics/shipment-tracking",
+        "label":  "Tra vận đơn",
+        "module":  "logistics",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về tình trạng vận chuyển, đơn vị vận chuyển hoặc thời gian giao hàng của (các) đơn hàng khớp tên khách hàng hoặc số điện thoại (tối đa 5 vận đơn gần nhất, bỏ qua đơn chưa có vận đơn). KHÔNG DÙNG KHI người dùng chỉ hỏi trạng thái đơn hàng nói chung (thanh toán, tổng tiền) — trường hợp đó dùng get_order_status.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Từ khoá",
+                         "description":  "Tên khách hàng hoặc số điện thoại của đơn hàng cần tra vận đơn."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_dashboard_overview",
+        "path":  "admin/dashboard-overview",
+        "label":  "Tổng quan dashboard",
+        "module":  "admin",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi tổng quan toàn hệ thống dành cho Admin (doanh thu, lợi nhuận, số đơn chờ xử lý/quá hạn, khách hàng mới, số xe bán ra, tồn kho hiện tại, công nợ quá hạn) trong một lệnh duy nhất. KHÔNG DÙNG KHI chỉ cần riêng doanh thu theo ngày/kỳ (dùng get_sales_summary thay thế).",
+        "args":  [
 
+                 ]
+    },
+    {
+        "name":  "get_product_price_list",
+        "path":  "products/price-list",
+        "label":  "Danh sách giá sản phẩm",
+        "module":  "product",
+        "required_permissions":  [
+                                     "Permissions.Order.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách sản phẩm kèm giá bán hiện tại, có thể lọc theo từ khóa tên sản phẩm. DÙNG KHI người dùng hỏi \u0027giá các sản phẩm là bao nhiêu\u0027, \u0027liệt kê giá nhớt Motul\u0027, \u0027bảng giá sản phẩm\u0027. KHÔNG dùng để tra tồn kho một sản phẩm cụ thể — dùng get_product_stock cho việc đó.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ khóa",
+                         "description":  "Từ khóa lọc theo tên sản phẩm, ví dụ \u0027nhớt Motul\u0027. Để trống \u0027\u0027 nếu không lọc."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng sản phẩm tối đa trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_brands",
+        "path":  "products/brands",
+        "label":  "Danh sách thương hiệu",
+        "module":  "product",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách các thương hiệu sản phẩm hiện có trong hệ thống. DÙNG KHI người dùng hỏi \u0027shop bán những thương hiệu nào\u0027, \u0027có hãng nào\u0027, \u0027liệt kê brand\u0027. KHÔNG dùng để tìm sản phẩm cụ thể của một hãng — dùng search_products cho việc đó.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng thương hiệu tối đa trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_categories",
+        "path":  "products/categories",
+        "label":  "Danh sách danh mục sản phẩm",
+        "module":  "product",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ProductManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách danh mục sản phẩm kèm số lượng sản phẩm trong mỗi danh mục. DÙNG KHI người dùng hỏi \u0027shop có những danh mục gì\u0027. KHÔNG dùng để tìm sản phẩm cụ thể — dùng search_products cho việc đó.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng danh mục tối đa trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_supplier_prices_for_variant",
+        "path":  "suppliers/variant-prices",
+        "label":  "Giá báo giá của NCC theo biến thể sản phẩm",
+        "module":  "supplier",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.SupplierManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần tra cứu các mức giá báo giá (quotation) mà các nhà cung cấp đã đưa ra cho một biến thể sản phẩm cụ thể, để so sánh giá nhập giữa các NCC. KHÔNG DÙNG KHI cần giá bán lẻ cho khách hàng — dùng get_product_detail/search_products.",
+        "args":  [
+                     {
+                         "name":  "variant_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã biến thể sản phẩm",
+                         "description":  "Id của ProductVariant cần xem báo giá NCC."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số báo giá tối đa trả về (mặc định 10, tối đa 25)."
+                     }
+                 ]
+    },
+    {
+        "name":  "search_suppliers",
+        "path":  "suppliers/search",
+        "label":  "Tìm kiếm nhà cung cấp",
+        "module":  "supplier",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.SupplierManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần tìm nhà cung cấp theo tên (một phần hoặc gần đúng) để lấy thông tin liên hệ cơ bản. KHÔNG DÙNG KHI cần thống kê tổng quan (dùng get_supplier_statistics) hoặc cần công nợ (dùng get_suppliers_with_debt/get_supplier_debt_detail).",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ khóa",
+                         "description":  "Tên hoặc một phần tên nhà cung cấp cần tìm."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số kết quả tối đa trả về (mặc định 10, tối đa 25)."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_supplier_statistics",
+        "path":  "suppliers/statistics",
+        "label":  "Thống kê tổng quan nhà cung cấp",
+        "module":  "supplier",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.SupplierManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần số liệu tổng quan toàn hệ thống về nhà cung cấp: tổng số NCC, số NCC theo loại. KHÔNG DÙNG KHI cần thông tin chi tiết một NCC cụ thể (dùng search_suppliers) hoặc công nợ theo từng NCC (dùng get_suppliers_with_debt).",
+        "args":  [
+
+                 ]
+    },
+    {
+        "name":  "get_inventory_ledger",
+        "path":  "inventory/ledger",
+        "label":  "Sổ xuất nhập kho",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.LedgerManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về các dòng ghi sổ xuất/nhập/điều chỉnh kho (số lượng nhập, xuất, tồn sau giao dịch) trong một khoảng thời gian, có thể lọc theo sản phẩm hoặc biến thể. DÙNG KHI người dùng hỏi \u0027lịch sử xuất nhập kho của sản phẩm X\u0027. KHÔNG DÙNG KHI chỉ cần số tồn hiện tại (dùng get_product_stock) hoặc danh sách phiếu nhập kho (dùng list_inventory_receipts).",
+        "args":  [
+                     {
+                         "name":  "product_id",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Mã sản phẩm",
+                         "description":  "Lọc theo ID sản phẩm, bỏ trống để không lọc."
+                     },
+                     {
+                         "name":  "variant_id",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Mã biến thể",
+                         "description":  "Lọc theo ID biến thể sản phẩm, bỏ trống để không lọc."
+                     },
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd)."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_inventory_receipts",
+        "path":  "inventory/receipts",
+        "label":  "Danh sách phiếu nhập kho",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ReceiptManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi danh sách/nhiều phiếu nhập kho gần đây, có thể lọc theo khoảng ngày tạo phiếu. KHÔNG DÙNG KHI người dùng hỏi chi tiết MỘT phiếu nhập cụ thể theo ID — dùng get_inventory_receipt_detail.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày tạo phiếu bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày tạo phiếu kết thúc (yyyy-MM-dd)."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_inventory_receipt_detail",
+        "path":  "inventory/receipts/detail",
+        "label":  "Chi tiết phiếu nhập kho",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ReceiptManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi chi tiết phiếu nhập kho theo TÊN NHÀ CUNG CẤP (nhà cung cấp, trạng thái, danh sách sản phẩm, số lượng, đơn giá, tổng tiền). Trả về tối đa 5 phiếu khớp gần nhất. KHÔNG DÙNG KHI cần liệt kê nhiều phiếu nhập kho không lọc theo NCC — dùng list_inventory_receipts.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Tên nhà cung cấp",
+                         "description":  "Tên (hoặc một phần tên) nhà cung cấp cần tìm phiếu nhập kho."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_purchase_requests",
+        "path":  "inventory/purchase-requests",
+        "label":  "Danh sách yêu cầu mua hàng",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.PurchaseRequestManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi danh sách/tổng quan nhiều yêu cầu mua hàng (PR) gần đây, có thể lọc theo trạng thái. KHÔNG DÙNG KHI người dùng hỏi về 1 yêu cầu mua hàng cụ thể theo ID — dùng get_purchase_request_detail.",
+        "args":  [
+                     {
+                         "name":  "status_id",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Trạng thái",
+                         "description":  "Lọc theo trạng thái yêu cầu mua hàng, bỏ trống lấy tất cả."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_purchase_request_detail",
+        "path":  "inventory/purchase-requests/detail",
+        "label":  "Chi tiết yêu cầu mua hàng",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.PurchaseRequestManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Tìm chi tiết yêu cầu mua hàng (PR) theo TÊN NHÀ CUNG CẤP, không cần biết ID. Trả về tối đa 5 yêu cầu khớp gần nhất, mới nhất trước. KHÔNG DÙNG KHI cần danh sách nhiều PR không lọc theo NCC — dùng list_purchase_requests.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Tên nhà cung cấp",
+                         "description":  "Tên (hoặc một phần tên) nhà cung cấp cần tìm yêu cầu mua hàng."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_revenue_by_category",
+        "path":  "analytics/revenue-by-category",
+        "label":  "Doanh thu theo danh mục sản phẩm",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về doanh thu và tỷ trọng (%) theo TỪNG DANH MỤC sản phẩm trong một khoảng thời gian. DÙNG KHI người dùng hỏi \u0027danh mục nào bán tốt nhất\u0027, \u0027cơ cấu doanh thu theo loại sản phẩm\u0027. KHÔNG DÙNG KHI hỏi tổng doanh thu theo ngày (dùng get_sales_summary) hoặc xếp hạng SẢN PHẨM cụ thể (dùng get_top_selling).",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số danh mục",
+                         "description":  "Số danh mục tối đa trả về, mặc định 10, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_sales_report",
+        "path":  "sales/report",
+        "label":  "Báo cáo danh sách đơn hàng bán ra",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về DANH SÁCH các đơn hàng (order id, khách hàng, trạng thái, tổng tiền, ngày tạo) trong một khoảng thời gian. DÙNG KHI người dùng hỏi \u0027liệt kê đơn hàng gần đây\u0027, \u0027xem báo cáo đơn hàng tháng này\u0027. KHÔNG DÙNG KHI chỉ cần TỔNG doanh thu theo ngày (dùng get_sales_summary) hoặc lọc nâng cao theo trạng thái (dùng list_orders).",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số đơn hàng tối đa trả về, mặc định 10, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_recent_transactions",
+        "path":  "analytics/recent-transactions",
+        "label":  "Giao dịch gần đây",
+        "module":  "sales",
+        "required_permissions":  [
+                                     "Permissions.Accountant.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về nhật ký các GIAO DỊCH tiền gần nhất (thời gian, khách hàng, sản phẩm, số tiền, thu/chi, trạng thái, nhân viên). DÙNG KHI người dùng hỏi \u0027giao dịch gần đây\u0027, \u0027các khoản thu chi mới nhất\u0027. KHÔNG DÙNG KHI cần tổng hợp doanh thu theo ngày/danh mục (dùng get_sales_summary/get_revenue_by_category) hoặc danh sách đơn hàng đầy đủ (dùng get_sales_report/list_orders).",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số giao dịch tối đa trả về, mặc định 10, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_sales_contracts",
+        "path":  "contracts/sales",
+        "label":  "Danh sách hợp đồng bán hàng",
+        "module":  "contract",
+        "required_permissions":  [
+                                     "Permissions.Order.ContractManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách hợp đồng bán xe mới nhất, có thể lọc theo trạng thái. DÙNG KHI người dùng hỏi \u0027các hợp đồng bán hàng gần đây\u0027, \u0027hợp đồng nào đang chờ ký\u0027. KHÔNG DÙNG KHI hỏi về hợp đồng tài chính/vay ngân hàng (dùng list_finance_contracts) hoặc hợp đồng với nhà cung cấp (dùng list_supplier_contracts).",
+        "args":  [
+                     {
+                         "name":  "status_id",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Trạng thái",
+                         "description":  "Lọc theo trạng thái hợp đồng bán hàng. Để trống \u0027\u0027 nếu không lọc."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng hợp đồng tối đa muốn trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_finance_contracts",
+        "path":  "contracts/finance",
+        "label":  "Danh sách hợp đồng tài chính",
+        "module":  "contract",
+        "required_permissions":  [
+                                     "Permissions.Admin.FinanceContractManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách hợp đồng vay tài chính/trả góp mới nhất, có thể lọc theo trạng thái giải ngân. DÙNG KHI người dùng hỏi \u0027các hợp đồng vay đang xử lý\u0027. KHÔNG DÙNG KHI hỏi về hợp đồng bán xe (dùng list_sales_contracts) hoặc hợp đồng nhà cung cấp (dùng list_supplier_contracts).",
+        "args":  [
+                     {
+                         "name":  "status_id",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Trạng thái giải ngân",
+                         "description":  "Lọc theo trạng thái giải ngân. Để trống \u0027\u0027 nếu không lọc."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng hợp đồng tối đa muốn trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_supplier_contracts",
+        "path":  "contracts/supplier",
+        "label":  "Danh sách hợp đồng nhà cung cấp",
+        "module":  "contract",
+        "required_permissions":  [
+                                     "Permissions.Accountant.SupplierContractManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách hợp đồng với nhà cung cấp mới nhất, có thể lọc theo trạng thái. DÙNG KHI người dùng hỏi \u0027hợp đồng với nhà cung cấp nào còn hiệu lực\u0027. KHÔNG DÙNG KHI hỏi về hợp đồng bán xe (dùng list_sales_contracts) hoặc hợp đồng vay tài chính (dùng list_finance_contracts).",
+        "args":  [
+                     {
+                         "name":  "status_id",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Trạng thái",
+                         "description":  "Lọc theo trạng thái hợp đồng nhà cung cấp. Để trống \u0027\u0027 nếu không lọc."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng hợp đồng tối đa muốn trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_vouchers",
+        "path":  "marketing/vouchers",
+        "label":  "Danh sách voucher",
+        "module":  "marketing",
+        "required_permissions":  [
+                                     "Permissions.Marketing.CustomerVoucherManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách voucher/mã giảm giá mới nhất trong hệ thống. DÙNG KHI người dùng hỏi \u0027đang có voucher nào\u0027, \u0027mã giảm giá nào còn hiệu lực\u0027.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng voucher tối đa muốn trả về."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_lead_pipeline",
+        "path":  "leads/pipeline",
+        "label":  "Tra pipeline lead",
+        "module":  "customer",
+        "required_permissions":  [
+                                     "Permissions.Marketing.LeadManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách lead theo từng giai đoạn pipeline (Mới, Đang tư vấn, Đang lái thử, Đã đặt cọc, Đang chờ giấy tờ, Đã giao xe). DÙNG KHI người dùng hỏi \u0027pipeline lead hiện tại thế nào\u0027, \u0027có bao nhiêu lead đang đặt cọc\u0027. KHÔNG dùng để tra chi tiết một lead cụ thể theo tên/SĐT — dùng get_lead_detail.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng",
+                         "description":  "Số lead tối đa trả về, mặc định 10, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_lead_detail",
+        "path":  "leads/detail",
+        "label":  "Tra chi tiết lead",
+        "module":  "customer",
+        "required_permissions":  [
+                                     "Permissions.Marketing.LeadManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Tìm chi tiết lead (khách hàng tiềm năng) theo tên hoặc số điện thoại: trạng thái, nguồn, xe quan tâm, điểm số, người phụ trách. Trả về tối đa 5 lead khớp gần nhất. KHÔNG dùng cho danh sách nhiều lead theo giai đoạn pipeline — dùng get_lead_pipeline.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Từ khoá",
+                         "description":  "Tên hoặc số điện thoại của lead cần tìm."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_contacts",
+        "path":  "contacts/list",
+        "label":  "Tra danh sách liên hệ",
+        "module":  "customer",
+        "required_permissions":  [
+                                     "Permissions.Marketing.ContactManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách các liên hệ gần nhất gửi tới (hỗ trợ, phản hồi, ứng tuyển), sắp xếp mới nhất trước. DÙNG KHI người dùng hỏi \u0027có liên hệ mới nào không\u0027.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng",
+                         "description":  "Số liên hệ tối đa trả về, mặc định 10, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_loyalty_members",
+        "path":  "loyalty/members",
+        "label":  "Tra thành viên thân thiết",
+        "module":  "customer",
+        "required_permissions":  [
+                                     "Permissions.Marketing.CustomerCareManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách thành viên chương trình khách hàng thân thiết, sắp xếp theo điểm tích lũy giảm dần. DÙNG KHI người dùng hỏi \u0027ai đang có điểm cao nhất\u0027, \u0027danh sách khách hàng thân thiết\u0027.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng",
+                         "description":  "Số thành viên tối đa trả về, mặc định 10, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_warranty_claim_detail",
+        "path":  "warranty/claims/detail",
+        "label":  "Chi tiết yêu cầu bảo hành",
+        "module":  "warranty",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần chi tiết đầy đủ 1 hoặc vài yêu cầu bảo hành, tìm theo tên khách hàng hoặc biển số xe (mô tả lỗi, phụ tùng thay, chi phí, quyết định hãng). Trả tối đa 5 kết quả khớp gần nhất. KHÔNG DÙNG KHI cần danh sách nhiều yêu cầu không theo khách/xe cụ thể (dùng list_warranty_claims) hoặc điều khoản/chính sách bảo hành chung (dùng get_warranty_terms).",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Từ khoá",
+                         "description":  "Tên khách hàng hoặc biển số xe cần tìm yêu cầu bảo hành."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_warranty_terms",
+        "path":  "warranty/terms",
+        "label":  "Điều khoản bảo hành",
+        "module":  "warranty",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về điều khoản/chính sách bảo hành chung của hãng (thời hạn, phạm vi), KHÔNG phải một yêu cầu bảo hành thực tế đang xử lý. KHÔNG DÙNG KHI cần danh sách yêu cầu bảo hành thực tế (dùng list_warranty_claims) hoặc chi tiết 1 yêu cầu cụ thể (dùng get_warranty_claim_detail).",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_workshop_payments",
+        "path":  "workshop/payments",
+        "label":  "Danh sách phiếu thu xưởng",
+        "module":  "warranty",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI cần danh sách các phiếu thu tiền từ xưởng sửa chữa/bảo hành. KHÔNG DÙNG KHI hỏi về yêu cầu bảo hành (dùng list_warranty_claims/get_warranty_claim_detail) hoặc doanh thu bán hàng chung (dùng get_sales_summary).",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_bookings",
+        "path":  "bookings/list",
+        "label":  "Danh sách đặt lịch lái thử",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.BookingManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về các lượt đặt lịch lái thử xe / đặt xe tại showroom. KHÔNG DÙNG KHI người dùng hỏi về lịch hẹn dịch vụ sửa chữa/bảo dưỡng đã xác nhận với khách hàng — dùng list_booking_appointments.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số lượng đặt lịch tối đa trả về, mặc định 10."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_services",
+        "path":  "services/list",
+        "label":  "Danh sách dịch vụ",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.RepairOrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về danh mục các dịch vụ sửa chữa/bảo dưỡng đang cung cấp và giá cơ bản. KHÔNG DÙNG KHI người dùng hỏi về một phiếu sửa chữa cụ thể đã lập cho khách — dùng list_repair_orders.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số lượng dịch vụ tối đa trả về, mặc định 10."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_workshop_dashboard",
+        "path":  "workshop/dashboard",
+        "label":  "Tổng quan xưởng dịch vụ",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi tổng quan tình hình xưởng dịch vụ trong một khoảng thời gian. KHÔNG DÙNG KHI người dùng hỏi chi tiết một phiếu sửa chữa/lịch hẹn cụ thể — dùng list_repair_orders hoặc list_booking_appointments.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày trước."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_vehicle_portfolio",
+        "path":  "vehicles/portfolio",
+        "label":  "Danh mục xe",
+        "module":  "service",
+        "required_permissions":  [
+                                     "Permissions.Factory.CustomerManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi danh sách xe của khách hàng đang quản lý trong hệ thống. KHÔNG DÙNG KHI người dùng hỏi lịch sử sửa chữa/bảo dưỡng chi tiết của MỘT xe cụ thể theo biển số/VIN.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số lượng xe tối đa trả về, mặc định 10."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_employees",
+        "path":  "hr/employees",
+        "label":  "Danh sách nhân viên",
+        "module":  "hr",
+        "required_permissions":  [
+                                     "Permissions.Admin.EmployeeManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách nhân viên (tên, chức vụ, trạng thái tài khoản), có thể lọc theo từ khóa. DÙNG KHI người dùng hỏi \u0027có nhân viên nào tên...\u0027, \u0027danh sách nhân viên\u0027. KHÔNG DÙNG KHI hỏi KPI hay hiệu suất (dùng get_employee_kpi/get_staff_performance). KHÔNG trả lương/hoa hồng/thông tin ngân hàng.",
+        "args":  [
+                     {
+                         "name":  "keyword",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ khóa",
+                         "description":  "Từ khóa tìm theo tên hoặc chức vụ nhân viên. Để trống \u0027\u0027 để lấy tất cả."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số bản ghi tối đa muốn trả về, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_employee_kpi",
+        "path":  "hr/employee-kpi",
+        "label":  "KPI nhân viên",
+        "module":  "hr",
+        "required_permissions":  [
+                                     "Permissions.Admin.EmployeeManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy các chỉ số KPI (theo từng kỳ) của một nhân viên cụ thể, theo employee_id. DÙNG KHI đã biết employee_id (nếu chưa biết, gọi list_employees trước). KHÔNG DÙNG KHI hỏi tổng quan hiệu suất nhiều nhân viên — dùng get_staff_performance. KHÔNG trả lương/hoa hồng.",
+        "args":  [
+                     {
+                         "name":  "employee_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã nhân viên",
+                         "description":  "ID nhân viên cần tra KPI."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_staff_performance",
+        "path":  "hr/staff-performance",
+        "label":  "Hiệu suất nhân viên",
+        "module":  "hr",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy bảng hiệu suất bán hàng của nhân viên (doanh số, chỉ tiêu, trạng thái KPI) trong một khoảng thời gian. DÙNG KHI người dùng hỏi \u0027nhân viên nào bán tốt nhất\u0027. KHÔNG DÙNG KHI hỏi KPI chi tiết của MỘT nhân viên cụ thể — dùng get_employee_kpi. KHÔNG trả hoa hồng/lương.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ ngày",
+                         "description":  "Để trống \u0027\u0027 để lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Đến ngày",
+                         "description":  "Để trống \u0027\u0027 để tính đến hôm nay."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số nhân viên tối đa muốn trả về, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_warehouse_report",
+        "path":  "admin/warehouse-report",
+        "label":  "Báo cáo kho toàn hệ thống",
+        "module":  "admin",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi sâu về tình trạng tồn kho toàn hệ thống: tổng tồn, tổng giá trị tồn kho, số sản phẩm sắp hết/hết hàng, phân bổ theo hãng xe. KHÔNG DÙNG KHI chỉ cần tổng quan chung (dùng get_dashboard_overview) hoặc doanh thu (dùng get_revenue_analysis).",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày trước."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_revenue_analysis",
+        "path":  "admin/revenue-analysis",
+        "label":  "Phân tích doanh thu",
+        "module":  "admin",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng muốn phân tích sâu doanh thu: xu hướng theo ngày, top sản phẩm theo doanh thu, phân bổ theo hãng xe. KHÔNG DÙNG KHI chỉ cần số tổng quan nhanh (dùng get_dashboard_overview), tồn kho (dùng get_warehouse_report), hoặc báo cáo lãi/lỗ (dùng get_pnl_report).",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), mặc định 30 ngày trước."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd), mặc định hôm nay."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_supplier_debt_detail",
+        "path":  "finance/supplier-debt-detail",
+        "label":  "Chi tiết công nợ nhà cung cấp",
+        "module":  "finance",
+        "required_permissions":  [
+                                     "Permissions.Accountant.DebtPaymentManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về lịch sử các lần trả nợ (log công nợ) của MỘT nhà cung cấp cụ thể theo supplier_id, sắp xếp giảm dần theo ngày thanh toán. DÙNG KHI người dùng hỏi chi tiết/lịch sử công nợ của một NCC cụ thể. KHÔNG DÙNG KHI người dùng hỏi tổng quan/danh sách nhiều NCC đang nợ — dùng get_suppliers_with_debt.",
+        "args":  [
+                     {
+                         "name":  "supplier_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã nhà cung cấp",
+                         "description":  "ID nhà cung cấp cần xem chi tiết công nợ."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_expenses",
+        "path":  "finance/expenses",
+        "label":  "Danh sách chi phí",
+        "module":  "finance",
+        "required_permissions":  [
+                                     "Permissions.Accountant.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về danh sách các khoản chi phí gần nhất (tên, số tiền, ngày chi, loại chi phí), sắp xếp giảm dần theo ngày. DÙNG KHI người dùng hỏi \u0027các khoản chi phí gần đây\u0027. KHÔNG DÙNG KHI cần báo cáo lãi/lỗ tổng hợp — dùng get_pnl_report.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_purchase_invoices",
+        "path":  "finance/purchase-invoices",
+        "label":  "Danh sách hóa đơn nhập hàng",
+        "module":  "finance",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.ReceiptManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Trả về danh sách hóa đơn nhập hàng gần nhất (số hóa đơn, nhà cung cấp, tổng tiền, trạng thái, trạng thái thanh toán), sắp xếp giảm dần theo ngày hóa đơn. DÙNG KHI người dùng hỏi \u0027các hóa đơn nhập hàng gần đây\u0027. KHÔNG DÙNG KHI cần công nợ NCC — dùng get_suppliers_with_debt/get_supplier_debt_detail.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa, mặc định 10, trần 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_active_shipments",
+        "path":  "logistics/active-shipments",
+        "label":  "Vận đơn đang giao",
+        "module":  "logistics",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi danh sách các vận đơn đang trong quá trình giao hàng (chưa giao xong). KHÔNG DÙNG KHI người dùng hỏi tình trạng vận chuyển của MỘT đơn hàng cụ thể theo mã đơn — dùng get_shipment_tracking.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số vận đơn tối đa trả về (mặc định 10, tối đa 25)."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_logistics_dashboard",
+        "path":  "logistics/dashboard",
+        "label":  "Tổng quan logistics",
+        "module":  "logistics",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi tổng quan tình hình vận chuyển/logistics (khối lượng đơn đang xử lý, COD chưa đối soát, tỉ lệ giao đúng hạn, số sự cố) trong một lệnh duy nhất. KHÔNG DÙNG KHI chỉ cần danh sách vận đơn hoặc đơn hàng cụ thể — dùng get_active_shipments hoặc get_fulfillment_orders.",
+        "args":  [
+                     {
+                         "name":  "range",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "today",
+                         "label":  "Khoảng thời gian",
+                         "description":  "\u0027today\u0027, \u0027month\u0027 hoặc \u0027year\u0027."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_fulfillment_orders",
+        "path":  "logistics/fulfillment-orders",
+        "label":  "Đơn cần xử lý",
+        "module":  "logistics",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng cần danh sách vận đơn có thể lọc theo trạng thái (đang giao/hoàn tất/hoàn hàng), đơn vị vận chuyển hoặc khoảng ngày tạo. KHÔNG DÙNG KHI chỉ cần các đơn ĐANG GIAO (dùng get_active_shipments) hoặc tra MỘT đơn cụ thể theo mã (dùng get_shipment_tracking).",
+        "args":  [
+                     {
+                         "name":  "status",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Trạng thái",
+                         "description":  "\u0027Shipping\u0027, \u0027Completed\u0027 hoặc \u0027Returned\u0027. Để trống nếu không lọc."
+                     },
+                     {
+                         "name":  "carrier",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đơn vị vận chuyển",
+                         "description":  "Tên đơn vị vận chuyển để lọc, ví dụ \u0027GHN\u0027."
+                     },
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd)."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd)."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số vận đơn tối đa trả về (mặc định 10, tối đa 25)."
+                     }
+                 ]
+    },
+    {
+        "name":  "calculate_shipping_fee",
+        "path":  "logistics/shipping-fee",
+        "label":  "Tính phí vận chuyển",
+        "module":  "logistics",
+        "required_permissions":  [
+                                     "Permissions.Order.OrderManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng muốn tính trước phí vận chuyển cho một sản phẩm/số lượng cụ thể đến một địa chỉ (phường/xã). KHÔNG DÙNG KHI người dùng hỏi phí ship thực tế đã phát sinh của một đơn đã tạo — dùng get_shipment_tracking hoặc get_fulfillment_orders.",
+        "args":  [
+                     {
+                         "name":  "province_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã tỉnh/thành",
+                         "description":  "ID tỉnh/thành giao đến."
+                     },
+                     {
+                         "name":  "ward_id",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Mã phường/xã",
+                         "description":  "Mã phường/xã giao đến (theo chuẩn GHN)."
+                     },
+                     {
+                         "name":  "product_variant_id",
+                         "type":  "integer",
+                         "required":  true,
+                         "label":  "Mã biến thể sản phẩm",
+                         "description":  "ID biến thể sản phẩm cần tính phí ship."
+                     },
+                     {
+                         "name":  "quantity",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  1,
+                         "label":  "Số lượng",
+                         "description":  "Số lượng sản phẩm (mặc định 1)."
+                     }
+                 ]
+    },
+    {
+        "name":  "create_purchase_request",
+        "path":  "inventory/purchase-requests/create",
+        "label":  "Tạo yêu cầu mua hàng",
+        "module":  "inventory",
+        "required_permissions":  [
+                                     "Permissions.Warehouse.PurchaseRequestManagement.Create"
+                                 ],
+        "is_write":  true,
+        "description":  "DÙNG KHI người dùng đã XÁC NHẬN RÕ RÀNG ý định tạo một yêu cầu mua hàng (PR) mới, sau khi đã báo lại danh sách sản phẩm/số lượng và người dùng xác nhận \u0027đúng, tạo đi\u0027. Đây là hành động GHI dữ liệu — KHÔNG được gọi khi người dùng chỉ đang hỏi thông tin hoặc còn cân nhắc. KHÔNG DÙNG KHI: chỉ tra cứu PR đã có (dùng list_purchase_requests/get_purchase_request_detail) hoặc thiếu variant_id/quantity xác định.",
+        "args":  [
+                     {
+                         "name":  "items_json",
+                         "type":  "string",
+                         "required":  true,
+                         "label":  "Danh sách sản phẩm (JSON)",
+                         "description":  "Chuỗi JSON dạng mảng, mỗi phần tử gồm variant_id (số nguyên) và quantity (số nguyên \u003e 0). Ví dụ: \u0027[{\"variant_id\":123,\"quantity\":50}]\u0027."
+                     },
+                     {
+                         "name":  "note",
+                         "type":  "string",
+                         "required":  false,
+                         "label":  "Ghi chú",
+                         "description":  "Ghi chú cho yêu cầu mua hàng (tùy chọn)."
+                     }
+                 ]
+    },
+    {
+        "name":  "list_news",
+        "path":  "marketing/news",
+        "label":  "Danh sách bài viết tin tức",
+        "module":  "marketing",
+        "required_permissions":  [
+                                     "Permissions.Marketing.NewsManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách bài viết tin tức đã xuất bản, mới nhất trước. DÙNG KHI người dùng hỏi \u0027có bài viết nào mới\u0027, \u0027danh sách tin tức gần đây\u0027. KHÔNG dùng để tra chi tiết một bài viết cụ thể.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng bài viết tối đa muốn trả về, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_debt_logs_missing_proofs",
+        "path":  "finance/debt-logs-missing-proofs",
+        "label":  "Công nợ thiếu chứng từ",
+        "module":  "finance",
+        "required_permissions":  [
+                                     "Permissions.Accountant.DebtPaymentManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách các lần thanh toán công nợ nhà cung cấp chưa có ảnh chứng từ đính kèm, mới nhất trước. DÙNG KHI người dùng hỏi \u0027khoản thanh toán nào thiếu chứng từ\u0027. KHÔNG dùng để tra toàn bộ lịch sử công nợ của một nhà cung cấp — dùng get_supplier_debt_detail.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng bản ghi tối đa muốn trả về, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_conversion_tools",
+        "path":  "knowledge/conversion-tools",
+        "label":  "Danh sách công cụ chuyển đổi",
+        "module":  "knowledge",
+        "required_permissions":  [
+
+                                 ],
+        "is_write":  false,
+        "description":  "Lấy danh sách các công cụ chuyển đổi (popup, banner...) đang cấu hình trên website, sắp xếp theo lượt xem giảm dần. DÙNG KHI người dùng hỏi \u0027đang có popup/công cụ chuyển đổi nào\u0027. KHÔNG dùng để chỉnh sửa hoặc tạo công cụ mới.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số lượng tối đa",
+                         "description":  "Số lượng công cụ tối đa muốn trả về, tối đa 25."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_payroll_summary",
+        "path":  "hr/payroll-summary",
+        "label":  "Tra cứu tổng hợp lương nhân viên",
+        "module":  "hr",
+        "required_permissions":  [
+                                     "Permissions.Admin.PayrollManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "⚠️ CẢNH BÁO: Đây là dữ liệu LƯƠNG — cực kỳ nhạy cảm. DÙNG KHI người hỏi có thẩm quyền rõ ràng (quản lý/HR/kế toán) và câu hỏi trực tiếp về lương cơ bản, hoa hồng đủ điều kiện tính lương, hoặc tổng lương thực nhận của một nhân viên/toàn công ty theo kỳ lương cụ thể. KHÔNG DÙNG KHI câu hỏi mơ hồ hoặc hỏi về thông tin ngân hàng/CCCD (tool không trả field đó).",
+        "args":  [
+                     {
+                         "name":  "employee_id",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Mã nhân viên",
+                         "description":  "Mã nhân viên cần xem lương. Không truyền = tổng hợp toàn công ty."
+                     },
+                     {
+                         "name":  "month",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Tháng",
+                         "description":  "Tháng của kỳ lương (1-12). Không truyền = tháng hiện tại."
+                     },
+                     {
+                         "name":  "year",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Năm",
+                         "description":  "Năm của kỳ lương. Không truyền = năm hiện tại."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số dòng tối đa trả về (mặc định 10, tối đa 25)."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_commission_records",
+        "path":  "hr/commission-records",
+        "label":  "Tra cứu bản ghi hoa hồng nhân viên",
+        "module":  "hr",
+        "required_permissions":  [
+                                     "Permissions.Admin.PayrollManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "⚠️ CẢNH BÁO: Đây là dữ liệu HOA HỒNG — nhạy cảm, liên quan trực tiếp đến thu nhập nhân viên. DÙNG KHI người hỏi có thẩm quyền rõ ràng và câu hỏi trực tiếp về các bản ghi hoa hồng cụ thể (số tiền, trạng thái, ngày) của một nhân viên hoặc toàn công ty. KHÔNG DÙNG KHI câu hỏi chung/mơ hồ không liên quan hoa hồng cụ thể.",
+        "args":  [
+                     {
+                         "name":  "employee_id",
+                         "type":  "integer",
+                         "required":  false,
+                         "label":  "Mã nhân viên",
+                         "description":  "Mã nhân viên cần xem bản ghi hoa hồng. Không truyền = toàn công ty."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa trả về (mặc định 10, tối đa 25), sắp xếp mới nhất trước."
+                     }
+                 ]
+    },
+    {
+        "name":  "get_store_settings",
+        "path":  "admin/store-settings",
+        "label":  "Xem cấu hình cửa hàng",
+        "module":  "admin",
+        "required_permissions":  [
+                                     "Permissions.Admin.SettingManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "DÙNG KHI người dùng hỏi về các thông số cấu hình vận hành hiện tại của cửa hàng (tỷ lệ đặt cọc, ngưỡng giá trị đơn hàng cần cảnh báo). KHÔNG DÙNG KHI cần chỉnh sửa cấu hình, hoặc câu hỏi liên quan đến doanh thu/thống kê — dùng get_dashboard_overview.",
+        "args":  [
+
+                 ]
+    },
+    {
+        "name":  "list_users_and_roles",
+        "path":  "admin/users-and-roles",
+        "label":  "Danh sách người dùng và vai trò",
+        "module":  "admin",
+        "required_permissions":  [
+                                     "Permissions.Admin.UserManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "⚠️ Tool này lộ thông tin phân quyền hệ thống (tên người dùng và vai trò được gán) — CHỈ dùng khi thực sự cần thiết. DÙNG KHI người dùng có quyền quản trị cần xác minh ai đang giữ vai trò gì. KHÔNG DÙNG KHI câu hỏi chỉ cần thông tin nhân viên thông thường (dùng list_employees), hoặc cần chi tiết permission string cụ thể của từng role.",
+        "args":  [
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số bản ghi tối đa trả về, mặc định 10, trần 25."
+                     }
+                 ]
+    }
+]
