@@ -1,8 +1,7 @@
-import os
 import json
 from fastapi import APIRouter, Depends
 from dependencies import verify_internal_token
-from langchain_google_genai import ChatGoogleGenerativeAI
+from app.core.llm import get_llm
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from langchain_core.output_parsers import PydanticOutputParser
@@ -20,14 +19,7 @@ class SearchIntent(BaseModel):
 	colors: List[str] = Field(description="Danh sách màu sắc nếu có, ví dụ: Đỏ, Đen, Xanh", default=[])
 	intent: str = Field(description="Ý định người dùng (search, unknown)", default="search")
 
-gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
-gemini_model_name = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
-
-if gemini_api_key:
-	llm = ChatGoogleGenerativeAI(google_api_key=gemini_api_key, model=gemini_model_name, temperature=0.1)
-else:
-	from langchain_core.language_models.fake import FakeListLLM
-	llm = FakeListLLM(responses=['{"intent":"unknown"}'])
+llm = get_llm(temperature=0.1)
 
 parser = PydanticOutputParser(pydantic_object=SearchIntent)
 
