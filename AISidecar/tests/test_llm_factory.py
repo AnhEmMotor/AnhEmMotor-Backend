@@ -1,6 +1,6 @@
 from app.core.llm import get_llm
 
-DEFAULT_MODEL = "gemini-3.5-flash"
+DEFAULT_MODEL = "gpt-4o-mini"
 
 
 def test_khong_co_api_key_tra_fake_llm(monkeypatch):
@@ -27,11 +27,11 @@ def test_provider_apiendpoint_khong_can_api_key(monkeypatch):
     assert type(llm).__name__ == "ChatOllama"
 
 
-def test_gemini_ton_trong_env_model(monkeypatch):
+def test_openai_ton_trong_env_model(monkeypatch):
     monkeypatch.setenv("AI_API_KEY", "fake-key-for-test")
-    monkeypatch.setenv("AI_MODEL", "gemini-3.5-flash")
+    monkeypatch.setenv("AI_MODEL", "gpt-4o-mini")
     llm = get_llm()
-    assert type(llm).__name__ == "ChatGoogleGenerativeAI"
+    assert type(llm).__name__ == "ChatOpenAI"
     assert DEFAULT_MODEL in str(llm.model)
 
 

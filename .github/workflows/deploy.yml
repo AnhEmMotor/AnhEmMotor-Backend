@@ -59,9 +59,10 @@ jobs:
           AI_MODEL: ${{ secrets.AI_MODEL }}
           LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING || 'false' }}
           LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
-          EMBEDDING_MODEL: ${{ secrets.EMBEDDING_MODEL }}
-          QDRANT_URL: ${{ secrets.QDRANT_URL }}
-          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_MEASUREMENT_ID_STORE: ${{ secrets.GA4_MEASUREMENT_ID_STORE }}
+          GA4_SERVICE_ACCOUNT_JSON: ${{ secrets.GA4_SERVICE_ACCOUNT_JSON }}
+          GA4_MP_API_SECRET: ${{ secrets.GA4_MP_API_SECRET }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -101,9 +102,10 @@ jobs:
             .AISetup.Model = (if env.AI_MODEL == "" then .AISetup.Model else env.AI_MODEL end) |
             .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
             .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY |
-            .AISetup.EmbeddingModel = (if env.EMBEDDING_MODEL == "" then .AISetup.EmbeddingModel else env.EMBEDDING_MODEL end) |
-            .AISetup.QdrantUrl = env.QDRANT_URL |
-            .AISetup.QdrantApiKey = env.QDRANT_API_KEY
+            .GoogleAnalytics4.PropertyId = env.GA4_PROPERTY_ID |
+            .GoogleAnalytics4.MeasurementId = env.GA4_MEASUREMENT_ID_STORE |
+            .GoogleAnalytics4.ServiceAccount = (if env.GA4_SERVICE_ACCOUNT_JSON == "" then {} else (env.GA4_SERVICE_ACCOUNT_JSON | fromjson) end) |
+            .GoogleAnalytics4.MeasurementProtocolApiSecret = env.GA4_MP_API_SECRET
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore

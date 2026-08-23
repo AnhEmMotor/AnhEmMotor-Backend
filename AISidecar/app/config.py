@@ -9,16 +9,16 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     backend_url: str = "http://localhost:5000/api"
     backend_internal_secret: str = ""
-    ai_provider: Literal["gemini", "apiendpoint"] = "gemini"
+    ai_provider: Literal["openai", "apiendpoint"] = "openai"
     ai_api_key: str = ""
     ai_api_endpoint: str = ""
-    ai_model: str = "gemini-3.5-flash"
+    ai_model: str = "gpt-4o-mini"
     ollama_num_ctx: int = 8192
 
     @field_validator("ai_model", mode="before")
     @classmethod
     def _empty_model_uses_default(cls, v):
-        return v or "gemini-3.5-flash"
+        return v or "gpt-4o-mini"
 
     @field_validator("ai_provider", mode="before")
     @classmethod
@@ -27,11 +27,6 @@ class Settings(BaseSettings):
 
     port: int = 8000
     request_timeout_seconds: float = 15.0
-
-    qdrant_url: str = ""
-    qdrant_api_key: str = ""
-    embedding_model: str = "text-embedding-004"
-    rag_enabled: bool = True
 
     postgres_url: str = ""
 

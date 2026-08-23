@@ -98,7 +98,7 @@ def test_build_tools_tra_dung_ten_va_mo_ta():
         "get_active_shipments", "get_logistics_dashboard", "get_fulfillment_orders", "calculate_shipping_fee",
         "create_purchase_request", "list_news", "get_debt_logs_missing_proofs", "get_conversion_tools",
         "get_payroll_summary", "get_commission_records", "get_store_settings", "list_users_and_roles",
-
+        "get_ga4_traffic",
     }
     for tool in tools:
         assert tool.description

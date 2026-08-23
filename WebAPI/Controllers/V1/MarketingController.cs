@@ -30,12 +30,4 @@ public class MarketingController(ISender sender) : ApiController
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
-
-    [HttpGet("google-ads/campaigns")]
-    [SwaggerOperation(Summary = "Lấy thống kê Google Ads")]
-    public async Task<IActionResult> GetGoogleAdsCampaigns([FromServices] Application.Interfaces.Services.Marketing.IGoogleAdsService googleAdsService, CancellationToken cancellationToken)
-    {
-        var result = await googleAdsService.GetCampaignPerformanceAsync(cancellationToken);
-        return Ok(result);
-    }
 }
