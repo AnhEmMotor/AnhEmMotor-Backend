@@ -27,6 +27,10 @@ public class WorkshopPaymentsController(IMediator mediator) : ApiController
     /// Lấy danh sách phiếu thu xưởng với phân trang, lọc và sắp xếp.
     /// </summary>
     /// <param name="sieveModel">Tham số phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="sourceType">Lọc theo loại nguồn phiếu thu. Bỏ trống để lấy tất cả.</param>
+    /// <param name="paymentStatus">Lọc theo trạng thái thanh toán. Bỏ trống để lấy tất cả.</param>
+    /// <param name="paymentMethod">Lọc theo phương thức thanh toán. Bỏ trống để lấy tất cả.</param>
+    /// <param name="search">Từ khóa tìm kiếm tự do. Bỏ trống để không lọc.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách phiếu thu xưởng đã phân trang.</returns>
     /// <response code="200">Trả về danh sách phiếu thu xưởng thành công.</response>

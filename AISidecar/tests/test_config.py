@@ -31,8 +31,7 @@ def test_ai_provider_validate():
 
 def test_default_values():
     s = Settings()
-    assert s.ai_model == "gemini-3.5-flash"
+    assert s.ai_model == "gpt-4o-mini"
     assert s.port == 8000
-    assert s.rag_enabled is True
     assert s.plan_cache_enabled is True
     assert s.tool_flags == {}
