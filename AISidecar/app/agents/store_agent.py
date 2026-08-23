@@ -28,7 +28,6 @@ MAX_TOOL_TURNS = 6
 
 STORE_REWRITE_MESSAGES = {
     "no_permission": "Xin lỗi, tôi chưa thể trả lời câu hỏi này. Bạn vui lòng bấm \"Gặp nhân viên\" để được hỗ trợ nhé.",
-    "unverified_metric": "Tôi chưa tra cứu được thông tin này, bạn cho tôi biết cụ thể hơn (ví dụ tên xe) để tôi tìm chính xác nhé.",
     "stalled_promise": "Xin lỗi, để tôi tra cứu ngay. Bạn nhắc lại yêu cầu hoặc cho thêm chi tiết giúp tôi không?",
 }
 

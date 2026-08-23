@@ -29,23 +29,6 @@ FAKE_TOOL_CALL_PATTERN = re.compile(
 
 CURRENCY_UNIT_MARKERS = ["đồng", "vnđ", "₫", "vnd"]
 
-CURRENCY_MENTION_PATTERN = re.compile(
-    r"\d[\d.,]*\s*(?:triệu|tỷ|nghìn)?\s*(?:đồng|vnđ|₫|vnd)\b", re.IGNORECASE)
-PERIOD_MARKERS = [
-    "tháng", "quý", "năm", "kỳ", "ngày", "tuần", "hôm nay", "hôm qua", "hiện tại", "trước", "này",
-]
-
-
-def contains_unlabeled_period_comparison(text: str) -> bool:
-    amounts = list(CURRENCY_MENTION_PATTERN.finditer(text))
-    if len(amounts) < 2:
-        return False
-    for m in amounts:
-        window = text[max(0, m.start() - 40):m.start()].lower()
-        if not any(marker in window for marker in PERIOD_MARKERS):
-            return True
-    return False
-
 
 @dataclass
 class GuardResult:
@@ -158,13 +141,6 @@ def check_output(answer: str, state: dict) -> GuardResult:
 
     if any(marker in answer for marker in PROMPT_LEAK_MARKERS):
         return GuardResult.block("Không thể trả lời yêu cầu này.")
-
-    if state.get("tool_call_count", 0) > 0 and contains_unlabeled_period_comparison(answer):
-        return GuardResult.rewrite(
-            "Câu trả lời có từ 2 con số tiền tệ trở lên nhưng thiếu nhãn kỳ (tháng/quý/năm) cạnh "
-            "từng con số — dễ gây nhầm là cùng một kỳ. Hãy viết lại, ghi rõ kỳ áp dụng ngay cạnh "
-            "mỗi số liệu.",
-            kind="unverified_metric")
 
     return GuardResult.allow()
 

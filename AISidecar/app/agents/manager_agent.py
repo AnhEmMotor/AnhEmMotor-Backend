@@ -95,10 +95,6 @@ REWRITE_MESSAGES = {
         "Tôi không có đủ quyền để tra dữ liệu này. "
         "Vui lòng liên hệ quản trị viên nếu bạn cần được cấp thêm quyền."
     ),
-    "unverified_metric": (
-        "Tôi chưa tra cứu được dữ liệu thật cho câu hỏi này nên không thể đưa ra số liệu. "
-        "Bạn có thể hỏi lại cụ thể hơn để tôi tra đúng thông tin không?"
-    ),
     "stalled_promise": (
         "Xin lỗi, tôi cần tra cứu thêm để trả lời chính xác. Bạn có thể nhắc lại yêu cầu "
         "hoặc cho thêm chi tiết (ví dụ tên/mã sản phẩm cụ thể) để tôi tìm giúp bạn?"
