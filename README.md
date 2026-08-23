@@ -726,7 +726,7 @@ This project integrates Google Analytics 4 to track users on the **Store website
    - Open the stream details and copy the Measurement ID (`G-XXXXXXXXXX`).
 4. **Service Account JSON** → secret `GA4_SERVICE_ACCOUNT_JSON` (needed for reading metrics):
    - Go to [Google Cloud Console](https://console.cloud.google.com), select/create a project.
-   - APIs & Services → Library → enable **Google Analytics Data API**.
+   - APIs & Services → Library → enable **Google Analytics Data API** and **Google Analytics Admin API**.
    - IAM & Admin → Service Accounts → Create service account (name e.g. `ga4-api-reader`, no extra roles needed).
    - Open that service account → Keys → Add Key → JSON → download the file.
    - Back in GA4: Admin → Property Access Management → ➕ add the service account email (`ga4-api-reader@...iam.gserviceaccount.com`) with role **Viewer**.
@@ -1529,30 +1529,25 @@ Sidecar dùng `ChatOllama` từ `langchain-ollama`, gọi API native của Ollam
 
 Dự án tích hợp Google Analytics 4 để theo dõi người dùng trên **website Store**, **app Android**, đồng thời hiển thị chỉ số trong **Management** (menu Marketing → Google Analytics) và có sẵn công cụ chat AI (`get_ga4_traffic`) để hỏi trực tiếp về lượng truy cập ngay trong khung chat quản trị.
 
-> **🚨 QUY TẮC BẢO MẬT — Toàn bộ thông tin xác thực GA4 CHỈ tồn tại ở Backend này.**
-> Store và Mobile KHÔNG chứa khoá nào: các app gọi `GET /api/v1/analytics/public-config` khi chạy để nhận Mã đo lường; Mobile gửi sự kiện về Backend rồi Backend chuyển tiếp sang GA4. Management chỉ XEM chỉ số qua trang dashboard, KHÔNG bị theo dõi.
-> Nếu bỏ trống bất kỳ giá trị nào dưới đây, tính năng tương ứng **tự tắt êm** (không gây lỗi): public-config trả `enabled: false`, các endpoint dashboard trả dữ liệu rỗng, công cụ chat AI báo "chưa cấu hình".
-
 ### Cách lấy các thông tin
 
-*(Tên menu bên dưới theo giao diện TIẾNG VIỆT của Google; nếu bạn dùng giao diện tiếng Anh thì đối chiếu tên gốc trong ngoặc.)*
+_(Tên menu bên dưới theo giao diện TIẾNG VIỆT của Google; nếu bạn dùng giao diện tiếng Anh thì đối chiếu tên gốc trong ngoặc.)_
 
 1. **Tạo tài sản GA4**: vào [analytics.google.com](https://analytics.google.com) → **Quản trị** (⚙️) → **Tạo tài khoản** → **Tạo tài sản** (múi giờ `Vietnam`, tiền tệ `VND`).
-2. **Mã tài sản** (*Property ID*) → secret `GA4_PROPERTY_ID`:
-   - Quản trị → **Cài đặt tài sản** → copy mã dạng số (ví dụ: `123456789`).
-3. **Mã đo lường cho Store** (*Measurement ID*) → secret `GA4_MEASUREMENT_ID_STORE`:
+2. **Mã tài sản** (_Property ID_) → secret `GA4_PROPERTY_ID`:
+   - Quản trị → **Cài đặt tài sản** → **Tài sản** → **Thông tin về tài sản** → copy mã dạng số (ví dụ: `123456789`).
+3. **Mã đo lường cho Store** (_Measurement ID_) → secret `GA4_MEASUREMENT_ID_STORE`:
    - Quản trị → **Luồng dữ liệu** → **Thêm luồng** → chọn **Web** → nhập tên miền của Store.
    - Mở chi tiết luồng vừa tạo và copy Mã đo lường dạng `G-XXXXXXXXXX`.
-4. **Nội dung file khoá JSON của Tài khoản dịch vụ** (*Service Account*) → secret `GA4_SERVICE_ACCOUNT_JSON` (cần để đọc chỉ số):
+4. **Nội dung file khoá JSON của Tài khoản dịch vụ** (_Service Account_) → secret `GA4_SERVICE_ACCOUNT_JSON` (cần để đọc chỉ số):
    - Vào [Google Cloud Console](https://console.cloud.google.com), chọn hoặc tạo một dự án.
-   - **API và dịch vụ → Thư viện** → bật **Google Analytics Data API**.
+   - **API và dịch vụ → Thư viện** → bật **Google Analytics Data API** và **Google Analytics Admin API**.
    - **IAM & Quản trị → Tài khoản dịch vụ** → **Tạo tài khoản dịch vụ** (tên ví dụ: `ga4-api-reader`, không cần gán thêm vai trò nào).
    - Vào tài khoản dịch vụ vừa tạo → **Khoá → Thêm khoá → JSON** → tải file về máy.
    - Quay lại GA4: Quản trị → **Quản lý quyền truy cập vào tài sản** → nút **➕** → thêm email tài khoản dịch vụ với vai trò **Người xem**.
    - Mở file JSON vừa tải, copy TOÀN BỘ nội dung rồi dán nguyên si vào secret (GitHub Secrets hỗ trợ nhiều dòng nên không cần chỉnh sửa gì). Không cần copy file nào lên VPS!
-5. **Mật mã API của Giao thức đo lường** (*Measurement Protocol API secret*) → secret `GA4_MP_API_SECRET` (cần để app Android gửi sự kiện):
+5. **Mật mã API của Giao thức đo lường** (_Measurement Protocol API secret_) → secret `GA4_MP_API_SECRET` (cần để app Android gửi sự kiện):
    - Trong GA4: Quản trị → **Luồng dữ liệu** → luồng web của Store → **Mật mã API Giao thức đo lường** → **Tạo mới**.
-6. **Firebase: KHÔNG bắt buộc** — app Android không dùng Firebase mà gửi sự kiện thô qua Backend chuyển tiếp. Bạn có thể bỏ qua hoàn toàn phần thiết lập Firebase.
 
 ### Cấu hình môi trường Local
 
@@ -1573,25 +1568,6 @@ Dự án tích hợp Google Analytics 4 để theo dõi người dùng trên **w
 ```
 
 Với mục `"ServiceAccount"`: mở file khoá JSON đã tải ở bước 4, thay `{}` bằng toàn bộ nội dung bên trong file đó (dán nguyên si, không cần escape dấu ngoặc kép hay xuống dòng).
-
-Kiểm tra ngay trên máy local được luôn:
-
-- **Data API** (đọc chỉ số) xác thực bằng Tài khoản dịch vụ — chạy từ localhost không cần cấu hình tên miền.
-- **gtag.js / Giao thức đo lường chấp nhận dữ liệu từ mọi nguồn, kể cả `localhost`.**
-- Xem kết quả ở GA4 → **Báo cáo → Thời gian thực** — dữ liệu hiện trong khoảng 1 phút (các báo cáo tổng hợp cần 24–48 giờ mới có số liệu).
-- Nên tạo tài sản riêng kiểu `AnhEm Motor - Dev` để dữ liệu thử nghiệm không làm bẩn số liệu production.
-
-### Cấu hình trên CI/CD (GitHub Actions)
-
-Chỉ cần thêm 1 secret duy nhất `GA4_SERVICE_ACCOUNT_JSON` (nội dung nguyên file khoá JSON) cùng các secret còn lại đã liệt kê ở mục 7. File `.github/workflows/deploy.yml` đã tự đọc nội dung này và điền vào cấu hình khi triển khai.
-
-### Tổng hợp đầu mối tracking
-
-| Client | Cách gửi dữ liệu | Khoá nằm ở đâu |
-|--------|------------------|----------------|
-| Store (Nuxt) | chèn gtag.js khi chạy, sau khi gọi public-config | Chỉ Backend |
-| Management (Vue) | chỉ xem — đọc chỉ số qua endpoint dashboard, KHÔNG bị theo dõi | Chỉ Backend |
-| App Android | `POST /api/v1/analytics/events` → Backend chuyển tiếp sang GA4 | Chỉ Backend |
 
 # 12. Troubleshooting
 

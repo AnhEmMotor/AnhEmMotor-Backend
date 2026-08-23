@@ -218,8 +218,10 @@ public class Ga4AnalyticsService(
                     "GA4 runReport thất bại ({StatusCode}): {Body}",
                     (int)httpResponse.StatusCode,
                     raw);
+                var reason = ExtractGoogleErrorMessage(raw);
                 return Result<JsonDocument>.Failure(
-                    $"Google Analytics trả lỗi {(int)httpResponse.StatusCode}. Kiểm tra PropertyId/quyền Service Account.");
+                    $"Google Analytics trả lỗi {(int)httpResponse.StatusCode}"
+                    + (string.IsNullOrWhiteSpace(reason) ? "." : $": {reason}"));
             }
 
             return Result<JsonDocument>.Success(JsonDocument.Parse(raw));
@@ -240,6 +242,27 @@ public class Ga4AnalyticsService(
             logger.LogError(ex, "Lỗi không xác định khi truy vấn Google Analytics.");
             return Result<JsonDocument>.Failure("Lỗi không xác định khi truy vấn Google Analytics.");
         }
+    }
+
+    /// <summary>Trích message thật từ body lỗi của Google (ghi rõ lý do 403: thiếu quyền/SERVICE_DISABLED...).</summary>
+    private static string? ExtractGoogleErrorMessage(string rawBody)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(rawBody);
+            if (doc.RootElement.TryGetProperty("error", out var error) &&
+                error.TryGetProperty("message", out var message))
+            {
+                var text = message.GetString() ?? string.Empty;
+                return text.Length > 400 ? text[..400] + "..." : text;
+            }
+        }
+        catch (JsonException)
+        {
+            // body không phải JSON — bỏ qua, trả lý do chung.
+        }
+
+        return null;
     }
 
     private static IEnumerable<Ga4DimensionRowDto> ParseRows(JsonElement root, string? dimension)
