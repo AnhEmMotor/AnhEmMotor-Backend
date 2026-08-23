@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Shipping;
+using Domain.Constants.Order;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Authorization;
@@ -136,9 +137,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .ExecuteSqlRawAsync(
                 "INSERT INTO \"InventoryReceiptStatus\" (\"Key\") VALUES ('draft'), ('sent'), ('approve'), ('reject') ON CONFLICT (\"Key\") DO NOTHING;")
             .ConfigureAwait(false);
+        var outputStatusValues = string.Join(", ", OrderStatus.All.Select(key => $"('{key}')"));
+        var outputStatusSql = "INSERT INTO \"OutputStatus\" (\"Key\") VALUES " + outputStatusValues + " ON CONFLICT (\"Key\") DO NOTHING;";
         await context.Database
-            .ExecuteSqlRawAsync(
-                "INSERT INTO \"OutputStatus\" (\"Key\") VALUES ('pending'), ('processing'), ('shipped'), ('delivered'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ExecuteSqlRawAsync(outputStatusSql)
             .ConfigureAwait(false);
         await context.Database
             .ExecuteSqlRawAsync(

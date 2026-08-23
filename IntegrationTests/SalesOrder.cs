@@ -1173,8 +1173,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content![OrderStatus.Pending].Should().Contain(OrderStatus.Cancelled);
     }
 
-    [Fact(DisplayName = "SO_108 - Lấy Transition Map bị từ chối khi chỉ có quyền View")]
-    public async Task GetTransitionMap_WithOnlyViewPermission_ReturnsForbidden()
+    [Fact(DisplayName = "SO_108 - Lấy Transition Map thành công khi chỉ có quyền View")]
+    public async Task GetTransitionMap_WithOnlyViewPermission_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
@@ -1199,7 +1199,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/SalesOrders/transition-map",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
+            .ReadFromJsonAsync<Dictionary<string, HashSet<string>>>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "SO_105 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
