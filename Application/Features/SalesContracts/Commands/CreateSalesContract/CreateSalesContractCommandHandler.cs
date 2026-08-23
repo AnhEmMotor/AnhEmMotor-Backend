@@ -41,6 +41,7 @@ public class CreateSalesContractCommandHandler(
                 $"Đơn hàng #{request.OrderId} đã được liên kết với hợp đồng {existingContract.ContractNumber}.");
         var contractNumber = $"HDMB-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..8]}";
         var entity = request.Adapt<SalesContract>();
+        entity.OutputId = order.Id;
         entity.ContractNumber = contractNumber;
         entity.Status = SalesContractStatus.Draft;
         entity.CustomerId = order.BuyerId;

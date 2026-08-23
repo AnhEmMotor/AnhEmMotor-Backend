@@ -1,5 +1,6 @@
 using Application.ApiContracts.DepositSetting.Requests;
 using Application.Interfaces.Repositories.Setting;
+using Domain.Constants;
 using MediatR;
 using System.Linq;
 
@@ -16,10 +17,12 @@ public class GetDepositSettingsQueryHandler(ISettingRepository settingRepository
         var result = new List<DepositSettingItemDto>();
         var defaultTypes = new[] { "Xe máy", "Phụ tùng & xe máy", "Chỉ có phụ tùng", "Chỉ có phụ kiện" };
         var settings = (await settingRepository.GetAllAsync(cancellationToken)).ToList();
+        var defaultThreshold = settings.FirstOrDefault(x => x.Key == SettingKeys.OrderValueExceeds)?.Value;
+        var defaultRatio = settings.FirstOrDefault(x => x.Key == SettingKeys.DepositRatio)?.Value;
         foreach (var type in defaultTypes)
         {
-            var thresholdStr = settings.FirstOrDefault(x => x.Key == $"Deposit_{type}_Threshold")?.Value;
-            var ratioStr = settings.FirstOrDefault(x => x.Key == $"Deposit_{type}_Ratio")?.Value;
+            var thresholdStr = settings.FirstOrDefault(x => x.Key == $"Deposit_{type}_Threshold")?.Value ?? defaultThreshold;
+            var ratioStr = settings.FirstOrDefault(x => x.Key == $"Deposit_{type}_Ratio")?.Value ?? defaultRatio;
             decimal threshold = decimal.TryParse(thresholdStr, out var t) ? t : 0;
             int ratio = int.TryParse(ratioStr, out var r) ? r : 0;
             result.Add(new DepositSettingItemDto { OrderType = type, OrderThreshold = threshold, DepositRatio = ratio });

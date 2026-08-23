@@ -2,6 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
@@ -9,6 +10,8 @@ using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
+using Domain.Entities.Logistics;
+using Domain.Constants.Logistics;
 using Mapster;
 using MediatR;
 
@@ -22,7 +25,8 @@ public class CreateOutputByManagerCommandHandler(
     IUserReadRepository userReadRepository,
     ISettingRepository settingRepository,
     IShippingService shippingService,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
+    IUnitOfWork unitOfWork,
+    IShipmentInsertRepository? shipmentInsertRepository = null) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         CreateOutputByManagerCommand request,
@@ -175,6 +179,31 @@ public class CreateOutputByManagerCommandHandler(
             if (result.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(result.Errors!);
+            }
+            if (shipmentInsertRepository != null)
+            {
+                await shipmentInsertRepository.AddAsync(
+                    new Shipment
+                    {
+                        CustomerName = output.CustomerName ?? string.Empty,
+                        CustomerPhone = output.CustomerPhone ?? string.Empty,
+                        DestinationAddress = output.CustomerAddress ?? string.Empty,
+                        ShippingCost = output.ShippingFee ?? 0,
+                        CodAmount = output.Total - (output.PaidAmount ?? 0),
+                        OriginAddress = "Kho AnhEmMotor",
+                        OutputId = output.Id,
+                        Type = ShipmentType.OrderDelivery,
+                        Items = output.OutputInfos.Select(
+                                info => new ShipmentItem
+                                {
+                                    ProductVariantId = info.ProductVariantId,
+                                    ProductVariantColorId = info.ProductVariantColorId,
+                                    Quantity = info.Count ?? 1
+                                })
+                            .ToList()
+                    },
+                    cancellationToken).ConfigureAwait(false);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);

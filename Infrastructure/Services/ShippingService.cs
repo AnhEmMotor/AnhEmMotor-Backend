@@ -248,7 +248,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(baseUrl))
             {
-                return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
+                return Result<string>.Failure(
+                    Error.ServiceUnavailable("GHN configuration is missing. Configure GhnSettings:Token and GhnSettings:BaseUrl."));
             }
             var requestUri = $"{baseUrl}/shiip/public-api/v3/master-data/province/all";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
@@ -259,12 +260,14 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return Result<string>.Failure(Error.BadRequest("Failed to fetch provinces: " + contentString));
+                return Result<string>.Failure(
+                    Error.ServiceUnavailable("GHN could not provide provinces. Upstream response: " + contentString));
             }
             return Result<string>.Success(contentString);
-        } catch (Exception)
+        } catch (Exception ex)
         {
-            return Result<string>.Failure(Error.Failure("An error occurred while fetching provinces."));
+            return Result<string>.Failure(
+                Error.ServiceUnavailable("GHN province service is unavailable: " + ex.Message));
         }
     }
 

@@ -121,6 +121,7 @@ public abstract class ApiController : ControllerBase
             "Unauthorized" => Unauthorized(errorResponse),
             "Forbidden" => StatusCode(403, errorResponse),
             "Conflict" => Conflict(errorResponse),
+            "ServiceUnavailable" => StatusCode(503, errorResponse),
             _ => BadRequest(errorResponse)
         };
     }

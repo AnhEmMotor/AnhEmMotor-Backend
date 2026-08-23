@@ -170,6 +170,7 @@ namespace Infrastructure.Repositories.ProductVariant
 
             var itemsQuery = context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => pagedIds.Contains(v.Id))
+                .AsNoTracking()
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.Product)

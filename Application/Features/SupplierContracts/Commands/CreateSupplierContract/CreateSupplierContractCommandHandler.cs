@@ -49,6 +49,8 @@ public class CreateSupplierContractCommandHandler(
         insertRepo.Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepo.GetByIdAsync(entity.Id, cancellationToken).ConfigureAwait(false);
-        return created!.Adapt<SupplierContractResponse>();
+        if (created == null)
+            return Result<SupplierContractResponse>.Failure("Không thể đọc lại hợp đồng sau khi tạo.");
+        return created.Adapt<SupplierContractResponse>();
     }
 }

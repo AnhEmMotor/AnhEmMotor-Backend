@@ -21,6 +21,12 @@ public static class SettingsSeeder
             { SettingKeys.DepositType, "percentage" },
             { SettingKeys.FixedDepositAmount, "2000000" }
         };
+        var depositTypes = new[] { "Xe máy", "Phụ tùng & xe máy", "Chỉ có phụ tùng", "Chỉ có phụ kiện" };
+        foreach (var type in depositTypes)
+        {
+            defaults[$"Deposit_{type}_Threshold"] = defaults[SettingKeys.OrderValueExceeds];
+            defaults[$"Deposit_{type}_Ratio"] = defaults[SettingKeys.DepositRatio];
+        }
         var toAdd = defaults
             .Where(kv => !existingKeys.Contains(kv.Key, StringComparer.OrdinalIgnoreCase))
             .Select(kv => new Setting { Key = kv.Key, Value = kv.Value })

@@ -18,9 +18,21 @@ public class SalesContractReadRepository(ApplicationDBContext context, ISievePag
 
     public Task<PagedResult<SalesContractResponse>> GetPagedAsync(
         SieveModel sieveModel,
+        string? keyword = null,
         CancellationToken cancellationToken = default)
     {
         var query = GetQueryable();
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            var normalizedKeyword = keyword.Trim();
+            query = query.Where(contract =>
+                contract.ContractNumber.Contains(normalizedKeyword) ||
+                (contract.CustomerFullName != null && contract.CustomerFullName.Contains(normalizedKeyword)) ||
+                (contract.CustomerCCCD != null && contract.CustomerCCCD.Contains(normalizedKeyword)) ||
+                (contract.CustomerPhone != null && contract.CustomerPhone.Contains(normalizedKeyword)) ||
+                (contract.FrameNumber != null && contract.FrameNumber.Contains(normalizedKeyword)) ||
+                (contract.EngineNumber != null && contract.EngineNumber.Contains(normalizedKeyword)));
+        }
         return paginator.ApplyAsync<Domain.Entities.SalesContract, SalesContractResponse>(
             query,
             sieveModel,

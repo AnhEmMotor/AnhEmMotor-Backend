@@ -161,10 +161,10 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Count.Should().Be(6);
-        content.First(x => x.ReportDay == DateOnly.FromDateTime(today)).TotalRevenue.Should().Be(1200000);
-        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddDays(-1))).TotalRevenue.Should().Be(3500000);
-        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddDays(-2))).TotalRevenue.Should().Be(2800000);
-        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddDays(-3))).TotalRevenue.Should().Be(0);
+        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddHours(7))).TotalRevenue.Should().Be(1200000);
+        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddHours(7).AddDays(-1))).TotalRevenue.Should().Be(3500000);
+        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddHours(7).AddDays(-2))).TotalRevenue.Should().Be(2800000);
+        content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddHours(7).AddDays(-3))).TotalRevenue.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_022 - Lấy doanh thu chỉ tính đơn hàng hợp lệ (Skip Cancelled/Pending)")]

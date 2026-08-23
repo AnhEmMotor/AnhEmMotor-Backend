@@ -21,9 +21,8 @@ public record CreateJobApplicationRequest
     [MaxLength(100)]
     public string AppliedPosition { get; set; } = string.Empty;
 
-    [Required]
     [MaxLength(500)]
-    public string CvFileUrl { get; set; } = string.Empty;
+    public string? CvFileUrl { get; set; }
 
     public string? CoverLetter { get; set; }
 }

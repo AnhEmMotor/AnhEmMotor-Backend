@@ -17,7 +17,7 @@ namespace Infrastructure.SqlServerMigrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.9")
+                .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -548,141 +548,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasIndex("SessionId");
 
                     b.ToTable("ChatMessage");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChatPlan", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastEditedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("LastEditedBy");
-
-                    b.Property<Guid>("RunId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("RunId");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("SessionId");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("Status");
-
-                    b.Property<string>("Steps")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Steps");
-
-                    b.Property<string>("ToolRegistryFingerprint")
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("ToolRegistryFingerprint");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RunId")
-                        .IsUnique();
-
-                    b.ToTable("ChatPlan");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ChatPlanTemplate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CanonicalQuestion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("CanonicalQuestion");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("IntentHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(64)")
-                        .HasColumnName("IntentHash");
-
-                    b.Property<DateTimeOffset?>("LastUsedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Module")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("Module");
-
-                    b.Property<int>("RejectCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RequiredPermissions")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("RequiredPermissions");
-
-                    b.Property<string>("RequiredTools")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("RequiredTools");
-
-                    b.Property<string>("Slots")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Slots");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("Status");
-
-                    b.Property<string>("StepsTemplate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("StepsTemplate");
-
-                    b.Property<int>("SuccessCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ToolRegistryFingerprint")
-                        .HasColumnType("nvarchar(32)")
-                        .HasColumnName("ToolRegistryFingerprint");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("UseCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserEditCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatPlanTemplate");
                 });
 
             modelBuilder.Entity("Domain.Entities.ChatRun", b =>
@@ -4461,6 +4326,17 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("VariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("VariantColorId");
+
+                    b.Property<int?>("VariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("VariantId");
+
+                    b.Property<DateTime>("ViewedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("VisitorKey")
                         .HasColumnType("nvarchar(64)")
                         .HasColumnName("VisitorKey");
@@ -4468,6 +4344,10 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("VariantColorId");
+
+                    b.HasIndex("VariantId");
 
                     b.HasIndex("CustomerUserId", "CreatedAt");
 
@@ -7050,17 +6930,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ChatPlan", b =>
-                {
-                    b.HasOne("Domain.Entities.ChatRun", "Run")
-                        .WithOne("Plan")
-                        .HasForeignKey("Domain.Entities.ChatPlan", "RunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Run");
-                });
-
             modelBuilder.Entity("Domain.Entities.ChatRun", b =>
                 {
                     b.HasOne("Domain.Entities.ChatSession", "Session")
@@ -7829,9 +7698,21 @@ namespace Infrastructure.SqlServerMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.ProductVariantColor", "VariantColor")
+                        .WithMany()
+                        .HasForeignKey("VariantColorId");
+
+                    b.HasOne("Domain.Entities.ProductVariant", "Variant")
+                        .WithMany()
+                        .HasForeignKey("VariantId");
+
                     b.Navigation("CustomerUser");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Variant");
+
+                    b.Navigation("VariantColor");
                 });
 
             modelBuilder.Entity("Domain.Entities.PromotionBanner", b =>
@@ -8532,8 +8413,6 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.ChatRun", b =>
                 {
                     b.Navigation("Events");
-
-                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("Domain.Entities.ChatSession", b =>
