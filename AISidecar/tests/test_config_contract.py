@@ -93,9 +93,6 @@ AISETUP_TO_SETTINGS = {
     "ApiEndpoint": "ai_api_endpoint",
     "ApiKey": "ai_api_key",
     "Model": "ai_model",
-    "EmbeddingModel": "embedding_model",
-    "QdrantUrl": "qdrant_url",
-    "QdrantApiKey": "qdrant_api_key",
 }
 
 AISETUP_SKIP = {"LangSmithTracing", "LangSmithApiKey"}

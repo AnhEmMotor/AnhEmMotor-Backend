@@ -1784,5 +1784,50 @@
                          "description":  "Số bản ghi tối đa trả về, mặc định 10, trần 25."
                      }
                  ]
+    },
+    {
+        "name":  "get_ga4_traffic",
+        "path":  "analytics/ga4-traffic",
+        "label":  "Chỉ số truy cập Google Analytics",
+        "module":  "marketing",
+        "required_permissions":  [
+                                     "Permissions.Admin.DashboardManagement.View"
+                                 ],
+        "is_write":  false,
+        "description":  "Đọc chỉ số người dùng thật từ Google Analytics 4 (web Store + app Mobile): phiên truy cập (sessions), người dùng, lượt xem trang, tỷ lệ tương tác, thời lượng phiên trung bình, sự kiện chuyển đổi. DÙNG KHI người dùng hỏi 'hôm nay có bao nhiêu người truy cập', 'traffic tuần này thế nào', 'nguồn nào đưa nhiều khách nhất', 'trang nào xem nhiều nhất', 'thiết bị nào phổ biến'. KHÔNG dùng cho doanh thu/đơn hàng nội bộ — dùng get_sales_summary hoặc list_orders. Lưu ý: breakdown='day' trả chuỗi theo ngày; 'source' theo nguồn traffic; 'page' theo trang; 'device' theo thiết bị; để trống trả tổng cả kỳ.",
+        "args":  [
+                     {
+                         "name":  "from_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Từ ngày",
+                         "description":  "Ngày bắt đầu (yyyy-MM-dd), bỏ trống lấy 30 ngày gần nhất."
+                     },
+                     {
+                         "name":  "to_date",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Đến ngày",
+                         "description":  "Ngày kết thúc (yyyy-MM-dd), bỏ trống tính đến hôm nay."
+                     },
+                     {
+                         "name":  "breakdown",
+                         "type":  "string",
+                         "required":  false,
+                         "default":  "",
+                         "label":  "Chiều phân rã",
+                         "description":  "'day' (theo ngày), 'source' (nguồn traffic), 'page' (trang), 'device' (thiết bị). Bỏ trống để lấy tổng cả kỳ."
+                     },
+                     {
+                         "name":  "limit",
+                         "type":  "integer",
+                         "required":  false,
+                         "default":  10,
+                         "label":  "Số dòng",
+                         "description":  "Số dòng tối đa khi có breakdown, mặc định 10, trần 25 (riêng 'day' trần 90)."
+                     }
+                 ]
     }
 ]

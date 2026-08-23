@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.SqlServerMigrations
 {
     /// <inheritdoc />
-    public partial class UpdateLatestSchema : Migration
+    public partial class UpdateSchemaForProductViewInvoiceAndDropChatPlan : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

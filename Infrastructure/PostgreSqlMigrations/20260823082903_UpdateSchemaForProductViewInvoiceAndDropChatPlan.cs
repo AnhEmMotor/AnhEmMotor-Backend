@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.MySqlMigrations
+namespace Infrastructure.PostgreSqlMigrations
 {
     /// <inheritdoc />
-    public partial class UpdateLatestSchema : Migration
+    public partial class UpdateSchemaForProductViewInvoiceAndDropChatPlan : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,55 +17,42 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropTable(
                 name: "ChatPlanTemplate");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Type",
-                table: "Shipments",
-                type: "varchar(255)",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "longtext")
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .OldAnnotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<int>(
                 name: "VariantColorId",
                 table: "ProductView",
-                type: "int",
+                type: "integer",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "VariantId",
                 table: "ProductView",
-                type: "int",
+                type: "integer",
                 nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "ViewedAt",
                 table: "ProductView",
-                type: "datetime(6)",
+                type: "timestamp with time zone",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.AddColumn<string>(
                 name: "VehicleImage",
                 table: "Invoice",
-                type: "longtext",
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
+                type: "text",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "VehicleType",
                 table: "Invoice",
-                type: "longtext",
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
+                type: "text",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "VehicleVersion",
                 table: "Invoice",
-                type: "longtext",
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
+                type: "text",
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shipments_DeletedAt_Status_DeliveredAt_Type_OutputId",
@@ -144,36 +131,22 @@ namespace Infrastructure.MySqlMigrations
                 name: "VehicleVersion",
                 table: "Invoice");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Type",
-                table: "Shipments",
-                type: "longtext",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "varchar(255)")
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .OldAnnotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ChatPlan",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    RunId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ApprovedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true),
-                    LastEditedBy = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SessionId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Steps = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ToolRegistryFingerprint = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    Version = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RunId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApprovedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LastEditedBy = table.Column<string>(type: "text", nullable: false),
+                    SessionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    Steps = table.Column<string>(type: "text", nullable: false),
+                    ToolRegistryFingerprint = table.Column<string>(type: "text", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -184,46 +157,35 @@ namespace Infrastructure.MySqlMigrations
                         principalTable: "ChatRun",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateTable(
                 name: "ChatPlanTemplate",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    CanonicalQuestion = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true),
-                    IntentHash = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastUsedAt = table.Column<long>(type: "bigint", nullable: true),
-                    Module = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    RejectCount = table.Column<int>(type: "int", nullable: false),
-                    RequiredPermissions = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    RequiredTools = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Slots = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    StepsTemplate = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SuccessCount = table.Column<int>(type: "int", nullable: false),
-                    ToolRegistryFingerprint = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    UseCount = table.Column<int>(type: "int", nullable: false),
-                    UserEditCount = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CanonicalQuestion = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    IntentHash = table.Column<string>(type: "text", nullable: false),
+                    LastUsedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    Module = table.Column<string>(type: "text", nullable: false),
+                    RejectCount = table.Column<int>(type: "integer", nullable: false),
+                    RequiredPermissions = table.Column<string>(type: "text", nullable: false),
+                    RequiredTools = table.Column<string>(type: "text", nullable: false),
+                    Slots = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    StepsTemplate = table.Column<string>(type: "text", nullable: false),
+                    SuccessCount = table.Column<int>(type: "integer", nullable: false),
+                    ToolRegistryFingerprint = table.Column<string>(type: "text", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UseCount = table.Column<int>(type: "integer", nullable: false),
+                    UserEditCount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ChatPlanTemplate", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChatPlan_RunId",

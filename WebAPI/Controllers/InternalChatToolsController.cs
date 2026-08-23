@@ -8,6 +8,7 @@ using Application.Features.ChatTools.Queries.GetDashboardOverviewForChat;
 using Application.Features.ChatTools.Queries.GetDebtLogsMissingProofsForChat;
 using Application.Features.ChatTools.Queries.GetEmployeeKpiForChat;
 using Application.Features.ChatTools.Queries.GetFulfillmentOrdersForChat;
+using Application.Features.ChatTools.Queries.GetGa4TrafficForChat;
 using Application.Features.ChatTools.Queries.GetInventoryLedgerForChat;
 using Application.Features.ChatTools.Queries.GetInventoryReceiptDetailForChat;
 using Application.Features.ChatTools.Queries.GetInventoryReportForChat;
@@ -179,6 +180,25 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
             {
                 FromDate = request.FromDate,
                 ToDate = request.ToDate,
+                Limit = request.Limit
+            },
+            cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    [HttpPost("analytics/ga4-traffic")]
+    [HasPermission(Permissions.Admin.DashboardManagement.View)]
+    public async Task<IActionResult> GetGa4Traffic(
+        [FromBody] GetGa4TrafficForChatRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetGa4TrafficForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Breakdown = request.Breakdown,
                 Limit = request.Limit
             },
             cancellationToken)
@@ -1437,6 +1457,17 @@ public record GetShipmentTrackingForChatRequest
 
 public record GetDashboardOverviewForChatRequest
 {
+}
+
+public record GetGa4TrafficForChatRequest
+{
+    public DateOnly? FromDate { get; init; }
+
+    public DateOnly? ToDate { get; init; }
+
+    public string Breakdown { get; init; } = string.Empty;
+
+    public int Limit { get; init; } = 10;
 }
 
 public record ListBookingAppointmentsForChatRequest

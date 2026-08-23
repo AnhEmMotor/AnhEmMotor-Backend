@@ -56,35 +56,6 @@ jobs:
         run: |
           dotnet tool install --global dotnet-ef
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Check Migration Count
-        shell: bash
-        run: |
-          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(SqlServerMigrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
-          if [ -z "$FILES" ]; then
-            echo "No new migrations found. Check passed."
-            exit 0
-          fi
-          echo "Detected new migration files:"
-          echo "$FILES"
-          echo "--------------------------------"
-          echo "Checking migrations per provider..."
-          FAILED=0
-          DIRS=$(echo "$FILES" | xargs -n1 dirname | sort -u)
-          for DIR in $DIRS; do
-            UNIQUE_NAMES=$(echo "$FILES" | grep "^$DIR/" | sed 's/.*\///' | sed -E 's/^[0-9]+_(.*)\.cs$/\1/' | sort -u)
-            COUNT=$(echo "$UNIQUE_NAMES" | wc -l)
-            if [ "$COUNT" -gt 1 ]; then
-              echo "::error::Provider '$DIR' has $COUNT unique migrations. Only 1 is allowed per PR."
-              echo "Migrations found: "
-              echo "$UNIQUE_NAMES"
-              FAILED=1
-            else
-              echo "  - $DIR: $COUNT migration(s) [OK] ($UNIQUE_NAMES)"
-            fi
-          done
-          if [ "$FAILED" -eq 1 ]; then
-            exit 1
-          fi
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -157,3 +128,32 @@ jobs:
             exit 1; 
           }
           echo "All migrations verified successfully!"
+      - name: Check Migration Count
+        shell: bash
+        run: |
+          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(SqlServerMigrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          if [ -z "$FILES" ]; then
+            echo "No new migrations found. Check passed."
+            exit 0
+          fi
+          echo "Detected new migration files:"
+          echo "$FILES"
+          echo "--------------------------------"
+          echo "Checking migrations per provider..."
+          FAILED=0
+          DIRS=$(echo "$FILES" | xargs -n1 dirname | sort -u)
+          for DIR in $DIRS; do
+            UNIQUE_NAMES=$(echo "$FILES" | grep "^$DIR/" | sed 's/.*\///' | sed -E 's/^[0-9]+_(.*)\.cs$/\1/' | sort -u)
+            COUNT=$(echo "$UNIQUE_NAMES" | wc -l)
+            if [ "$COUNT" -gt 1 ]; then
+              echo "::error::Provider '$DIR' has $COUNT unique migrations. Only 1 is allowed per PR."
+              echo "Migrations found: "
+              echo "$UNIQUE_NAMES"
+              FAILED=1
+            else
+              echo "  - $DIR: $COUNT migration(s) [OK] ($UNIQUE_NAMES)"
+            fi
+          done
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi

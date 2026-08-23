@@ -44,6 +44,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
+        services.Configure<Configurations.Options.GoogleAnalytics4Options>(
+            configuration.GetSection(Configurations.Options.GoogleAnalytics4Options.SectionName));
         var provider = configuration.GetValue("Provider", "SqlServer");
         if (string.Compare(provider, "MySql", StringComparison.OrdinalIgnoreCase) == 0)
         {
@@ -123,7 +125,6 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<Application.Interfaces.Services.Marketing.IGoogleAdsService, Infrastructure.Services.Marketing.GoogleAdsService>();
         services.AddScoped<IBrandExcelService, BrandExcelService>();
         services.AddScoped<IProductExcelService, ProductExcelService>();
         services.AddScoped<IProductCategoryExcelService, ProductCategoryExcelService>();
@@ -141,6 +142,11 @@ public static class DependencyInjection
                 client.BaseAddress = new Uri(baseAddress);
             });
         services.AddHttpClient<IGeocodingService, GeocodingService>();
+        services.AddHttpClient(
+            "Ga4Analytics",
+            client => client.Timeout = TimeSpan.FromSeconds(15));
+        services.AddScoped<Application.Interfaces.Services.Analytics.IGa4AnalyticsService, Services.Analytics.Ga4AnalyticsService>();
+        services.AddScoped<Application.Interfaces.Services.Analytics.IGa4MeasurementProtocolService, Services.Analytics.Ga4MeasurementProtocolService>();
         services.AddSingleton<IPythonEnvService, PythonEnvService>();
         services.AddSingleton<AiSidecarManager>();
         services.AddSingleton<IAiSidecarUrlProvider>(provider => provider.GetRequiredService<AiSidecarManager>());

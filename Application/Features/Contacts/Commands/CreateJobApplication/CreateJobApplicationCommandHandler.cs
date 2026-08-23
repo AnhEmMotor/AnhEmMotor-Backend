@@ -32,7 +32,7 @@ public class CreateJobApplicationCommandHandler(
             Email = request.Request.Email,
             PhoneNumber = request.Request.PhoneNumber,
             AppliedPosition = request.Request.AppliedPosition,
-            CvFileUrl = request.Request.CvFileUrl,
+            CvFileUrl = request.Request.CvFileUrl ?? string.Empty,
             CoverLetter = request.Request.CoverLetter,
             Status = AppStatus.New
         };

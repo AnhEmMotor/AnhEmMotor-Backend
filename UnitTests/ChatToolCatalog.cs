@@ -9,7 +9,7 @@ namespace UnitTests;
 
 public class ChatToolCatalog
 {
-    private static readonly string[] ExpectedNames = ["search_products", "get_product_stock", "get_low_stock_products", "get_order_status", "get_sales_summary", "get_top_selling", "list_booking_appointments", "get_product_detail", "get_inventory_report", "list_orders", "get_order_statistics", "get_customer_profile", "search_customers", "list_repair_orders", "get_repair_order_detail", "list_warranty_claims", "get_pnl_report", "get_suppliers_with_debt", "get_shipment_tracking", "get_dashboard_overview", "get_product_price_list", "list_brands", "list_categories", "get_supplier_prices_for_variant", "search_suppliers", "get_supplier_statistics", "get_inventory_ledger", "list_inventory_receipts", "get_inventory_receipt_detail", "list_purchase_requests", "get_purchase_request_detail", "get_revenue_by_category", "get_sales_report", "get_recent_transactions", "list_sales_contracts", "list_finance_contracts", "list_supplier_contracts", "list_vouchers", "get_lead_pipeline", "get_lead_detail", "list_contacts", "get_loyalty_members", "get_warranty_claim_detail", "get_warranty_terms", "list_workshop_payments", "list_bookings", "list_services", "get_workshop_dashboard", "get_vehicle_portfolio", "list_employees", "get_employee_kpi", "get_staff_performance", "get_warehouse_report", "get_revenue_analysis", "get_supplier_debt_detail", "list_expenses", "list_purchase_invoices", "get_active_shipments", "get_logistics_dashboard", "get_fulfillment_orders", "calculate_shipping_fee", "create_purchase_request", "list_news", "get_debt_logs_missing_proofs", "get_conversion_tools", "get_payroll_summary", "get_commission_records", "get_store_settings", "list_users_and_roles", ];
+    private static readonly string[] ExpectedNames = ["search_products", "get_product_stock", "get_low_stock_products", "get_order_status", "get_sales_summary", "get_top_selling", "list_booking_appointments", "get_product_detail", "get_inventory_report", "list_orders", "get_order_statistics", "get_customer_profile", "search_customers", "list_repair_orders", "get_repair_order_detail", "list_warranty_claims", "get_pnl_report", "get_suppliers_with_debt", "get_shipment_tracking", "get_dashboard_overview", "get_product_price_list", "list_brands", "list_categories", "get_supplier_prices_for_variant", "search_suppliers", "get_supplier_statistics", "get_inventory_ledger", "list_inventory_receipts", "get_inventory_receipt_detail", "list_purchase_requests", "get_purchase_request_detail", "get_revenue_by_category", "get_sales_report", "get_recent_transactions", "list_sales_contracts", "list_finance_contracts", "list_supplier_contracts", "list_vouchers", "get_lead_pipeline", "get_lead_detail", "list_contacts", "get_loyalty_members", "get_warranty_claim_detail", "get_warranty_terms", "list_workshop_payments", "list_bookings", "list_services", "get_workshop_dashboard", "get_vehicle_portfolio", "list_employees", "get_employee_kpi", "get_staff_performance", "get_warehouse_report", "get_revenue_analysis", "get_supplier_debt_detail", "list_expenses", "list_purchase_invoices", "get_active_shipments", "get_logistics_dashboard", "get_fulfillment_orders", "calculate_shipping_fee", "create_purchase_request", "list_news", "get_debt_logs_missing_proofs", "get_conversion_tools", "get_payroll_summary", "get_commission_records", "get_store_settings", "list_users_and_roles", "get_ga4_traffic", ];
 
     [Fact(DisplayName = "CATALOG_01 - Unit - GetChatToolCatalogQueryHandler map đúng Name/Label từ provider")]
     public async Task Handle_MapsProviderEntriesToDtos()
@@ -26,15 +26,15 @@ public class ChatToolCatalog
     }
 
     [Fact(
-        DisplayName = "CATALOG_02 - Guard - chat-tools-catalog.json khớp đúng 69 tool đã implement (Stage 3 + Stage 15 P1+P2+P3), không lệch tên/route")]
+        DisplayName = "CATALOG_02 - Guard - chat-tools-catalog.json khớp đúng 70 tool đã implement (Stage 3 + Stage 15 P1+P2+P3 + GA4), không lệch tên/route")]
     public void ChatToolCatalogProvider_DocDungFileThat_KhongLech6Tool()
     {
         var provider = new ChatToolCatalogProvider(NullLogger<ChatToolCatalogProvider>.Instance);
         var catalog = provider.GetCatalog();
         catalog.Should()
             .HaveCount(
-                69,
-                "chat-tools-catalog.json phải khớp đúng 69/69 tool Stage 3 + Stage 15 P1+P2+P3 đã implement (Qdrant product/knowledge search đã bị loại bỏ)");
+                70,
+                "chat-tools-catalog.json phải khớp đúng 70/70 tool Stage 3 + Stage 15 P1+P2+P3 + GA4 đã implement (Qdrant product/knowledge search đã bị loại bỏ)");
         catalog.Select(e => e.Name)
             .Should()
             .BeEquivalentTo(
