@@ -6,6 +6,8 @@ namespace Application.Interfaces.Repositories.ReturnRequest;
 
 public interface IReturnRequestReadRepository
 {
+    public Task<int> CountAsync(CancellationToken cancellationToken = default);
+
     public Task<PagedResult<ReturnRequestEntity>> GetPagedAsync(
         SieveModel sieveModel,
         CancellationToken cancellationToken = default);

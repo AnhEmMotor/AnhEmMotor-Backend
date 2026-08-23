@@ -12,7 +12,11 @@ public class GetSalesContractsListQueryHandler(ISalesContractReadRepository read
         GetSalesContractsListQuery request,
         CancellationToken cancellationToken)
     {
-        var paged = await readRepo.GetPagedAsync(request.SieveModel ?? new(), cancellationToken).ConfigureAwait(false);
+        var paged = await readRepo.GetPagedAsync(
+                request.SieveModel ?? new(),
+                request.Keyword,
+                cancellationToken)
+            .ConfigureAwait(false);
         return Result<PagedResult<SalesContractResponse>>.Success(paged);
     }
 }

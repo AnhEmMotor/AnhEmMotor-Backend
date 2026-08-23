@@ -13,11 +13,8 @@ namespace Application.Features.Logistics.Queries.GetActiveShipments
             CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.UtcNow;
-            var shipments = await db.GetAllAsync(cancellationToken);
-            var activeShipments = shipments.Where(
-                x => x.Status == ParcelDeliveryStatus.Shipping && !x.DeliveredAt.HasValue)
-                .ToList();
-            var result = activeShipments.Select(
+            var shipments = await db.GetActiveDeliveryShipmentsAsync(cancellationToken);
+            var result = shipments.Select(
                 x => new ActiveShipmentResponse
                 {
                     Id = x.Id,

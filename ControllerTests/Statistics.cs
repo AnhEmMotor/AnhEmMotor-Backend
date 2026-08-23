@@ -1,4 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
+using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -6,6 +7,7 @@ using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Application.Interfaces.Repositories.Statistical;
+using Domain.Constants.Order;
 using FluentAssertions;
 using FluentValidation;
 using MediatR;
@@ -329,6 +331,77 @@ public class Statistics
         actualStats.TopSellingProducts.Should().HaveCount(2);
         actualStats.TopSellingProducts[0].ProductName.Should().Be("Xe Vision");
         actualStats.TopSellingProducts[0].QuantitySold.Should().Be(50);
+    }
+
+    [Fact(DisplayName = "STAT_110 - Controller - GetAdminDashboardOverviewAsync thành công với tham số mặc định")]
+    public async Task GetAdminDashboardOverview_DefaultParams_ReturnsOkWithData()
+    {
+        var expectedOverview = new AdminDashboardOverviewResponse
+        {
+            Summary = new DashboardStatsResponse { TodayRevenue = 20000000, MonthlyRevenue = 200000000 },
+            DailyRevenue = [new DailyRevenueResponse { ReportDay = DateOnly.FromDateTime(DateTime.Today), TotalRevenue = 20000000 }],
+            OrderStatusDistribution = [new OrderStatusCountResponse { StatusName = OrderStatus.Completed, OrderCount = 10 }],
+            RecentOrders = [new RecentOrderResponse { Id = 1, OrderCode = "ORD-001", TotalAmount = 5000000 }],
+            TopStaff = [new StaffPerformanceResponse { EmployeeName = "Nguyen Van A", TotalSales = 50000000 }],
+            RecentTransactions = [new TransactionLogResponse { CustomerName = "Le Van C", Amount = 5000000 }]
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetAdminDashboardOverviewQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedOverview);
+
+        var result = await _controller.GetAdminDashboardOverviewAsync(null, null, CancellationToken.None).ConfigureAwait(true);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var actualOverview = okResult.Value.Should().BeAssignableTo<AdminDashboardOverviewResponse>().Subject;
+
+        actualOverview.Summary.TodayRevenue.Should().Be(20000000);
+        actualOverview.DailyRevenue.Should().HaveCount(1);
+        actualOverview.RecentOrders.Should().HaveCount(1);
+        actualOverview.TopStaff.Should().HaveCount(1);
+        actualOverview.RecentTransactions.Should().HaveCount(1);
+    }
+
+    [Fact(DisplayName = "STAT_111 - Controller - GetAdminDashboardOverviewAsync truyền đúng StartDate và EndDate theo Tháng")]
+    public async Task GetAdminDashboardOverview_MonthParams_PassesCorrectDatesToQuery()
+    {
+        var startMonth = new DateTime(2026, 8, 1);
+        var endMonth = new DateTime(2026, 8, 31);
+        var expectedOverview = new AdminDashboardOverviewResponse
+        {
+            Summary = new DashboardStatsResponse { MonthlyRevenue = 500000000, PeriodRevenue = 500000000 }
+        };
+
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<GetAdminDashboardOverviewQuery>(q => q.StartDate == startMonth && q.EndDate == endMonth),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedOverview);
+
+        var result = await _controller.GetAdminDashboardOverviewAsync(startMonth, endMonth, CancellationToken.None).ConfigureAwait(true);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var actualOverview = okResult.Value.Should().BeAssignableTo<AdminDashboardOverviewResponse>().Subject;
+
+        actualOverview.Summary.PeriodRevenue.Should().Be(500000000);
+    }
+
+    [Fact(DisplayName = "STAT_112 - Controller - GetAdminDashboardOverviewAsync truyền đúng StartDate và EndDate theo Năm")]
+    public async Task GetAdminDashboardOverview_YearParams_PassesCorrectDatesToQuery()
+    {
+        var startYear = new DateTime(2026, 1, 1);
+        var endYear = new DateTime(2026, 12, 31);
+        var expectedOverview = new AdminDashboardOverviewResponse
+        {
+            Summary = new DashboardStatsResponse { YearlyRevenue = 5000000000, PeriodRevenue = 5000000000 }
+        };
+
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<GetAdminDashboardOverviewQuery>(q => q.StartDate == startYear && q.EndDate == endYear),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedOverview);
+
+        var result = await _controller.GetAdminDashboardOverviewAsync(startYear, endYear, CancellationToken.None).ConfigureAwait(true);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var actualOverview = okResult.Value.Should().BeAssignableTo<AdminDashboardOverviewResponse>().Subject;
+
+        actualOverview.Summary.YearlyRevenue.Should().Be(5000000000);
     }
 
 #pragma warning restore CRR0035

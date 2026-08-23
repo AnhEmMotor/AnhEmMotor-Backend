@@ -27,11 +27,20 @@ public class ReturnRequestReadRepository : IReturnRequestReadRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return _context.ReturnRequests.CountAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<ReturnRequestEntity>> GetPagedAsync(
         SieveModel sieveModel,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.ReturnRequests.Include(x => x.Items).AsNoTracking();
+        var query = _context.ReturnRequests
+            .Include(x => x.Items)
+            .AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id);
         var totalCount = await _sieveProcessor.Apply(sieveModel, query, applyPagination: false)
             .CountAsync(cancellationToken);
         var items = await _sieveProcessor.Apply(sieveModel, query, applySorting: true, applyPagination: true)

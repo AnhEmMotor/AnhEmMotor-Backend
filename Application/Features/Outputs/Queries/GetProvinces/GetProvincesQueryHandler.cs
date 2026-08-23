@@ -24,7 +24,7 @@ public sealed class GetProvincesQueryHandler(IShippingService shippingService) :
                     .Select(
                         p => new
                         {
-                            ProvinceId = p.TryGetProperty("_id", out var idProp) ? idProp.GetInt32() : 0,
+                            ProvinceId = ReadProvinceId(p),
                             ProvinceName = p.TryGetProperty("name", out var nameProp)
                                 ? nameProp.GetString()
                                 : string.Empty
@@ -37,5 +37,17 @@ public sealed class GetProvincesQueryHandler(IShippingService shippingService) :
         {
             return Result<object>.Failure(Error.Failure("Failed to parse GHN API response."));
         }
+    }
+
+    private static int ReadProvinceId(JsonElement province)
+    {
+        if (!province.TryGetProperty("_id", out var idProperty))
+            return 0;
+        if (idProperty.ValueKind == JsonValueKind.Number && idProperty.TryGetInt32(out var numericId))
+            return numericId;
+        return idProperty.ValueKind == JsonValueKind.String &&
+            int.TryParse(idProperty.GetString(), out var stringId)
+                ? stringId
+                : 0;
     }
 }

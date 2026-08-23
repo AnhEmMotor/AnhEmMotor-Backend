@@ -23,19 +23,20 @@ public class LogisticsDashboardRepository : ILogisticsDashboardRepository
         CancellationToken cancellationToken)
     {
         var response = new LogisticsDashboardResponse();
-        var workload = await _context.Shipments
+        var shipmentQuery = _context.Shipments.AsNoTracking();
+        var workload = await shipmentQuery
             .Where(s => s.Status == ParcelDeliveryStatus.Shipping && s.DeliveredAt == null)
             .CountAsync(cancellationToken);
-        var pendingCod = await _context.Shipments
+        var pendingCod = await shipmentQuery
             .Where(s => s.Status == ParcelDeliveryStatus.Shipping && s.DeliveredAt == null)
             .SumAsync(s => s.CodAmount, cancellationToken);
-        var completedShipments = await _context.Shipments
+        var completedShipments = await shipmentQuery
             .Where(
                 s => (s.Status == ParcelDeliveryStatus.Completed ||
                         (s.Status == ParcelDeliveryStatus.Shipping && s.DeliveredAt != null)) &&
                     s.CreatedAt >= fromDate)
             .CountAsync(cancellationToken);
-        var returnedShipments = await _context.Shipments
+        var returnedShipments = await shipmentQuery
             .Where(s => s.Status == ParcelDeliveryStatus.Returned && s.CreatedAt >= fromDate)
             .CountAsync(cancellationToken);
         var totalFinished = completedShipments + returnedShipments;
@@ -49,7 +50,20 @@ public class LogisticsDashboardRepository : ILogisticsDashboardRepository
             OtifRate = otif,
             ReturnsClaimsRate = returnRate
         };
-        var allShipments = await _context.Shipments.Where(s => s.CreatedAt >= fromDate).ToListAsync(cancellationToken);
+        var allShipments = await shipmentQuery
+            .Where(s => s.CreatedAt >= fromDate)
+            .Select(s => new
+            {
+                s.Id,
+                s.Status,
+                s.TrackingNumber,
+                s.Carrier,
+                s.CodAmount,
+                s.ShippingCost,
+                s.CreatedAt,
+                s.DeliveredAt
+            })
+            .ToListAsync(cancellationToken);
         response.FulfillmentFunnel["total"] = allShipments.Count;
         response.FulfillmentFunnel["shipping"] = allShipments.Count(s => s.Status == ParcelDeliveryStatus.Shipping);
         response.FulfillmentFunnel["completed"] = allShipments.Count(s => s.Status == ParcelDeliveryStatus.Completed);

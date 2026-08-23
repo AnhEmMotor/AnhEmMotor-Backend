@@ -42,6 +42,11 @@ public record Error(string Code, string Message, string? Field = null, string? I
         return new Error("Conflict", message, field, id);
     }
 
+    public static Error ServiceUnavailable(string message, string? field = null, string? id = null)
+    {
+        return new Error("ServiceUnavailable", message, field, id);
+    }
+
     public static Error Failure(string message, string? field = null, string? id = null)
     {
         return new Error("Failure", message, field, id);

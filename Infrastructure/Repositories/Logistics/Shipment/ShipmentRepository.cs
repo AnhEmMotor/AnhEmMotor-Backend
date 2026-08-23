@@ -32,6 +32,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         CancellationToken cancellationToken = default)
     {
         return await _context.Shipments
+            .AsNoTracking()
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariant)
             .ThenInclude(pv => pv!.Product)
@@ -45,6 +46,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         CancellationToken cancellationToken = default)
     {
         return await _context.Shipments
+            .AsNoTracking()
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariant)
             .ThenInclude(pv => pv!.Product)
@@ -57,6 +59,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         CancellationToken cancellationToken = default)
     {
         return await _context.Shipments
+            .AsNoTracking()
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariant)
             .ThenInclude(pv => pv!.Product)
@@ -69,15 +72,18 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         CancellationToken cancellationToken = default)
     {
         var shipments = await _context.Shipments
+            .AsNoTracking()
             .Where(
                 s => s.Status == ParcelDeliveryStatus.Shipping &&
                     s.DeliveredAt == null &&
                     s.Type == ShipmentType.OrderDelivery &&
                     s.TrackingNumber != null &&
+                    s.TrackingNumber != string.Empty &&
                     s.OutputId != null)
+            .Where(s => !s.TrackingNumber.StartsWith("GHN-"))
+            .OrderByDescending(s => s.CreatedAt)
             .Take(50)
             .ToListAsync(cancellationToken);
-
-        return shipments.Where(s => !s.TrackingNumber!.StartsWith("GHN-")).ToList();
+        return shipments;
     }
 }

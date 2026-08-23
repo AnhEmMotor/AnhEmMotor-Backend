@@ -72,9 +72,10 @@ public class ImportInventoryReceiptsCommandHandler(
             if (!string.IsNullOrWhiteSpace(r.QtyStr) && !int.TryParse(r.QtyStr, out qty))
                 rowErrors.Add("Số lượng không hợp lệ.");
             int prItemId = 0;
+            PurchaseRequestItem? matchedItem = null;
             if (prId > 0 && rowErrors.Count == 0)
             {
-                var matchedItem = prItems.FirstOrDefault(
+                matchedItem = prItems.FirstOrDefault(
                     x => x.PurchaseRequestId == prId &&
                         x.ProductVariant?.Product?.Name == r.ProductName &&
                         x.ProductVariant?.VariantName == r.VariantName &&
@@ -130,7 +131,19 @@ public class ImportInventoryReceiptsCommandHandler(
                 if (!string.IsNullOrWhiteSpace(r.Vin) || !string.IsNullOrWhiteSpace(r.Engine))
                 {
                     existingInfo.Vehicles
-                        .Add(new Vehicle { VinNumber = r.Vin, EngineNumber = r.Engine, ImportPrice = 0 });
+                        .Add(
+                            new Vehicle
+                            {
+                                ProductVariantId = matchedItem!.ProductVariantId,
+                                ProductVariantColorId = matchedItem.ProductVariantColorId,
+                                InventoryReceiptInfo = existingInfo,
+                                VinNumber = r.Vin,
+                                EngineNumber = r.Engine,
+                                ImportPrice = 0,
+                                IsActive = true,
+                                Status = Domain.Constants.Order.VehicleStatus.Available,
+                                PurchaseDate = DateTimeOffset.UtcNow
+                            });
                 }
             }
         }

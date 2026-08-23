@@ -235,4 +235,49 @@ public class SalesContractScan
         _insertRepository.VerifyNoOtherCalls();
         _unitOfWork.VerifyNoOtherCalls();
     }
+
+    [Fact]
+    public async Task CreateContract_PersistsOrderLink()
+    {
+        const int orderId = 23;
+        SalesContract? insertedContract = null;
+        var order = new Output
+        {
+            Id = orderId,
+            StatusId = OrderStatus.ConfirmedCod,
+            CustomerName = "Khách kiểm thử",
+            CustomerPhone = "0900000023",
+            DepositRatio = 20
+        };
+        _orderReadRepository
+            .Setup(repository => repository.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(order);
+        _readRepository
+            .Setup(repository => repository.GetByOrderIdAsync(orderId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((SalesContract?)null);
+        _insertRepository
+            .Setup(repository => repository.Add(It.IsAny<SalesContract>()))
+            .Callback<SalesContract>(contract => insertedContract = contract);
+        _unitOfWork
+            .Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _readRepository
+            .Setup(repository => repository.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => insertedContract);
+
+        var handler = new CreateSalesContractCommandHandler(
+            _readRepository.Object,
+            _insertRepository.Object,
+            _orderReadRepository.Object,
+            _unitOfWork.Object);
+        var result = await handler.Handle(
+            new CreateSalesContractCommand(new CreateSalesContractRequest { OrderId = orderId }),
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        insertedContract.Should().NotBeNull();
+        insertedContract!.OutputId.Should().Be(orderId);
+        _unitOfWork.Verify(repository => repository.SaveChangesAsync(CancellationToken.None), Times.Once);
+    }
 }

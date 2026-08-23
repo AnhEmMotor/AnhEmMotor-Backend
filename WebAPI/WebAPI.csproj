@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<DocumentationFile>api.xml</DocumentationFile>
+		<UserSecretsId>AnhEmMotor-WebAPI-Development</UserSecretsId>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<NoWarn>$(NoWarn);1591</NoWarn>
   	</PropertyGroup>
