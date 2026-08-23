@@ -40,9 +40,10 @@ public class SalesContractsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetSalesContractsAsync(
         [FromQuery] SieveModel sieveModel,
+        [FromQuery] string? keyword,
         CancellationToken cancellationToken)
     {
-        var query = new GetSalesContractsListQuery { SieveModel = sieveModel };
+        var query = new GetSalesContractsListQuery { SieveModel = sieveModel, Keyword = keyword };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

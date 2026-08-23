@@ -35,6 +35,7 @@ public class UpdateOutputStatusCommandHandler(
     ILeadReadRepository? leadReadRepository = null,
     ILeadInsertRepository? leadInsertRepository = null,
     IShippingService? shippingService = null,
+    IShipmentReadRepository? shipmentReadRepository = null,
     IShipmentInsertRepository? shipmentInsertRepository = null,
     IGeocodingService? geocodingService = null,
     IInventoryLedgerRepository? ledgerRepository = null,
@@ -149,7 +150,9 @@ public class UpdateOutputStatusCommandHandler(
                     }
                     trackingNumber = shippingResult.Value;
                 }
-                if (shipmentInsertRepository != null)
+                if (shipmentInsertRepository != null &&
+                    (shipmentReadRepository == null ||
+                        await shipmentReadRepository.GetByOutputIdAsync(output.Id, cancellationToken).ConfigureAwait(false) == null))
                 {
                     double? destLat = null;
                     double? destLon = null;

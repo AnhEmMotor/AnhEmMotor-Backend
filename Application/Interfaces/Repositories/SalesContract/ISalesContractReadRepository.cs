@@ -8,6 +8,7 @@ public interface ISalesContractReadRepository
 {
     public Task<PagedResult<SalesContractResponse>> GetPagedAsync(
         SieveModel sieveModel,
+        string? keyword = null,
         CancellationToken cancellationToken = default);
 
     public Task<global::Domain.Entities.SalesContract?> GetByIdAsync(

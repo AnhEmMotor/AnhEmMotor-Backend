@@ -3,45 +3,48 @@ using System;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.PostgreSqlMigrations
+namespace Infrastructure.MySqlMigrations
 {
-    [DbContext(typeof(PostgreSqlDbContext))]
-    partial class PostgreSqlDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MySqlDbContext))]
+    [Migration("20260820070353_UpdateLatestSchema")]
+    partial class UpdateLatestSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Domain.Entities.ApplicationRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
 
@@ -56,90 +59,90 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("LockoutEnd")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordResetToken")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("PasswordResetTokenExpiry")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("PasswordResetTokenExpiry")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("RefreshTokenExpiryTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("RefreshTokenExpiryTime")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
 
@@ -157,49 +160,49 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CtaLabel")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CtaLabel");
 
                     b.Property<string>("CtaLink")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CtaLink");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DesktopImageUrl")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DesktopImageUrl");
 
                     b.Property<string>("MobileImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MobileImageUrl");
 
                     b.Property<string>("Placement")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Placement");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -210,37 +213,37 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Action");
 
                     b.Property<int>("BannerId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("BannerId");
 
                     b.Property<string>("ChangedBy")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ChangedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Details")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Details");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -253,62 +256,62 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BookingType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("BookingType");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Location");
 
                     b.Property<string>("Note")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
-                    b.Property<DateTimeOffset>("PreferredDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("PreferredDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("PreferredDate");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -321,78 +324,78 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("AppointmentAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("AppointmentAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("AppointmentAt");
 
                     b.Property<string>("CancelReason")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CancelReason");
 
-                    b.Property<DateTimeOffset?>("ConfirmedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("ConfirmedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ConfirmedAt");
 
                     b.Property<Guid?>("ConfirmedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ConfirmedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
                     b.Property<DateTime?>("PreferredDate")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("PreferredDate");
 
                     b.Property<string>("PreferredTimeSlot")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PreferredTimeSlot");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<string>("ServiceType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ServiceType");
 
                     b.Property<string>("Showroom")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Showroom");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -409,49 +412,49 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DescriptionJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
                     b.Property<string>("LogoUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("LogoUrl");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("NameJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("NameJson");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Origin");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<DateTime?>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bytea")
+                        .HasColumnType("timestamp(6)")
                         .HasColumnName("RowVersion");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -462,28 +465,28 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("ChatRunId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ChatRunId");
 
                     b.Property<string>("Comment")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Comment");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("ReportedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ReportedBy");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -498,44 +501,44 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsSteering")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<double?>("ReasoningElapsedSeconds")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<string>("ReasoningStepsJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ReasoningStepsJson");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Role");
 
                     b.Property<Guid?>("RunId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RunId");
 
                     b.Property<Guid>("SessionId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SessionId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -552,67 +555,67 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ErrorCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ErrorCode");
 
                     b.Property<DateTime?>("HeartbeatAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<long>("LastSeq")
                         .HasColumnType("bigint");
 
                     b.Property<string>("ModelUsed")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ModelUsed");
 
                     b.Property<string>("OwnerInstanceId")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("OwnerInstanceId");
 
                     b.Property<string>("PartialOutput")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PartialOutput");
 
                     b.Property<string>("PendingSteering")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PendingSteering");
 
                     b.Property<Guid>("SessionId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SessionId");
 
                     b.Property<DateTime?>("StartedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
                     b.Property<string>("ToolRegistryFingerprint")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ToolRegistryFingerprint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UserMessage")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("UserMessage");
 
                     b.HasKey("Id");
@@ -626,18 +629,18 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Payload")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Payload");
 
                     b.Property<Guid>("RunId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RunId");
 
                     b.Property<long>("Seq")
@@ -645,7 +648,7 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Type");
 
                     b.HasKey("Id");
@@ -660,29 +663,29 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("RoutingContext")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("RoutingContext");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UserId");
 
                     b.HasKey("Id");
@@ -698,50 +701,50 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset>("EffectiveDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("EffectiveDate")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("EmployeeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("ProductId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("TargetGroup")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Unit")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(18,2)");
@@ -759,44 +762,44 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ChangedByName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("ChangedByUserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewValueSnapshot")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldValueSnapshot")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("PolicyId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -809,42 +812,42 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("DateEarned")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("EmployeeProfileId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("PolicySnapshot")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -859,57 +862,57 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("InternalNote")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("InternalNote");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int?>("Rating")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Subject");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -920,36 +923,36 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ContactId");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsInternal")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsInternal");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<Guid?>("RepliedById")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RepliedById");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -964,68 +967,68 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Clicks")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Clicks");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("DelaySeconds")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("DelaySeconds");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<int>("Leads")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Leads");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Pages")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Pages");
 
                     b.Property<string>("Status")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Type");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Url")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Url");
 
                     b.Property<int>("Views")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Views");
 
                     b.HasKey("Id");
@@ -1037,67 +1040,67 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("InternalNote")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("InternalNote");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
-                    b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("ProcessedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ProcessedAt");
 
                     b.Property<Guid?>("ProcessedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ProcessedBy");
 
-                    b.Property<DateTimeOffset?>("RepliedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("RepliedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("RepliedAt");
 
                     b.Property<string>("Source")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Source");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Subject");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1112,43 +1115,43 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ContactId");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsInternal")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsInternal");
 
                     b.Property<Guid?>("RepliedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RepliedBy");
 
                     b.Property<string>("ReplyContent")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ReplyContent");
 
-                    b.Property<DateTimeOffset?>("SentAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("SentAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("SentAt");
 
                     b.Property<int?>("SupportTicketId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1165,52 +1168,52 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ContactId");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerName");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FeedbackArea")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FeedbackArea");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1223,16 +1226,16 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DepositRatio")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("OrderThreshold")
                         .HasColumnType("decimal(18,2)");
@@ -1240,10 +1243,10 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("OrderType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1254,47 +1257,47 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("BankAccountNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ContractDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("JobTitle")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -1307,33 +1310,33 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Category")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("ExpenseDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1344,32 +1347,32 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CavetLocation")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DisbursementStatus")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("InterestRate")
                         .HasColumnType("decimal(18,2)");
@@ -1378,13 +1381,13 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("SignedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("TermMonths")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1395,65 +1398,65 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DocumentCode")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DocumentCode");
 
                     b.Property<int>("ExportQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ExportQty");
 
                     b.Property<int>("ImportQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ImportQty");
 
                     b.Property<string>("PartnerName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PartnerName");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("StockAfter")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("StockAfter");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset>("TransactionDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("TransactionDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("TransactionDate");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransactionType");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("UnitPrice");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1468,54 +1471,54 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BeginningQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("BeginningQty");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ExportedQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ExportedQty");
 
                     b.Property<int>("ImportedQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ImportedQty");
 
                     b.Property<int>("Month")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Month");
 
                     b.Property<int>("OrderedQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("OrderedQty");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("StockQty")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("StockQty");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Year")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Year");
 
                     b.HasKey("Id");
@@ -1534,59 +1537,59 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ApprovedBy");
 
                     b.Property<Guid?>("ConfirmedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ConfirmedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("InventoryReceiptDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("InventoryReceiptDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("InventoryReceiptDate");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<int?>("PurchaseRequestId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("PurchaseRequestId");
 
                     b.Property<Guid?>("RejectedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RejectedBy");
 
                     b.Property<Guid?>("SentBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SentBy");
 
                     b.Property<int?>("SourceOrderId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SourceOrderId");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1613,43 +1616,43 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("ChangedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("NewNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewStatusId")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldStatusId")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1664,42 +1667,42 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Count")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Count");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("InventoryReceiptId");
 
                     b.Property<int?>("ParentOutputInfoId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ParentOutputInfoId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("PurchaseRequestItemId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("PurchaseRequestItemId");
 
                     b.Property<int?>("RemainingCount")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("RemainingCount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1718,31 +1721,31 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptInfoId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("NewQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("OldQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1754,17 +1757,17 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -1775,60 +1778,60 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
-                    b.Property<DateTimeOffset?>("PerformedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("PerformedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PerformedAt");
 
                     b.Property<Guid?>("PerformedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("PerformedBy");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Quantity");
 
                     b.Property<int?>("ReferenceId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ReferenceId");
 
                     b.Property<string>("ReferenceType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ReferenceType");
 
                     b.Property<int>("StockAfter")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("StockAfter");
 
                     b.Property<int>("StockBefore")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("StockBefore");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransactionType");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1843,114 +1846,114 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BankName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ChassisNo")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerAddress")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerIdCard")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeliveryDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("EngineNo")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("InsuranceFee")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("IssueDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ProcessedBy")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("RegistrationFee")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SalesPerson")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("VehicleColor")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleImage")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleModel")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("VehiclePrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("VehicleType")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleVersion")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -1963,57 +1966,57 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AppliedPosition")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("AppliedPosition");
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ContactId");
 
                     b.Property<string>("CoverLetter")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverLetter");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CvFileUrl")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CvFileUrl");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2026,40 +2029,40 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("ActualValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("EmployeeProfileId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("MetricName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("PeriodEnd")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("TargetValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2072,118 +2075,118 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Address");
 
                     b.Property<string>("AddressDetail")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("AddressDetail");
 
                     b.Property<Guid?>("AssignedToId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AssignedToId");
 
                     b.Property<DateTime?>("Birthday")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("Birthday");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("District")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("District");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Gender");
 
                     b.Property<string>("IdentificationNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("IdentificationNumber");
 
                     b.Property<string>("InterestedVehicle")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("InterestedVehicle");
 
                     b.Property<bool>("IsVerified")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsVerified");
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int>("Points")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Points");
 
                     b.Property<string>("Priority")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Priority");
 
                     b.Property<string>("Province")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Province");
 
                     b.Property<int>("Score")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Score");
 
                     b.Property<string>("Source")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Source");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Tier")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Tier");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Ward")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Ward");
 
                     b.HasKey("Id");
@@ -2197,33 +2200,33 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ActivityType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ActivityType");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<int>("LeadId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("LeadId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2236,65 +2239,65 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("AllowLiquidCargo")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("AllowOversizeCargo")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ApiBaseUrl")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ApiToken")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("AutoSyncPricing")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("CarrierCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Environment")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<decimal>("MaxParcelWeightKg")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PricingRulesJson")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SlaJson")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("WebhookEndpointUrl")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WebhookSecret")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2305,16 +2308,16 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Value")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -2325,85 +2328,85 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BoxCondition")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("CodAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("CustomerAddress")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("ExpectedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("InspectedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("OriginalOrderCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ProductCondition")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("RefundAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("RejectionReason")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnAction")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnInternalNote")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnProofImage")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnReason")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("ReturnShippingCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("ShippingCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("TrackingNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2414,42 +2417,42 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsOutOfStock")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsPicked")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsRestricted")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("ParcelDeliveryOrderId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("ShelfLocation")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2462,75 +2465,75 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("CodAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeliveredAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeliveredAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DestinationAddress")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<double?>("DestinationLatitude")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<double?>("DestinationLongitude")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<string>("OriginAddress")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<double?>("OriginLatitude")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<double?>("OriginLongitude")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<int?>("OutputId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("ShippingCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("TrackingNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2545,30 +2548,30 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ShipmentId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2585,62 +2588,62 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("LaborCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset>("MaintenanceDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("MaintenanceDate")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("MaintenanceNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Mileage")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("NextMaintenanceDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("NextMaintenanceDate")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("NextMaintenanceOdo")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PartsCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PartsJson")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ServiceType")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("TechnicianId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -2655,42 +2658,42 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ContentType")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FileExtension")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<long?>("FileSize")
                         .HasColumnType("bigint");
 
                     b.Property<string>("OriginalFileName")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("StoragePath")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("StorageType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2701,55 +2704,55 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AuthorId");
 
                     b.Property<string>("AuthorName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("AuthorName");
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("CategoryId");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsPublished")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsPublished");
 
                     b.Property<string>("MetaDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaDescription");
 
                     b.Property<string>("MetaKeywords")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaKeywords");
 
                     b.Property<string>("MetaTitle")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaTitle");
 
-                    b.Property<DateTimeOffset?>("PublishedDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("PublishedDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("PublishedDate");
 
                     b.Property<string>("Slug")
@@ -2759,11 +2762,11 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2778,77 +2781,77 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AuthorId");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Excerpt")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Excerpt");
 
                     b.Property<bool>("IsFeatured")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsFeatured");
 
-                    b.Property<DateTimeOffset?>("PublishedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("PublishedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PublishedAt");
 
                     b.Property<Guid?>("PublishedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("PublishedBy");
 
                     b.Property<string>("SeoDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoDescription");
 
                     b.Property<string>("SeoKeywords")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoKeywords");
 
                     b.Property<string>("SeoTitle")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoTitle");
 
                     b.Property<string>("Slug")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Slug");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ViewCount")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ViewCount");
 
                     b.HasKey("Id");
@@ -2869,24 +2872,24 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Slug")
@@ -2894,8 +2897,8 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("Slug");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2906,51 +2909,51 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ArticleSlug")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ArticleSlug");
 
                     b.Property<string>("ArticleType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ArticleType");
 
                     b.Property<string>("AuthorEmail")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("AuthorEmail");
 
                     b.Property<string>("AuthorName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("AuthorName");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsApproved");
 
                     b.Property<int?>("NewsId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("NewsId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UserId");
 
                     b.HasKey("Id");
@@ -2966,31 +2969,31 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("NewsId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("NewsId");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3007,23 +3010,23 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Name");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3036,51 +3039,51 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorCode");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<int?>("OptionId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("OptionId");
 
                     b.Property<string>("SeoDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoDescription");
 
                     b.Property<string>("SeoTitle")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoTitle");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3093,52 +3096,52 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BottleneckDescription")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<double>("CurrentLat")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<double>("CurrentLng")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double");
 
                     b.Property<int>("CurrentStage")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DriverName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("DriverPhone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("EstimatedArrivalTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsBottleneck")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3149,44 +3152,44 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("ChangedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("ChangedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ChangedAt");
 
                     b.Property<Guid?>("ChangedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ChangedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FromStatus")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FromStatus");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("OutputId");
 
                     b.Property<string>("ToStatus")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ToStatus");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3201,34 +3204,34 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("AppliedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("AppliedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("AppliedBy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DiscountApplied")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VoucherId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -3243,120 +3246,120 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BudgetCode")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("BudgetCode");
 
                     b.Property<Guid?>("BuyerId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("BuyerId");
 
                     b.Property<string>("CompanyAddress")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("CompanyAddress");
 
                     b.Property<string>("CompanyEmail")
                         .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("CompanyEmail");
 
                     b.Property<string>("CompanyName")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("CompanyName");
 
                     b.Property<string>("CompanyTaxCode")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("CompanyTaxCode");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerAddress");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerName");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerPhone");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("DepositRatio")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("DepositRatio");
 
                     b.Property<Guid?>("FinishedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("FinishedBy");
 
                     b.Property<bool>("IsCompanyInvoice")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsCompanyInvoice");
 
-                    b.Property<DateTimeOffset?>("LastStatusChangedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("LastStatusChangedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("LastStatusChangedAt");
 
                     b.Property<int?>("LeadId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("LeadId");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<decimal?>("PaidAmount")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("PaidAmount");
 
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PaidAt");
 
                     b.Property<string>("PaymentCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentCode");
 
-                    b.Property<DateTimeOffset?>("PaymentExpiredAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("PaymentExpiredAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PaymentExpiredAt");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentMethod");
 
                     b.Property<string>("PaymentStatus")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<string>("PaymentUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentUrl");
 
                     b.Property<int?>("ProvinceId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProvinceId");
 
                     b.Property<string>("ProvinceName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ProvinceName");
 
                     b.Property<decimal?>("ShippingFee")
@@ -3364,22 +3367,22 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("ShippingFee");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
                     b.Property<string>("TransactionId")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransactionId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("WardCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("WardCode");
 
                     b.Property<string>("WardName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("WardName");
 
                     b.HasKey("Id");
@@ -3401,27 +3404,27 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal?>("CostPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("CostPrice");
 
                     b.Property<int?>("Count")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Count");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("OutputId");
 
                     b.Property<decimal?>("Price")
@@ -3429,15 +3432,15 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("Price");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3453,17 +3456,17 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.OutputStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -3473,17 +3476,17 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.PartnerType", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -3508,15 +3511,15 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
@@ -3524,20 +3527,20 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<decimal>("Bonus")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("EmployeeProfileId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Month")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Penalty")
                         .HasColumnType("decimal(18,2)");
@@ -3548,11 +3551,11 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<decimal>("TotalSalary")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Year")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -3565,13 +3568,13 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -3582,28 +3585,28 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Value");
 
                     b.HasKey("Id");
@@ -3618,87 +3621,87 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BatteryType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("BatteryType");
 
                     b.Property<string>("BoreStroke")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("BoreStroke");
 
                     b.Property<int?>("BrandId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("BrandId");
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("CategoryId");
 
                     b.Property<string>("CompressionRatio")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CompressionRatio");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DashboardType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DashboardType");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DescriptionJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
                     b.Property<decimal?>("Displacement")
-                        .HasColumnType("numeric")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("Displacement");
 
                     b.Property<string>("EngineType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("EngineType");
 
                     b.Property<string>("FrameType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrameType");
 
                     b.Property<string>("FrontBrake")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontBrake");
 
                     b.Property<string>("FrontSuspension")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontSuspension");
 
                     b.Property<string>("FrontTireSize")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontTireSize");
 
                     b.Property<string>("FuelCapacity")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FuelCapacity");
 
                     b.Property<string>("FuelConsumption")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FuelConsumption");
 
                     b.Property<string>("FuelSystem")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FuelSystem");
 
                     b.Property<string>("GroundClearance")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("GroundClearance");
 
                     b.Property<decimal?>("Height")
@@ -3710,133 +3713,133 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("Length");
 
                     b.Property<string>("LightingSystem")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("LightingSystem");
 
                     b.Property<string>("Material")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Material");
 
                     b.Property<string>("MaxPower")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MaxPower");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("MaxTorque")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MaxTorque");
 
                     b.Property<string>("MetaDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaDescription");
 
                     b.Property<string>("MetaDescriptionJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaDescriptionJson");
 
                     b.Property<string>("MetaTitle")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaTitle");
 
                     b.Property<string>("MetaTitleJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaTitleJson");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("NameJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("NameJson");
 
                     b.Property<decimal?>("OilCapacity")
-                        .HasColumnType("numeric")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("OilCapacity");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Origin");
 
                     b.Property<string>("OtherStandards")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("OtherStandards");
 
                     b.Property<string>("RearBrake")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearBrake");
 
                     b.Property<string>("RearSuspension")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearSuspension");
 
                     b.Property<string>("RearTireSize")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearTireSize");
 
                     b.Property<decimal?>("SeatHeight")
-                        .HasColumnType("numeric")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("SeatHeight");
 
                     b.Property<string>("ShortDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ShortDescription");
 
                     b.Property<string>("ShortDescriptionJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ShortDescriptionJson");
 
                     b.Property<string>("StarterSystem")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("StarterSystem");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
                     b.Property<bool>("StdDot")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdDot");
 
                     b.Property<bool>("StdEce")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdEce");
 
                     b.Property<bool>("StdJis")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdJis");
 
                     b.Property<bool>("StdSnell")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdSnell");
 
                     b.Property<string>("TireSize")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TireSize");
 
                     b.Property<string>("TransmissionType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransmissionType");
 
                     b.Property<string>("Unit")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Unit");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("WarrantyPeriod")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("WarrantyPeriod");
 
                     b.Property<decimal?>("Weight")
-                        .HasColumnType("numeric")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("Weight");
 
                     b.Property<string>("Wheelbase")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Wheelbase");
 
                     b.Property<decimal?>("Width")
@@ -3858,90 +3861,92 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("ManagementType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ManagementType");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("MaxPurchaseQuantity");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<int?>("ParentId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ParentId");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Slug");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId");
 
                     b.ToTable("ProductCategory");
+
+                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "utf8mb4_unicode_ci");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategoryTranslation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("ProductCategoryId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3954,27 +3959,27 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3987,31 +3992,31 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BaseProductId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("BaseProductId");
 
                     b.Property<int>("CompatibleVehicleModelId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("CompatibleVehicleModelId");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4026,29 +4031,29 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Note")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int?>("QuotePrice")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("QuotePrice");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SupplierId");
 
                     b.HasKey("Id");
@@ -4065,17 +4070,17 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -4096,43 +4101,43 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomDescription");
 
                     b.Property<string>("CustomImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomImageUrl");
 
                     b.Property<string>("CustomTitle")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomTitle");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("DisplayOrder");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductId");
 
                     b.Property<int>("TechnologyId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("TechnologyId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4147,31 +4152,31 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("EngineType")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("EngineType");
 
                     b.Property<string>("FrontBrake")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontBrake");
 
                     b.Property<string>("FrontSuspension")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontSuspension");
 
                     b.Property<decimal?>("FuelCapacity")
@@ -4191,26 +4196,26 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("Length");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("Price");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductId");
 
                     b.Property<string>("RearBrake")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearBrake");
 
                     b.Property<string>("RearSuspension")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearSuspension");
 
                     b.Property<string>("SKU")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SKU");
 
                     b.Property<decimal?>("SeatHeight")
@@ -4218,18 +4223,18 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("SeatHeight");
 
                     b.Property<string>("TireSize")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TireSize");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UrlSlug")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("UrlSlug");
 
                     b.Property<string>("VariantName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("VariantName");
 
                     b.Property<decimal?>("Weight")
@@ -4255,38 +4260,38 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorCode");
 
                     b.Property<string>("ColorName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorName");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4299,41 +4304,41 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CustomerUserId");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DwellTimeMs")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("VariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("VariantColorId");
 
                     b.Property<int?>("VariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("VariantId");
 
                     b.Property<DateTime>("ViewedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("VisitorKey")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("VisitorKey");
 
                     b.HasKey("Id");
@@ -4355,59 +4360,59 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
-                    b.Property<DateTimeOffset>("EndDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("EndDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("EndDate");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsEnabled");
 
                     b.Property<string>("LinkUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("LinkUrl");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SortOrder");
 
-                    b.Property<DateTimeOffset>("StartDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("StartDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("StartDate");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UpdatedBy");
 
                     b.HasKey("Id");
@@ -4425,73 +4430,73 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedByUserId");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerAddress");
 
                     b.Property<string>("CustomerIdCard")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerIdCard");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerName");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerPhone");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DueDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("DueDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("DueDate");
 
-                    b.Property<DateTimeOffset>("InvoiceDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("InvoiceDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("InvoiceDate");
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("InvoiceNumber");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PaidAt");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentMethod");
 
                     b.Property<string>("PaymentStatus")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<int?>("PurchaseRequestId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("PurchaseRequestId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<decimal>("SubTotal")
@@ -4499,23 +4504,23 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("SubTotal");
 
                     b.Property<string>("SupplierAddress")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierAddress");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SupplierId");
 
                     b.Property<string>("SupplierName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierName");
 
                     b.Property<string>("SupplierPhone")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierPhone");
 
                     b.Property<string>("SupplierTaxCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierTaxCode");
 
                     b.Property<decimal>("TaxAmount")
@@ -4526,8 +4531,8 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4542,43 +4547,43 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorName");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ProductName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ProductName");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("PurchaseInvoiceId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("PurchaseInvoiceId");
 
                     b.Property<int?>("PurchaseRequestItemId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("PurchaseRequestItemId");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Quantity");
 
                     b.Property<decimal>("TaxAmount")
@@ -4597,11 +4602,11 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("UnitPrice");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VariantName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("VariantName");
 
                     b.HasKey("Id");
@@ -4615,35 +4620,35 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ApprovedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<Guid?>("RejectedBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RejectedBy");
 
                     b.Property<Guid?>("SentBy")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SentBy");
 
                     b.Property<string>("Status")
@@ -4651,8 +4656,8 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("varchar(30)")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4671,43 +4676,43 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("ChangedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("NewNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewStatusId")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldNotes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldStatusId")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("PurchaseRequestId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4722,47 +4727,47 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("ProductQuotationId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductQuotationId");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("PurchaseRequestId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("PurchaseRequestId");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Quantity");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SupplierId");
 
                     b.Property<decimal?>("UnitPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("UnitPrice");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4783,55 +4788,55 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("NewProductVariantColorId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("NewProductVariantId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("NewQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("NewSupplierName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("NewUnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<int?>("OldProductVariantColorId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("OldProductVariantId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("OldQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("OldSupplierName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("OldUnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("PurchaseRequestItemId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4844,72 +4849,72 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CancelReason")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("EvidenceImagesJson")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("InspectedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("InspectedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OrderCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("OriginalTrackingNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("RejectionReason")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnAction")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4922,45 +4927,45 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ReturnQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("ReturnRequestId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4974,10 +4979,10 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("PermissionId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -4990,7 +4995,7 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("ActualSalePrice")
                         .HasColumnType("decimal(18, 2)");
@@ -4998,92 +5003,92 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerCCCD")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerFullName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DepositAmount")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("EngineNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("FinalPaymentDeadline")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("FinalPaymentDeadline")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FrameNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("OutputId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("RemainingAmount")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("ScannedFileUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomAddress")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomRepresentative")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomTaxCode")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("SignedDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("SignedDate")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SpecialTerms")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VehicleColor")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleModel")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleVersion")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WarrantyPeriod")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WarrantyScope")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -5098,37 +5103,37 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("CategoryId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("EstimatedDurationMinutes")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5141,92 +5146,92 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CancelledDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("CancelledDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("CancelledDate");
 
                     b.Property<string>("CancelledReason")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CancelledReason");
 
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("CompletedDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("CompletedDate");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CustomerId");
 
                     b.Property<string>("CustomerNotes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerNotes");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("DepositAmount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("DepositAmount");
 
                     b.Property<int?>("EstimatedDurationMinutes")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("EstimatedDurationMinutes");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<int?>("Rating")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Review")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Review");
 
-                    b.Property<DateTimeOffset>("ScheduledDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("ScheduledDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("ScheduledDate");
 
                     b.Property<int>("ServiceId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ServiceId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<int?>("TechnicianId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("TechnicianId");
 
                     b.Property<string>("TechnicianNotes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TechnicianNotes");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("VehicleId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
@@ -5246,25 +5251,25 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5274,20 +5279,20 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.Setting", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Value")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Value");
 
                     b.HasKey("Key");
@@ -5299,34 +5304,34 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("CardsJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CardsJson");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Sender")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Sender");
 
                     b.Property<Guid>("SessionId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SessionId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5339,48 +5344,48 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid?>("AssignedStaffId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AssignedStaffId");
 
                     b.Property<string>("ContactName")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ContactName");
 
                     b.Property<string>("ContactPhone")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ContactPhone");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CustomerUserId");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("LastMessageAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Mode")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Mode");
 
                     b.Property<Guid?>("PreviousSessionId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("PreviousSessionId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VisitorKey")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("VisitorKey");
 
                     b.HasKey("Id");
@@ -5399,51 +5404,51 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Address");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PartnerTypeId")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("PartnerTypeId");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
                     b.Property<string>("TaxIdentificationNumber")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("TaxIdentificationNumber");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5458,39 +5463,39 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CitizenID")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("CitizenID");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SupplierId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5503,73 +5508,73 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("BankAccountNumber")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("BankName")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("ContractFilePath")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<decimal>("ContractValue")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("CreditLimit")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("DiscountRate")
                         .HasColumnType("decimal(5, 2)");
 
                     b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("MinimumVolumePerMonth")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Note")
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("varchar(1000)");
 
                     b.Property<Guid?>("ParentContractId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<int?>("PaymentWindowDays")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Terms")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("varchar(500)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5584,44 +5589,44 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("ChangedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Details")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("NewValue")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("OldValue")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<Guid>("SupplierContractId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5634,22 +5639,22 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<Guid>("SupplierContractId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("WholesalePrice")
                         .HasColumnType("decimal(18, 2)");
@@ -5667,19 +5672,19 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("InventoryReceiptId");
 
                     b.Property<decimal>("PaidAmount")
@@ -5687,15 +5692,15 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("PaidAmount");
 
                     b.Property<int>("SupplierId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("SupplierId");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5710,35 +5715,35 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AmountPaid")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedById")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("PaymentDate")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("RemainingDebt")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5753,26 +5758,26 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<int>("SupplierDebtLogId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5785,32 +5790,32 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("EvidenceUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("PaymentDate")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5822,20 +5827,20 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.SupplierFinance", b =>
                 {
                     b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("CurrentDebt")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("SupplierId");
 
@@ -5845,17 +5850,17 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -5866,96 +5871,96 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("AssignedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("AssignedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("AssignedAt");
 
                     b.Property<Guid?>("AssignedUserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AssignedUserId");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Category");
 
-                    b.Property<DateTimeOffset?>("ClosedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("ClosedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ClosedAt");
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ContactId");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("CustomerRatedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("CustomerRatedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("CustomerRatedAt");
 
                     b.Property<string>("CustomerRatingComment")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerRatingComment");
 
                     b.Property<int?>("CustomerRatingOfEmployee")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("CustomerRatingOfEmployee");
 
                     b.Property<Guid?>("CustomerTrackingToken")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CustomerTrackingToken");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
-                    b.Property<DateTimeOffset?>("EmployeeRatedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("EmployeeRatedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("EmployeeRatedAt");
 
                     b.Property<string>("EmployeeRatingComment")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("EmployeeRatingComment");
 
                     b.Property<int?>("EmployeeRatingOfCustomer")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("EmployeeRatingOfCustomer");
 
                     b.Property<string>("OrderCode")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("OrderCode");
 
-                    b.Property<DateTimeOffset?>("StartedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("StartedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("StartedAt");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Subject");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5970,46 +5975,46 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AssignedAdminId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Priority")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("SLADeadline")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -6024,41 +6029,41 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("BrandId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DefaultDescription")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DefaultDescription");
 
                     b.Property<string>("DefaultImageUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DefaultImageUrl");
 
                     b.Property<string>("DefaultTitle")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DefaultTitle");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -6073,23 +6078,23 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -6100,31 +6105,31 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<int>("TechnologyId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Type");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -6137,26 +6142,26 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("OptionValueId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("OptionValueId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("VariantId");
 
                     b.HasKey("Id");
@@ -6172,29 +6177,29 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<double>("CurrentOdo")
-                        .HasColumnType("double precision")
+                        .HasColumnType("double")
                         .HasColumnName("CurrentOdo");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ElectronicWarrantyQrCode")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ElectronicWarrantyQrCode");
 
                     b.Property<string>("EngineNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("EngineNumber");
 
                     b.Property<decimal>("ImportPrice")
@@ -6202,69 +6207,69 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("ImportPrice");
 
                     b.Property<int?>("InventoryReceiptInfoId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("InventoryReceiptInfoId");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<DateTime?>("LastMaintenanceDate")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("LastMaintenanceDate");
 
                     b.Property<int?>("LeadId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("LeadId");
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("LicensePlate");
 
                     b.Property<DateTime?>("NextMaintenanceDate")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("NextMaintenanceDate");
 
                     b.Property<double?>("NextMaintenanceOdo")
-                        .HasColumnType("double precision")
+                        .HasColumnType("double")
                         .HasColumnName("NextMaintenanceOdo");
 
                     b.Property<int?>("OutputInfoId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("OutputInfoId");
 
                     b.Property<int?>("ProductId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductId");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset>("PurchaseDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("PurchaseDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("PurchaseDate");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UserId");
 
                     b.Property<string>("VinNumber")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("VinNumber");
 
                     b.HasKey("Id");
@@ -6290,43 +6295,43 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("ChangedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("NewEngineNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewVinNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldEngineNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldVinNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -6341,37 +6346,37 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DocumentType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DocumentType");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("FileUrl");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
@@ -6385,65 +6390,65 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ApplyFor")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Channel")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DiscountType")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("DiscountValue")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("MaxDiscountAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("MinOrderValue")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("TotalUsageLimit")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Type")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("UsageLimitPerUser")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("UsedCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("ValidTo")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -6456,10 +6461,10 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.VoucherLead", b =>
                 {
                     b.Property<int>("VoucherId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("LeadId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("VoucherId", "LeadId");
 
@@ -6472,56 +6477,56 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsRecall")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("IssueDescription")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ManufacturerClaimNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ManufacturerDecision")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("MediaUrls")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ServiceCenterName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalLaborCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalPartsCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -6534,37 +6539,37 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PartCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PartName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("WarrantyClaimId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -6577,84 +6582,84 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BrandId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("BrandId");
 
                     b.Property<string>("Coverage")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Coverage");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DescriptionJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
                     b.Property<int?>("DurationKm")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("DurationKm");
 
                     b.Property<int?>("DurationMonths")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("DurationMonths");
 
                     b.Property<DateTime?>("EffectiveDate")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("EffectiveDate");
 
                     b.Property<string>("ErrorCategory")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("ErrorCategory");
 
                     b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("ExpirationDate");
 
                     b.Property<string>("MediaUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("MediaUrl");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<DateTime?>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bytea")
+                        .HasColumnType("timestamp(6)")
                         .HasColumnName("RowVersion");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("TermName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TermName");
 
                     b.Property<string>("TermNameJson")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("TermNameJson");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VehicleType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("VehicleType");
 
                     b.HasKey("Id");
@@ -6668,76 +6673,76 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("InvoicePrintedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("InvoicePrintedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PaymentNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("ReceivedById")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ServiceDescription")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("SourceId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("SourceType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("SubTotal")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VehicleInfo")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -6748,18 +6753,18 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -6772,18 +6777,18 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -6795,16 +6800,16 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -6816,13 +6821,13 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -6836,16 +6841,16 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 

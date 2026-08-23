@@ -3,8 +3,11 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
+using Domain.Constants.Logistics;
+using Domain.Entities.Logistics;
 using Mapster;
 using MediatR;
 
@@ -14,7 +17,9 @@ public class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
     ICommissionUpdateRepository commissionUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
+    IUnitOfWork unitOfWork,
+    IShipmentReadRepository? shipmentReadRepository = null,
+    IShipmentInsertRepository? shipmentInsertRepository = null) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
 {
     public async Task<Result<List<OutputItemResponse>?>> Handle(
         UpdateManyOutputStatusCommand request,
@@ -119,6 +124,32 @@ public class UpdateManyOutputStatusCommandHandler(
                     .ConfigureAwait(false);
                 if (result.IsFailure)
                     return result.Errors!;
+                if (shipmentInsertRepository != null &&
+                    (shipmentReadRepository == null ||
+                        await shipmentReadRepository.GetByOutputIdAsync(output.Id, cancellationToken).ConfigureAwait(false) == null))
+                {
+                    await shipmentInsertRepository.AddAsync(
+                        new Shipment
+                        {
+                            CustomerName = output.CustomerName ?? string.Empty,
+                            CustomerPhone = output.CustomerPhone ?? string.Empty,
+                            DestinationAddress = output.CustomerAddress ?? string.Empty,
+                            ShippingCost = output.ShippingFee ?? 0,
+                            CodAmount = output.Total - (output.PaidAmount ?? 0),
+                            OriginAddress = "Kho AnhEmMotor",
+                            OutputId = output.Id,
+                            Type = ShipmentType.OrderDelivery,
+                            Items = output.OutputInfos.Select(
+                                    info => new ShipmentItem
+                                    {
+                                        ProductVariantId = info.ProductVariantId,
+                                        ProductVariantColorId = info.ProductVariantColorId,
+                                        Quantity = info.Count ?? 1
+                                    })
+                                .ToList()
+                        },
+                        cancellationToken).ConfigureAwait(false);
+                }
             }
             output.StatusId = request.StatusId;
             updateRepository.Update(output);

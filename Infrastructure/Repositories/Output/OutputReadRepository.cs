@@ -1,10 +1,12 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.ApiContracts.Output.Responses;
 using Domain.Constants;
 using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq.Expressions;
@@ -21,7 +23,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         bool withoutContract = false,
         CancellationToken cancellationToken = default)
     {
-        var query = GetQueryable(mode);
+        var query = GetBaseQueryable(mode);
         if (filter != null)
         {
             query = query.Where(filter);
@@ -31,10 +33,19 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             query = query.Where(o => !context.Set<global::Domain.Entities.SalesContract>().Any(c => c.OutputId == o.Id));
         }
 
-        return paginator.ApplyAsync<OutputEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+        if (typeof(TResponse) == typeof(OutputItemResponse))
+        {
+            return GetPagedOutputItemsAsync<TResponse>(query, sieveModel, mode, cancellationToken);
+        }
+
+        return paginator.ApplyAsync<OutputEntity, TResponse>(
+            GetQueryable(mode).Where(x => query.Select(y => y.Id).Contains(x.Id)),
+            sieveModel,
+            mode,
+            cancellationToken);
     }
 
-    internal IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    private IQueryable<OutputEntity> GetBaseQueryable(DataFetchMode mode)
     {
         var query = context.OutputOrders.IgnoreQueryFilters();
         if (mode == DataFetchMode.ActiveOnly)
@@ -44,7 +55,13 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         {
             query = query.Where(x => x.DeletedAt != null);
         }
-        return query
+        return query;
+    }
+
+    private IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return GetBaseQueryable(mode)
+            .AsNoTracking()
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
@@ -53,15 +70,111 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.ProductCollectionPhotos)
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariant)
-            .ThenInclude(pv => pv!.VariantOptionValues)
-            .ThenInclude(vov => vov.OptionValue)
-            .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariantColor)
-            .Include(x => x.OutputStatus)
             .Include(x => x.Buyer)
-            .Include(x => x.FinishedByUser)
             .AsSplitQuery();
+    }
+
+    private async Task<PagedResult<TResponse>> GetPagedOutputItemsAsync<TResponse>(
+        IQueryable<OutputEntity> query,
+        SieveModel sieveModel,
+        DataFetchMode mode,
+        CancellationToken cancellationToken)
+    {
+        var page = await paginator.ApplyAsync<OutputEntity, OutputEntity>(
+                query,
+                sieveModel,
+                mode,
+                cancellationToken)
+            .ConfigureAwait(false);
+        var ids = (page.Items ?? []).Select(item => item.Id).ToList();
+        if (ids.Count == 0)
+        {
+            return new PagedResult<TResponse>([], page.TotalCount, page.PageNumber, page.PageSize);
+        }
+
+        var projectedItems = await GetBaseQueryable(mode)
+            .Where(item => ids.Contains(item.Id))
+            .Select(item => new OutputItemResponse
+            {
+                Id = item.Id,
+                BuyerId = item.BuyerId.HasValue ? item.BuyerId.Value.ToString() : null,
+                BuyerName = item.Buyer != null ? item.Buyer.FullName : null,
+                BuyerEmail = item.Buyer != null ? item.Buyer.Email : null,
+                BuyerPhone = item.Buyer != null ? item.Buyer.PhoneNumber : null,
+                CustomerName = item.CustomerName,
+                CustomerAddress = item.CustomerAddress,
+                CustomerPhone = item.CustomerPhone,
+                CreatedAt = item.CreatedAt,
+                StatusId = item.StatusId,
+                PaymentMethod = item.PaymentMethod,
+                PaymentStatus = item.PaymentStatus,
+                Notes = item.Notes,
+                DepositRatio = item.DepositRatio,
+                Total =
+                    (item.OutputInfos
+                        .Where(info => info.DeletedAt == null)
+                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) +
+                    (item.ShippingFee ?? 0),
+                DepositAmount = item.DepositRatio.HasValue && item.DepositRatio != 0
+                    ? (item.OutputInfos
+                        .Where(info => info.DeletedAt == null)
+                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) *
+                        (item.DepositRatio.Value / 100m)
+                    : null,
+                RemainingAmount = item.DepositRatio.HasValue && item.DepositRatio != 0
+                    ? ((item.OutputInfos
+                        .Where(info => info.DeletedAt == null)
+                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) +
+                        (item.ShippingFee ?? 0)) -
+                        ((item.OutputInfos
+                            .Where(info => info.DeletedAt == null)
+                            .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) *
+                            (item.DepositRatio.Value / 100m))
+                    : null,
+                IsInventoryLocked = item.StatusId != null &&
+                    item.StatusId != "pending" &&
+                    item.StatusId != "waiting_deposit" &&
+                    item.StatusId != "waiting_installment",
+                ExpectedDeliveryDate = item.CreatedAt.HasValue
+                    ? item.CreatedAt.Value.AddDays(3)
+                    : null,
+                Quantity = item.OutputInfos
+                    .Where(info => info.DeletedAt == null)
+                    .Sum(info => (int?)info.Count) ?? 0,
+                ProductName = item.OutputInfos
+                    .Where(info => info.DeletedAt == null)
+                    .OrderBy(info => info.Id)
+                    .Select(info => info.ProductVariant != null && info.ProductVariant.Product != null
+                        ? info.ProductVariant.Product.Name
+                        : null)
+                    .FirstOrDefault(),
+                ProductImage = item.OutputInfos
+                    .Where(info => info.DeletedAt == null)
+                    .OrderBy(info => info.Id)
+                    .Select(info => info.ProductVariantColor != null &&
+                        info.ProductVariantColor.CoverImageUrl != null &&
+                        info.ProductVariantColor.CoverImageUrl != ""
+                            ? info.ProductVariantColor.CoverImageUrl
+                            : info.ProductVariant != null && info.ProductVariant.CoverImageUrl != null &&
+                                info.ProductVariant.CoverImageUrl != ""
+                                ? info.ProductVariant.CoverImageUrl
+                                : info.ProductVariant != null
+                                    ? info.ProductVariant.ProductCollectionPhotos
+                                        .OrderBy(photo => photo.Id)
+                                        .Select(photo => photo.ImageUrl)
+                                        .FirstOrDefault()
+                                    : null)
+                    .FirstOrDefault()
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var itemsById = projectedItems.ToDictionary(item => item.Id);
+        var responses = ids
+            .Where(itemsById.ContainsKey)
+            .Select(id => (TResponse)(object)itemsById[id])
+            .ToList();
+        return new PagedResult<TResponse>(responses, page.TotalCount, page.PageNumber, page.PageSize);
     }
 
     public Task<IEnumerable<OutputEntity>> GetAllAsync(
@@ -72,6 +185,26 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         return query
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<OutputEntity>>(t => t.Result, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<OutputEntity>> GetOrderStatisticsDataAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return await context.GetQuery<OutputEntity>(mode)
+            .AsNoTracking()
+            .Select(o => new OutputEntity
+            {
+                Id = o.Id,
+                CustomerName = o.CustomerName,
+                StatusId = o.StatusId,
+                PaymentStatus = o.PaymentStatus,
+                PaidAmount = o.PaidAmount,
+                CreatedAt = o.CreatedAt,
+                LastStatusChangedAt = o.LastStatusChangedAt
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public Task<OutputEntity?> GetByIdAsync(

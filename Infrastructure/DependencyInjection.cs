@@ -137,7 +137,7 @@ public static class DependencyInjection
         services.AddHttpClient<IShippingService, ShippingService>(
             client =>
             {
-                var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
+                var baseAddress = configuration["GhnSettings:BaseUrl"] ?? "https://online-gateway.ghn.vn";
                 client.BaseAddress = new Uri(baseAddress);
             });
         services.AddHttpClient<IGeocodingService, GeocodingService>();

@@ -1,4 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
+using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -960,6 +961,162 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.BestDayDate.Should().Be("2026-05-01");
         result.Value.BestDayRevenue.Should().Be(50000000);
+    }
+
+    [Fact(DisplayName = "STAT_106 - Unit - GetAdminDashboardOverviewQueryHandler mặc định không tham số")]
+    public async Task Handle_AdminDashboardOverview_DefaultDates_ReturnsCompleteOverview()
+    {
+        var query = new GetAdminDashboardOverviewQuery();
+        var expectedSummary = new DashboardStatsResponse
+        {
+            TodayRevenue = 15000000,
+            MonthlyRevenue = 150000000,
+            MonthlyProfit = 45000000,
+            OutOfStockCount = 2,
+            LowStockCount = 5
+        };
+        var expectedDaily = new List<DailyRevenueResponse>
+        {
+            new() { ReportDay = DateOnly.FromDateTime(DateTime.Today), TotalRevenue = 15000000 }
+        };
+        var expectedStatuses = new List<OrderStatusCountResponse>
+        {
+            new() { StatusName = OrderStatus.Completed, OrderCount = 20 }
+        };
+        var expectedRecentOrders = new List<RecentOrderResponse>
+        {
+            new() { Id = 1, OrderCode = "ORD-001", TotalAmount = 5000000, BuyerName = "Nguyen Van A" }
+        };
+        var expectedTopStaff = new List<StaffPerformanceResponse>
+        {
+            new() { EmployeeName = "Tran Van B", TotalSales = 50000000, KpiStatus = "Vượt KPI" }
+        };
+        var expectedRecentTx = new List<TransactionLogResponse>
+        {
+            new() { CustomerName = "Nguyen Van A", Amount = 5000000, ProductName = "Wave Alpha", StaffName = "Tran Van B" }
+        };
+
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedSummary);
+        _repositoryMock.Setup(r => r.GetOrderStatusCountsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedStatuses);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedDaily);
+        _repositoryMock.Setup(r => r.GetRecentOrdersAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedRecentOrders);
+        _repositoryMock.Setup(r => r.GetTopStaffPerformanceAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), 5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedTopStaff);
+        _repositoryMock.Setup(r => r.GetRecentTransactionsAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedRecentTx);
+
+        var handler = new GetAdminDashboardOverviewQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Summary.TodayRevenue.Should().Be(15000000);
+        result.Value.Summary.MonthlyRevenue.Should().Be(150000000);
+        result.Value.Summary.OutOfStockCount.Should().Be(2);
+        result.Value.Summary.LowStockCount.Should().Be(5);
+        result.Value.DailyRevenue.Should().HaveCount(1);
+        result.Value.OrderStatusDistribution.Should().HaveCount(1);
+        result.Value.RecentOrders.Should().HaveCount(1);
+        result.Value.TopStaff.Should().HaveCount(1);
+        result.Value.RecentTransactions.Should().HaveCount(1);
+    }
+
+    [Fact(DisplayName = "STAT_107 - Unit - GetAdminDashboardOverviewQueryHandler theo khoảng Tháng Dương lịch")]
+    public async Task Handle_AdminDashboardOverview_CustomMonthRange_CallsRepoWithCorrectRange()
+    {
+        var startMonth = new DateTime(2026, 8, 1);
+        var endMonth = new DateTime(2026, 8, 31);
+        var query = new GetAdminDashboardOverviewQuery { StartDate = startMonth, EndDate = endMonth };
+
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DashboardStatsResponse { PeriodRevenue = 80000000, PeriodProfit = 25000000 });
+        _repositoryMock.Setup(r => r.GetOrderStatusCountsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetRecentOrdersAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetTopStaffPerformanceAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), 5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetRecentTransactionsAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var handler = new GetAdminDashboardOverviewQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Summary.PeriodRevenue.Should().Be(80000000);
+        result.Value.Summary.PeriodProfit.Should().Be(25000000);
+
+        _repositoryMock.Verify(r => r.GetDashboardStatsAsync(
+            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 8 && d.Day == 1),
+            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 8 && d.Day == 31),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "STAT_108 - Unit - GetAdminDashboardOverviewQueryHandler theo khoảng Năm Dương lịch")]
+    public async Task Handle_AdminDashboardOverview_CustomYearRange_CallsRepoWithCorrectRange()
+    {
+        var startYear = new DateTime(2026, 1, 1);
+        var endYear = new DateTime(2026, 12, 31);
+        var query = new GetAdminDashboardOverviewQuery { StartDate = startYear, EndDate = endYear };
+
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DashboardStatsResponse { YearlyRevenue = 1200000000, YearlyProfit = 350000000 });
+        _repositoryMock.Setup(r => r.GetOrderStatusCountsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetRecentOrdersAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetTopStaffPerformanceAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), 5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetRecentTransactionsAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var handler = new GetAdminDashboardOverviewQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Summary.YearlyRevenue.Should().Be(1200000000);
+        result.Value.Summary.YearlyProfit.Should().Be(350000000);
+
+        _repositoryMock.Verify(r => r.GetDashboardStatsAsync(
+            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 1 && d.Day == 1),
+            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 12 && d.Day == 31),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "STAT_109 - Unit - GetAdminDashboardOverviewQueryHandler khi repository trả về summary null")]
+    public async Task Handle_AdminDashboardOverview_WhenSummaryNull_InitializesEmptyStats()
+    {
+        var query = new GetAdminDashboardOverviewQuery();
+
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((DashboardStatsResponse?)null);
+        _repositoryMock.Setup(r => r.GetOrderStatusCountsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetRecentOrdersAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetTopStaffPerformanceAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), 5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetRecentTransactionsAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var handler = new GetAdminDashboardOverviewQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Summary.Should().NotBeNull();
+        result.Value.Summary.TodayRevenue.Should().Be(0);
+        result.Value.Summary.MonthlyRevenue.Should().Be(0);
     }
 
 #pragma warning restore CRR0035

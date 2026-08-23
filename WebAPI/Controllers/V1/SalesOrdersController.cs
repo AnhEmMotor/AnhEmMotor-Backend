@@ -104,7 +104,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Lấy danh sách phiếu bán hàng đã xác nhận.
     /// </summary>
     [HttpGet("confirmed")]
-    [HasPermission(Permissions.Order.OrderManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.SalesInvoiceManagement.View)]
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetConfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -119,7 +122,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Lấy danh sách phiếu tạm chưa xác nhận.
     /// </summary>
     [HttpGet("unconfirmed")]
-    [HasPermission(Permissions.Order.OrderManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.SalesInvoiceManagement.View)]
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetUnconfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -151,7 +157,13 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     [RequiresAnyPermissions(
         Permissions.Order.OrderManagement.View,
         Permissions.Order.OrderManagement.Create,
-        Permissions.Order.OrderManagement.Edit)]
+        Permissions.Order.OrderManagement.Edit,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.DraftOrderManagement.Create,
+        Permissions.Order.DraftOrderManagement.Edit,
+        Permissions.Order.SalesInvoiceManagement.View,
+        Permissions.Order.SalesInvoiceManagement.Create,
+        Permissions.Order.SalesInvoiceManagement.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOutputStatusesAsync(CancellationToken cancellationToken)
     {
@@ -177,7 +189,16 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
     /// </summary>
     [HttpGet("transition-map")]
-    [RequiresAnyPermissions(Permissions.Order.OrderManagement.Create, Permissions.Order.OrderManagement.Edit)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.OrderManagement.Create,
+        Permissions.Order.OrderManagement.Edit,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.DraftOrderManagement.Create,
+        Permissions.Order.DraftOrderManagement.Edit,
+        Permissions.Order.SalesInvoiceManagement.View,
+        Permissions.Order.SalesInvoiceManagement.Create,
+        Permissions.Order.SalesInvoiceManagement.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, IEnumerable<string>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTransitionMapAsync(CancellationToken cancellationToken)
     {
@@ -229,7 +250,13 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Lấy yêu cầu chọn VIN theo từng dòng sản phẩm trước khi đổi trạng thái đơn hàng.
     /// </summary>
     [HttpGet("{id:int}/vehicle-assignment-requirements")]
-    [RequiresAnyPermissions(Permissions.Order.OrderManagement.View, Permissions.Order.OrderManagement.ChangeStatus)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.OrderManagement.ChangeStatus,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.DraftOrderManagement.ChangeStatus,
+        Permissions.Order.SalesInvoiceManagement.View,
+        Permissions.Order.SalesInvoiceManagement.ChangeStatus)]
     [ProducesResponseType(typeof(VehicleAssignmentRequirementResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetVehicleAssignmentRequirementsAsync(
         int id,
@@ -245,7 +272,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Lấy thông tin chi tiết của đơn hàng.
     /// </summary>
     [HttpGet("{id:int}", Name = SaleOrders.GetById)]
-    [HasPermission(Permissions.Order.OrderManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.SalesInvoiceManagement.View)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOutputByIdAsync(int id, CancellationToken cancellationToken)
@@ -259,7 +289,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Tạo đơn hàng mới (dành cho người có quyền tạo đơn hàng).
     /// </summary>
     [HttpPost("by-manager")]
-    [HasPermission(Permissions.Order.OrderManagement.Create)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.Create,
+        Permissions.Order.DraftOrderManagement.Create,
+        Permissions.Order.SalesInvoiceManagement.Create)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputForAdminAsync(
@@ -339,7 +372,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// đơn hàng).
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
-    [HasPermission(Permissions.Order.OrderManagement.Edit)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.Edit,
+        Permissions.Order.DraftOrderManagement.Edit,
+        Permissions.Order.SalesInvoiceManagement.Edit)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -362,7 +398,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Cập nhật trạng thái của đơn hàng.
     /// </summary>
     [HttpPatch("{id:int}/status")]
-    [HasPermission(Permissions.Order.OrderManagement.ChangeStatus)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.ChangeStatus,
+        Permissions.Order.DraftOrderManagement.ChangeStatus,
+        Permissions.Order.SalesInvoiceManagement.ChangeStatus)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -384,7 +423,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Cập nhật trạng thái của nhiều đơn hàng cùng lúc.
     /// </summary>
     [HttpPatch("status")]
-    [HasPermission(Permissions.Order.OrderManagement.ChangeStatus)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.ChangeStatus,
+        Permissions.Order.DraftOrderManagement.ChangeStatus,
+        Permissions.Order.SalesInvoiceManagement.ChangeStatus)]
     [ProducesResponseType(typeof(List<OutputItemResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyOutputStatusAsync(

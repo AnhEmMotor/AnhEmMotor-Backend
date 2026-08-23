@@ -1,11 +1,11 @@
-using Application.Interfaces.Repositories.ParcelDeliveryOrder;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using MediatR;
 
 namespace Application.Features.Logistics.Commands.UpdateTrackingNumberCommand;
 
 public class UpdateTrackingNumberCommandHandler(
-    IParcelDeliveryOrderReadRepository readRepository,
-    IParcelDeliveryOrderUpdateRepository updateRepository) : IRequestHandler<UpdateTrackingNumberCommand, bool>
+    IShipmentReadRepository readRepository,
+    IShipmentUpdateRepository updateRepository) : IRequestHandler<UpdateTrackingNumberCommand, bool>
 {
     public async Task<bool> Handle(UpdateTrackingNumberCommand request, CancellationToken cancellationToken)
     {

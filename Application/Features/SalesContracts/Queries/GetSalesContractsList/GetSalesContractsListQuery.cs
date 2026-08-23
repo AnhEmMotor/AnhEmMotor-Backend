@@ -9,4 +9,6 @@ namespace Application.Features.SalesContracts.Queries.GetSalesContractsList;
 public sealed record GetSalesContractsListQuery : IRequest<Result<PagedResult<SalesContractResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
+
+    public string? Keyword { get; init; }
 }

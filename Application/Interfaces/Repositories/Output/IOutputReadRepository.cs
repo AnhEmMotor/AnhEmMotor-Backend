@@ -19,6 +19,10 @@ public interface IOutputReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
+    public Task<IReadOnlyList<OutputEntity>> GetOrderStatisticsDataAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
     public Task<OutputEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,

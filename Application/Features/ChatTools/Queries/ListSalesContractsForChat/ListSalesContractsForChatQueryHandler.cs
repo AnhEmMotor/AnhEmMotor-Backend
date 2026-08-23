@@ -25,7 +25,7 @@ public class ListSalesContractsForChatQueryHandler(
             Filters = statusId is null ? null : $"Status=={statusId}"
         };
         var paged = await salesContractReadRepository
-            .GetPagedAsync(sieveModel, cancellationToken)
+            .GetPagedAsync(sieveModel, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         var items = paged.Items ?? [];
         var dtos = items

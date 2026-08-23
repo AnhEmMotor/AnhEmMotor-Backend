@@ -1,4 +1,5 @@
 using Domain.Entities.Logistics;
+using Domain.Constants.Logistics;
 using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,16 @@ public static class LogisticsDataSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        if (await context.ParcelDeliveryOrders.AnyAsync(cancellationToken).ConfigureAwait(false))
-            return;
-        var parcels = new List<ParcelDeliveryOrder>
+        var parcels = await context.ParcelDeliveryOrders
+            .Include(x => x.Items)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        if (parcels.Count == 0)
         {
+            if (await context.Shipments.AnyAsync(cancellationToken).ConfigureAwait(false))
+                return;
+            parcels = new List<ParcelDeliveryOrder>
+            {
             new()
             {
                 CustomerName = "Nguyễn Văn A",
@@ -301,8 +308,63 @@ public static class LogisticsDataSeeder
                         }
                     }
             }
-        };
-        await context.ParcelDeliveryOrders.AddRangeAsync(parcels, cancellationToken).ConfigureAwait(false);
+            };
+            await context.ParcelDeliveryOrders.AddRangeAsync(parcels, cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        var variantsByProductId = await context.ProductVariants
+            .Where(x => x.DeletedAt == null)
+            .GroupBy(x => x.ProductId)
+            .Select(g => g.OrderBy(x => x.Id).First())
+            .ToDictionaryAsync(x => x.ProductId, cancellationToken)
+            .ConfigureAwait(false);
+        var existingShipments = await context.Shipments
+            .AsNoTracking()
+            .Select(shipment => new
+            {
+                shipment.TrackingNumber,
+                shipment.CustomerPhone,
+                shipment.CreatedAt
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var shipments = parcels
+            .Where(parcel => !existingShipments.Any(shipment =>
+                (!string.IsNullOrWhiteSpace(parcel.TrackingNumber) &&
+                    shipment.TrackingNumber == parcel.TrackingNumber) ||
+                (string.IsNullOrWhiteSpace(parcel.TrackingNumber) &&
+                    shipment.TrackingNumber == string.Empty &&
+                    shipment.CustomerPhone == parcel.CustomerPhone &&
+                    shipment.CreatedAt.HasValue &&
+                    shipment.CreatedAt.Value.UtcDateTime == parcel.CreatedAt)))
+            .Select(parcel => new Shipment
+        {
+            TrackingNumber = parcel.TrackingNumber,
+            Carrier = parcel.Carrier,
+            CustomerName = parcel.CustomerName,
+            CustomerPhone = parcel.CustomerPhone,
+            CodAmount = parcel.CodAmount,
+            ShippingCost = parcel.ShippingCost,
+            DeliveredAt = parcel.DeliveredAt.HasValue
+                ? new DateTimeOffset(parcel.DeliveredAt.Value, TimeSpan.Zero)
+                : null,
+            OriginAddress = "Kho AnhEmMotor",
+            DestinationAddress = parcel.CustomerAddress,
+            Type = ShipmentType.OrderDelivery,
+            Status = parcel.Status,
+            CreatedAt = new DateTimeOffset(parcel.CreatedAt, TimeSpan.Zero),
+            Items = parcel.Items.Select(item => new ShipmentItem
+            {
+                ProductVariantId = variantsByProductId.TryGetValue(item.ProductId, out var variant)
+                    ? variant.Id
+                    : null,
+                Quantity = item.Quantity
+            }).ToList()
+        }).ToList();
+        if (shipments.Count == 0)
+            return;
+        await context.Shipments.AddRangeAsync(shipments, cancellationToken).ConfigureAwait(false);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }
