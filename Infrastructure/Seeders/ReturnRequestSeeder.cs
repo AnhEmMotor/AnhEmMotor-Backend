@@ -21,7 +21,7 @@ namespace Infrastructure.Seeders
             var outputs = await context.OutputOrders
                 .Include(o => o.OutputInfos)
                 .ThenInclude(oi => oi.ProductVariant)
-                .ThenInclude(pv => pv.Product)
+                .ThenInclude(pv => pv!.Product)
                 .Where(o => o.OutputInfos.Any())
                 .Take(20)
                 .ToListAsync(cancellationToken);
@@ -87,7 +87,7 @@ namespace Infrastructure.Seeders
                         {
                             ProductId = info.ProductVariant.Product.Id,
                             ProductName = info.ProductVariant.Product.Name ?? "Sản phẩm",
-                            Sku = info.ProductVariant.Sku ?? "",
+                            Sku = info.ProductVariant.SKU ?? "",
                             Quantity = info.Count ?? 1,
                             ReturnQuantity = random.Next(1, (info.Count ?? 1) + 1),
                             UnitPrice = info.Price ?? 0m
