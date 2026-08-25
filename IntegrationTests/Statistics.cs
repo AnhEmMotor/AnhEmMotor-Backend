@@ -912,5 +912,91 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ConfigureAwait(true);
         content!.TodayActivities.Should().NotBeNull();
     }
+
+    [Fact(DisplayName = "STAT_111 - Dashboard kinh doanh dùng cùng nguồn doanh thu đã hoàn thành")]
+    public async Task EcommerceDashboard_CompletedRevenueSources_StayConsistent()
+    {
+        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
+        if (!await db.OutputStatuses.AnyAsync(x => x.Key == "Completed", CancellationToken.None)
+            .ConfigureAwait(true))
+        {
+            db.OutputStatuses.Add(new OutputStatusEntity { Key = "Completed" });
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+
+        var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+        var businessDay = new DateTimeOffset(2099, 8, 31, 12, 0, 0, TimeSpan.Zero);
+        var legacyCompletedOrder = new OutputEntity { StatusId = "Completed", CreatedAt = businessDay };
+        var completedOrder = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = businessDay };
+        var pendingOrder = new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = businessDay };
+        db.OutputOrders.AddRange(legacyCompletedOrder, completedOrder, pendingOrder);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        db.OutputInfos.AddRange(
+            new OutputInfoEntity
+            {
+                OutputId = legacyCompletedOrder.Id,
+                ProductVariantId = variantId,
+                Price = 45000000,
+                CostPrice = 30000000,
+                Count = 1
+            },
+            new OutputInfoEntity
+            {
+                OutputId = completedOrder.Id,
+                ProductVariantId = variantId,
+                Price = 11000000,
+                CostPrice = 5000000,
+                Count = 1
+            },
+            new OutputInfoEntity
+            {
+                OutputId = pendingOrder.Id,
+                ProductVariantId = variantId,
+                Price = 99000000,
+                CostPrice = 1000000,
+                Count = 1
+            });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        const string range = "start=2099-08-31&end=2099-08-31";
+        var summaryResponse = await _client.GetAsync(
+            $"/api/analytics/dashboard/summary?{range}",
+            CancellationToken.None).ConfigureAwait(true);
+        var categoryResponse = await _client.GetAsync(
+            $"/api/v1/Statistics/revenue-by-category?{range}",
+            CancellationToken.None).ConfigureAwait(true);
+        var dailyResponse = await _client.GetAsync(
+            $"/api/v1/Statistics/daily-category-revenue?days=7&{range}",
+            CancellationToken.None).ConfigureAwait(true);
+        var transactionsResponse = await _client.GetAsync(
+            "/api/analytics/transactions/recent",
+            CancellationToken.None).ConfigureAwait(true);
+
+        summaryResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        categoryResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        dailyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        transactionsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var summary = await summaryResponse.Content
+            .ReadFromJsonAsync<DashboardSummaryResponse>(CancellationToken.None).ConfigureAwait(true);
+        var categories = await categoryResponse.Content
+            .ReadFromJsonAsync<List<RevenueByCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var daily = await dailyResponse.Content
+            .ReadFromJsonAsync<List<DailyCategoryRevenueResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var transactions = await transactionsResponse.Content
+            .ReadFromJsonAsync<List<TransactionLogResponse>>(CancellationToken.None).ConfigureAwait(true);
+
+        summary!.TotalRevenue.Should().Be(56000000);
+        summary.GrossProfit.Should().Be(21000000);
+        summary.NetProfit.Should().Be(21000000);
+        categories!.Sum(x => x.Revenue).Should().Be(summary.TotalRevenue);
+        daily!.Sum(x => x.Revenue).Should().Be(summary.TotalRevenue);
+        transactions!.Where(x => x.Amount is 45000000 or 11000000)
+            .Should().OnlyContain(x => x.Status == "Completed");
+    }
 }
 

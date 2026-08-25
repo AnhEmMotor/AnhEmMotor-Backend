@@ -118,13 +118,15 @@ public class UpdateManyOutputStatusCommandHandler(
                     .ConfigureAwait(false);
                 if (result.IsFailure)
                     return result.Errors!;
-            } else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+            } else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0 ||
+                string.Compare(request.StatusId, OrderStatus.WaitingPickup) == 0)
             {
                 var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
                     .ConfigureAwait(false);
                 if (result.IsFailure)
                     return result.Errors!;
-                if (shipmentInsertRepository != null &&
+                if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0 &&
+                    shipmentInsertRepository != null &&
                     (shipmentReadRepository == null ||
                         await shipmentReadRepository.GetByOutputIdAsync(output.Id, cancellationToken).ConfigureAwait(false) == null))
                 {

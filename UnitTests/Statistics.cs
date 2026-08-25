@@ -1,5 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
+using Application.Features.Statistical.Queries.GetDailyCategoryRevenue;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -1117,6 +1118,29 @@ public class Statistics
         result.Value.Summary.Should().NotBeNull();
         result.Value.Summary.TodayRevenue.Should().Be(0);
         result.Value.Summary.MonthlyRevenue.Should().Be(0);
+    }
+
+    [Fact(DisplayName = "STAT_110 - Unit - Biểu đồ danh mục chuyển đúng khoảng ngày tùy chỉnh")]
+    public async Task Handle_DailyCategoryRevenue_CustomRange_ForwardsExactRange()
+    {
+        var start = new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.FromHours(7));
+        var end = new DateTimeOffset(2026, 8, 31, 0, 0, 0, TimeSpan.FromHours(7));
+        var query = new GetDailyCategoryRevenueQuery(30, start, end);
+
+        _repositoryMock.Setup(
+            r => r.GetDailyCategoryRevenueAsync(
+                It.IsAny<DateTimeOffset>(),
+                It.IsAny<DateTimeOffset>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var handler = new GetDailyCategoryRevenueQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        _repositoryMock.Verify(
+            r => r.GetDailyCategoryRevenueAsync(start, end, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
 #pragma warning restore CRR0035

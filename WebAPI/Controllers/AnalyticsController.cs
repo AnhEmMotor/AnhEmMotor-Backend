@@ -67,10 +67,15 @@ namespace WebAPI.Controllers
             [FromQuery] DateTime? end,
             CancellationToken cancellationToken)
         {
-            var startDate = (start ?? DateTime.Today.AddDays(-30)).ToUniversalTime();
-            var endDate = (end ?? DateTime.Today).ToUniversalTime();
+            var startDate = NormalizeReportDate(start ?? DateTime.Today.AddDays(-30));
+            var endDate = NormalizeReportDate(end ?? DateTime.Today);
             var result = await mediator.Send(new GetStaffPerformanceQuery(startDate, endDate), cancellationToken);
             return HandleResult(result);
+        }
+
+        internal static DateTime NormalizeReportDate(DateTime value)
+        {
+            return DateTime.SpecifyKind(value.Date, DateTimeKind.Utc);
         }
 
         /// <summary>

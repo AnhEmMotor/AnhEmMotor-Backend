@@ -129,6 +129,17 @@ public class UpdateOutputStatusCommandHandler(
                     }
                 }
                 break;
+            case OrderStatus.WaitingPickup:
+                var pickupCheckResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    false,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+                if (pickupCheckResult.IsFailure)
+                {
+                    return Result<OrderDetailResponse>.Failure(pickupCheckResult.Errors!);
+                }
+                break;
             case OrderStatus.Delivering:
                 var checkResult = await updateRepository.HandleInventoryTransactionAsync(
                     output.Id,
@@ -211,23 +222,6 @@ public class UpdateOutputStatusCommandHandler(
             case OrderStatus.PaidProcessing:
                 break;
             default:
-                foreach (var outputInfo in output.OutputInfos)
-                {
-                    if (outputInfo.ProductVariantId.HasValue && outputInfo.Count.HasValue)
-                    {
-                        var stock = await readRepository.GetStockQuantityByVariantIdAsync(
-                            outputInfo.ProductVariantId.Value,
-                            outputInfo.ProductVariantColorId,
-                            cancellationToken)
-                            .ConfigureAwait(false);
-                        if (stock < outputInfo.Count.Value)
-                        {
-                            return Error.BadRequest(
-                                $"Sản phẩm ID {outputInfo.ProductVariantId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
-                                "Products");
-                        }
-                    }
-                }
                 break;
         }
         output.StatusId = request.StatusId;

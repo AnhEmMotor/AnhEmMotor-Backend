@@ -76,6 +76,8 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                         Timestamp = baseDate,
                         Location = "Showroom AnhEmMotor Biên Hòa",
                         Status = "Đã lấy hàng",
+                        Description = "Đã lấy hàng",
+                        StatusType = "picked_up",
                         IsCurrent = false,
                         Latitude = dto.OriginLatitude,
                         Longitude = dto.OriginLongitude
@@ -88,6 +90,8 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                             Timestamp = baseDate.AddHours(4),
                             Location = "Bưu cục trung chuyển Đồng Nai",
                             Status = "Đã đến bưu cục trung chuyển",
+                            Description = "Đã đến bưu cục trung chuyển",
+                            StatusType = "in_transit",
                             IsCurrent = order.Status == ParcelDeliveryStatus.Shipping,
                             Latitude = (dto.OriginLatitude + dto.DestinationLatitude) / 2,
                             Longitude = (dto.OriginLongitude + dto.DestinationLongitude) / 2
@@ -101,6 +105,8 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                             Timestamp = order.DeliveredAt.Value.UtcDateTime,
                             Location = order.DestinationAddress ?? "Địa chỉ người nhận",
                             Status = "Giao hàng thành công",
+                            Description = "Giao hàng thành công",
+                            StatusType = "delivered",
                             IsCurrent = true,
                             Latitude = dto.DestinationLatitude,
                             Longitude = dto.DestinationLongitude

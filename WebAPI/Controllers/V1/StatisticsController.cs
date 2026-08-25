@@ -799,6 +799,8 @@ public class StatisticsController(
     /// Lấy doanh thu theo ngày và danh mục sản phẩm (multi-series cho biểu đồ).
     /// </summary>
     /// <param name="days">Số ngày lấy dữ liệu xu hướng (mặc định: 7 ngày).</param>
+    /// <param name="start">Ngày bắt đầu tùy chọn cho khoảng tùy chỉnh.</param>
+    /// <param name="end">Ngày kết thúc tùy chọn cho khoảng tùy chỉnh.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Doanh thu theo ngày và danh mục sản phẩm (multi-series).</returns>
     /// <response code="200">Trả về doanh thu theo ngày và danh mục thành công.</response>
@@ -810,9 +812,11 @@ public class StatisticsController(
     [ProducesResponseType(typeof(IEnumerable<DailyCategoryRevenueResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDailyCategoryRevenueAsync(
         [FromQuery] int days = 7,
+        [FromQuery] DateTimeOffset? start = null,
+        [FromQuery] DateTimeOffset? end = null,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetDailyCategoryRevenueQuery(days);
+        var query = new GetDailyCategoryRevenueQuery(days, start, end);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

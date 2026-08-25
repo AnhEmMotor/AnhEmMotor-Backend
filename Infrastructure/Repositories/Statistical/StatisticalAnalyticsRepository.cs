@@ -1,5 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
+using Domain.Constants.Order;
 using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -13,31 +14,56 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         DateTime end,
         CancellationToken cancellationToken)
     {
-        var timeSpan = end - start;
+        var endExclusive = end.TimeOfDay == TimeSpan.Zero ? end.Date.AddDays(1) : end.AddTicks(1);
+        var timeSpan = endExclusive - start;
         var prevStart = start.Subtract(timeSpan);
-        var prevEnd = start.AddTicks(-1);
-        var totalRevenue = await context.OutputOrders
-            .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
+        var prevEndExclusive = start;
+        var currentTotals = await context.OutputOrders
+            .Where(
+                o => o.CreatedAt >= start &&
+                    o.CreatedAt < endExclusive &&
+                    o.StatusId != null &&
+                    o.StatusId.ToLower() == OrderStatus.Completed)
             .SelectMany(o => o.OutputInfos)
-            .SumAsync(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0)), cancellationToken)
-            .ConfigureAwait(false) ?? 0;
-        var prevRevenue = await context.OutputOrders
-            .Where(o => o.CreatedAt >= prevStart && o.CreatedAt <= prevEnd && o.StatusId == "Completed")
+            .GroupBy(_ => 1)
+            .Select(
+                g => new
+                {
+                    Revenue = g.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
+                    CostOfGoodsSold = g.Sum(oi => (oi.CostPrice ?? 0) * (oi.Count ?? 0))
+                })
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var previousTotals = await context.OutputOrders
+            .Where(
+                o => o.CreatedAt >= prevStart &&
+                    o.CreatedAt < prevEndExclusive &&
+                    o.StatusId != null &&
+                    o.StatusId.ToLower() == OrderStatus.Completed)
             .SelectMany(o => o.OutputInfos)
-            .SumAsync(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0)), cancellationToken)
-            .ConfigureAwait(false) ?? 0;
+            .GroupBy(_ => 1)
+            .Select(
+                g => new
+                {
+                    Revenue = g.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
+                    CostOfGoodsSold = g.Sum(oi => (oi.CostPrice ?? 0) * (oi.Count ?? 0))
+                })
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var totalRevenue = currentTotals?.Revenue ?? 0;
+        var cogs = currentTotals?.CostOfGoodsSold ?? 0;
+        var prevRevenue = previousTotals?.Revenue ?? 0;
+        var prevCogs = previousTotals?.CostOfGoodsSold ?? 0;
         var totalExpenses = await context.Expenses
-            .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
+            .Where(e => e.ExpenseDate >= start && e.ExpenseDate < endExclusive)
             .SumAsync(e => (decimal?)e.Amount, cancellationToken)
             .ConfigureAwait(false) ?? 0;
         var prevExpenses = await context.Expenses
-            .Where(e => e.ExpenseDate >= prevStart && e.ExpenseDate <= prevEnd)
+            .Where(e => e.ExpenseDate >= prevStart && e.ExpenseDate < prevEndExclusive)
             .SumAsync(e => (decimal?)e.Amount, cancellationToken)
             .ConfigureAwait(false) ?? 0;
-        var cogs = totalRevenue * 0.7m;
         var grossProfit = totalRevenue - cogs;
         var netProfit = grossProfit - totalExpenses;
-        var prevCogs = prevRevenue * 0.7m;
         var prevGrossProfit = prevRevenue - prevCogs;
         var prevNetProfit = prevGrossProfit - prevExpenses;
         decimal revChange = prevRevenue == 0
@@ -135,7 +161,8 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
                                     o.CreatedBy == e.User.Id &&
                                     o.CreatedAt >= start &&
                                     o.CreatedAt <= endOfDay &&
-                                    o.StatusId == "Completed")
+                                    o.StatusId != null &&
+                                    o.StatusId.ToLower() == OrderStatus.Completed)
                         .SelectMany(o => o.OutputInfos)
                         .Sum(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0))) ?? 0,
                     TargetSales = context.KPIs
@@ -194,7 +221,9 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
                                 "N/A",
                     Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
                     IsRevenue = true,
-                    Status = o.StatusId == "Completed" ? "Completed" : "Pending",
+                    Status = o.StatusId != null && o.StatusId.ToLower() == OrderStatus.Completed
+                        ? "Completed"
+                        : "Pending",
                     StaffName = "N/A"
                 })
             .ToListAsync(cancellationToken)
