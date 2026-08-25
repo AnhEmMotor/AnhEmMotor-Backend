@@ -1,11 +1,12 @@
 using Application.Common.Models;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Product;
 using Domain.Primitives;
 using MediatR;
 
 namespace Application.Features.Marketing.Queries.GetProductViewHistory;
 
-public class GetProductViewHistoryQueryHandler(IProductViewRepository repository) : IRequestHandler<GetProductViewHistoryQuery, Result<PagedResult<ProductViewHistoryResponse>>>
+public class GetProductViewHistoryQueryHandler(IProductViewRepository repository, IFileReadService fileReadService) : IRequestHandler<GetProductViewHistoryQuery, Result<PagedResult<ProductViewHistoryResponse>>>
 {
     public async Task<Result<PagedResult<ProductViewHistoryResponse>>> Handle(GetProductViewHistoryQuery request, CancellationToken cancellationToken)
     {
@@ -17,7 +18,15 @@ public class GetProductViewHistoryQueryHandler(IProductViewRepository repository
             request.To,
             cancellationToken);
 
-        var items = entities.Select(pv => ProductViewHistoryResponse.FromEntity(pv)).ToList();
+        var items = entities
+            .Select(
+                pv =>
+                {
+                    var response = ProductViewHistoryResponse.FromEntity(pv);
+                    response.ProductImageUrl = fileReadService.GetPublicUrl(response.ProductImageUrl ?? string.Empty);
+                    return response;
+                })
+            .ToList();
 
         var pagedResult = new PagedResult<ProductViewHistoryResponse>(items, totalCount, request.PageNumber, request.PageSize);
         return Result<PagedResult<ProductViewHistoryResponse>>.Success(pagedResult);

@@ -1,4 +1,5 @@
 using Application.Features.Marketing.Queries.GetProductViewHistory;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Product;
 using Domain.Entities;
 using FluentAssertions;
@@ -11,11 +12,15 @@ namespace UnitTests;
 public class GetProductViewHistoryHandlerTests
 {
     private readonly Mock<IProductViewRepository> _repositoryMock = new();
+    private readonly Mock<IFileReadService> _fileReadServiceMock = new();
     private readonly GetProductViewHistoryQueryHandler _handler;
 
     public GetProductViewHistoryHandlerTests()
     {
-        _handler = new GetProductViewHistoryQueryHandler(_repositoryMock.Object);
+        _fileReadServiceMock
+            .Setup(s => s.GetPublicUrl(It.IsAny<string>()))
+            .Returns<string>(url => url);
+        _handler = new GetProductViewHistoryQueryHandler(_repositoryMock.Object, _fileReadServiceMock.Object);
     }
 
     [Fact(DisplayName = "PVH_01 - Handler truyền đúng From/To và phân trang xuống repository")]
@@ -90,5 +95,47 @@ public class GetProductViewHistoryHandlerTests
         item.ProductImageUrl.Should().Be("https://img/red.png");
         item.DwellTimeMs.Should().Be(5200);
         item.VisitorKey.Should().Be("guest-abc");
+    }
+
+    [Fact(DisplayName = "PVH_04 - Ảnh placeholder dummyimage bị bỏ qua, fallback sang ảnh màu của biến thể")]
+    public async Task Handle_SkipsDummyImagePlaceholder_FallsBackToVariantColorImage()
+    {
+        var entity = new ProductViewEntity
+        {
+            Id = Guid.NewGuid(),
+            ProductId = 9,
+            Product = new ProductEntity
+            {
+                Name = "Honda SH 110cc ABS",
+                ProductVariants =
+                [
+                    new ProductVariant
+                    {
+                        Id = 3,
+                        VariantName = "Phiên bản tiêu chuẩn",
+                        CoverImageUrl = "https://dummyimage.com/900x600/111827/ffffff.png&text=Honda+SH+110cc+ABS+AnhEm+Motor",
+                        ProductVariantColors =
+                        [
+                            new ProductVariantColor { ColorName = "Đỏ đen", CoverImageUrl = "/img_hondash_en.webp" },
+                            new ProductVariantColor { ColorName = "Đen nhám", CoverImageUrl = "https://dummyimage.com/900x600/111827/ffffff.png&text=Den" }
+                        ]
+                    }
+                ]
+            },
+            VariantId = 3,
+            Variant = null,
+            VariantColorId = null,
+            DwellTimeMs = 3000,
+            ViewedAt = new DateTime(2026, 8, 24, 10, 30, 0, DateTimeKind.Utc)
+        };
+        _repositoryMock
+            .Setup(r => r.GetProductViewHistoryPagedAsync(null, 1, 10, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<ProductViewEntity> { entity }, 1));
+
+        var result = await _handler.Handle(new GetProductViewHistoryQuery(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        var item = result.Value.Items.Should().ContainSingle().Subject;
+        item.ProductImageUrl.Should().Be("/img_hondash_en.webp");
     }
 }

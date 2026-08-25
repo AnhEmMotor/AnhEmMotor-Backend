@@ -65,6 +65,9 @@ public class ProductViewRepository(ApplicationDBContext context) : IProductViewR
             .Include(pv => pv.Product)
                 .ThenInclude(p => p!.ProductVariants)
                     .ThenInclude(v => v.ProductVariantColors)
+            .Include(pv => pv.Product)
+                .ThenInclude(p => p!.ProductVariants)
+                    .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(pv => pv.Variant)
             .Include(pv => pv.VariantColor)
             .AsNoTracking();
