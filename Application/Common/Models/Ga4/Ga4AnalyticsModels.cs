@@ -92,6 +92,45 @@ public record Ga4ReportDto<T>
     public int RowCount { get; init; }
 }
 
+/// <summary>Một dòng số liệu realtime GA4 (30 phút gần nhất): thiết bị / nguồn / phút.</summary>
+public record Ga4RealtimeRowDto
+{
+    /// <summary>Giá trị chiều: loại thiết bị, nguồn traffic, hoặc số phút trước (minutesAgo: 0..29).</summary>
+    [JsonPropertyName("label")]
+    public string Label { get; init; } = string.Empty;
+
+    [JsonPropertyName("activeUsers")]
+    public long ActiveUsers { get; init; }
+
+    [JsonPropertyName("screenPageViews")]
+    public long ScreenPageViews { get; init; }
+}
+
+/// <summary>Chỉ số realtime GA4 trong 30 phút qua phục vụ widget dashboard.</summary>
+public record Ga4RealtimeDto
+{
+    [JsonPropertyName("activeUsers")]
+    public long ActiveUsers { get; init; }
+
+    [JsonPropertyName("screenPageViews")]
+    public long ScreenPageViews { get; init; }
+
+    /// <summary>Người dùng hoạt động theo từng phút trong 30 phút qua.</summary>
+    [JsonPropertyName("byMinute")]
+    public IReadOnlyList<Ga4RealtimeRowDto> ByMinute { get; init; } = [];
+
+    /// <summary>Thành phần truy cập theo nguồn traffic (sessionSource).</summary>
+    [JsonPropertyName("bySource")]
+    public IReadOnlyList<Ga4RealtimeRowDto> BySource { get; init; } = [];
+
+    /// <summary>Phân rã theo loại thiết bị.</summary>
+    [JsonPropertyName("byDevice")]
+    public IReadOnlyList<Ga4RealtimeRowDto> ByDevice { get; init; } = [];
+
+    [JsonPropertyName("retrievedAt")]
+    public string RetrievedAt { get; init; } = string.Empty;
+}
+
 /// <summary>Yêu cầu chạy report tổng quát lên Google Analytics Data API.</summary>
 public record Ga4ReportRequest
 {

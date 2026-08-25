@@ -183,6 +183,85 @@ public class GoogleAnalyticsController(
         return HandleResult(result);
     }
 
+    /// <summary>Top trang theo TIÊU ĐỀ trang — phục vụ widget "Số lần xem theo Tiêu đề trang".</summary>
+    [HttpGet("pages/titles")]
+    [Authorize]
+    [HasPermission(Permissions.Admin.DashboardManagement.View)]
+    [SwaggerOperation(Summary = "Top trang GA4 theo tiêu đề (pageTitle) theo lượt xem")]
+    public async Task<IActionResult> GetTopPageTitles(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        [FromQuery] int limit = 10,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ga4AnalyticsService.IsConfigured())
+        {
+            return Ok(new Ga4ReportDto<Ga4DimensionRowDto>());
+        }
+
+        var (start, end) = ResolveRange(from, to);
+        var result = await ga4AnalyticsService.GetTopPageTitlesAsync(start, end, Math.Clamp(limit, 1, 25), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>Phân rã người dùng theo hệ điều hành.</summary>
+    [HttpGet("operating-systems")]
+    [Authorize]
+    [HasPermission(Permissions.Admin.DashboardManagement.View)]
+    [SwaggerOperation(Summary = "Phân rã truy cập GA4 theo hệ điều hành (Windows, Android, iOS...)")]
+    public async Task<IActionResult> GetOperatingSystemBreakdown(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        CancellationToken cancellationToken)
+    {
+        if (!ga4AnalyticsService.IsConfigured())
+        {
+            return Ok(new Ga4ReportDto<Ga4DimensionRowDto>());
+        }
+
+        var (start, end) = ResolveRange(from, to);
+        var result = await ga4AnalyticsService.GetOperatingSystemBreakdownAsync(start, end, cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>Phân rã người dùng theo trình duyệt.</summary>
+    [HttpGet("browsers")]
+    [Authorize]
+    [HasPermission(Permissions.Admin.DashboardManagement.View)]
+    [SwaggerOperation(Summary = "Phân rã truy cập GA4 theo trình duyệt (Chrome, Safari...)")]
+    public async Task<IActionResult> GetBrowserBreakdown(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        CancellationToken cancellationToken)
+    {
+        if (!ga4AnalyticsService.IsConfigured())
+        {
+            return Ok(new Ga4ReportDto<Ga4DimensionRowDto>());
+        }
+
+        var (start, end) = ResolveRange(from, to);
+        var result = await ga4AnalyticsService.GetBrowserBreakdownAsync(start, end, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>Chỉ số realtime 30 phút qua: người dùng hoạt động, lượt xem, nguồn traffic, thiết bị.</summary>
+    [HttpGet("realtime")]
+    [Authorize]
+    [HasPermission(Permissions.Admin.DashboardManagement.View)]
+    [SwaggerOperation(Summary = "Chỉ số realtime GA4 trong 30 phút qua (người dùng, lượt xem, nguồn, thiết bị)")]
+    public async Task<IActionResult> GetRealtime(CancellationToken cancellationToken)
+    {
+        if (!ga4AnalyticsService.IsConfigured())
+        {
+            return Ok(new Ga4RealtimeDto());
+        }
+
+        var result = await ga4AnalyticsService.GetRealtimeAsync(cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
     private (DateOnly Start, DateOnly End) ResolveRange(DateOnly? from, DateOnly? to)
     {
         var today = DateOnly.FromDateTime(dateProvider.VietnamNow.DateTime);

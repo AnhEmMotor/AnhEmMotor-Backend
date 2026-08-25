@@ -23,6 +23,8 @@ public interface IProductViewRepository
         string? searchKeyword,
         int pageNumber,
         int pageSize,
+        DateTimeOffset? from,
+        DateTimeOffset? to,
         CancellationToken cancellationToken);
 
     public Task<List<ProductViewHistoryDto>> GetProductViewHistoryForChatAsync(

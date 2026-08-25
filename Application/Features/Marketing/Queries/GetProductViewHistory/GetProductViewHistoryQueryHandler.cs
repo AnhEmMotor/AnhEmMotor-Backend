@@ -10,9 +10,11 @@ public class GetProductViewHistoryQueryHandler(IProductViewRepository repository
     public async Task<Result<PagedResult<ProductViewHistoryResponse>>> Handle(GetProductViewHistoryQuery request, CancellationToken cancellationToken)
     {
         var (entities, totalCount) = await repository.GetProductViewHistoryPagedAsync(
-            request.SearchKeyword, 
-            request.PageNumber, 
-            request.PageSize, 
+            request.SearchKeyword,
+            request.PageNumber,
+            request.PageSize,
+            request.From,
+            request.To,
             cancellationToken);
 
         var items = entities.Select(pv => ProductViewHistoryResponse.FromEntity(pv)).ToList();

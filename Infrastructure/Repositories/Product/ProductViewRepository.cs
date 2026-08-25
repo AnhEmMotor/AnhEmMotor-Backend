@@ -56,6 +56,8 @@ public class ProductViewRepository(ApplicationDBContext context) : IProductViewR
         string? searchKeyword,
         int pageNumber,
         int pageSize,
+        DateTimeOffset? from,
+        DateTimeOffset? to,
         CancellationToken cancellationToken)
     {
         var query = context.ProductViews
@@ -66,6 +68,16 @@ public class ProductViewRepository(ApplicationDBContext context) : IProductViewR
             .Include(pv => pv.Variant)
             .Include(pv => pv.VariantColor)
             .AsNoTracking();
+
+        if (from.HasValue)
+        {
+            query = query.Where(pv => pv.ViewedAt >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(pv => pv.ViewedAt <= to.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(searchKeyword))
         {

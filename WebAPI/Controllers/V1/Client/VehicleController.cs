@@ -1,4 +1,6 @@
+using Application.ApiContracts.Vehicle.Requests;
 using Application.ApiContracts.Vehicle.Responses;
+using Application.Features.Client.Vehicles.Commands.RegisterCustomerVehicle;
 using Application.Features.Client.Vehicles.Queries;
 using Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail;
 using Application.Features.Client.Vehicles.Queries.GetCustomerVehicleHistory;
@@ -92,10 +94,36 @@ public class VehicleController(IMediator mediator) : ControllerBase
     /// Đăng ký xe mới cho khách hàng.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> RegisterVehicle([FromBody] object request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(VehicleResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> RegisterVehicle(
+        [FromBody] RegisterCustomerVehicleRequest request,
+        CancellationToken cancellationToken)
     {
-        // TODO: Implement actual logic
-        return Ok(new { message = "Vehicle registered successfully (mock)" });
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+            User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+            User.FindFirst("sub")?.Value ??
+            User.Identity?.Name ??
+            string.Empty;
+        if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier" });
+        }
+        var result = await mediator.Send(
+            new RegisterCustomerVehicleCommand
+            {
+                UserId = userId,
+                LicensePlate = request.LicensePlate?.Trim() ?? string.Empty,
+                VinNumber = request.Vin?.Trim() ?? string.Empty,
+                EngineNumber = request.EngineNumber?.Trim() ?? string.Empty,
+                CurrentOdo = request.CurrentOdo,
+            },
+            cancellationToken);
+        if (!result.IsSuccess)
+        {
+            var error = result.Errors?.FirstOrDefault() ?? result.Error;
+            return BadRequest(new { message = error?.Message ?? "Đăng ký xe thất bại" });
+        }
+        return Ok(result);
     }
 
     /// <summary>
