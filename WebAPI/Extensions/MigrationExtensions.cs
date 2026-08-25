@@ -65,5 +65,6 @@ public static class MigrationExtensions
         await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
+        await ReturnRequestSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
     }
 }
