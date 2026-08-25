@@ -337,6 +337,85 @@ public class SalesOrder
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
     }
 
+    [Fact(DisplayName = "SO_007A - UpdateOutputStatus không chặn bước xác nhận khi sản phẩm hết tồn kho")]
+    public async Task UpdateOutputStatus_NonFulfillmentTransition_ShouldSkipInventoryCheck()
+    {
+        var existingOutput = new Output
+        {
+            Id = 1,
+            StatusId = OrderStatus.Pending,
+            OutputInfos = [new OutputInfo { ProductVariantId = 100, Count = 5 }]
+        };
+        _readRepoMock.Setup(
+            x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        _readRepoMock.Setup(
+            x => x.GetStockQuantityByVariantIdAsync(100, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateOutputStatusCommand
+            {
+                Id = 1,
+                StatusId = OrderStatus.ConfirmedCod,
+                CurrentUserId = Guid.NewGuid()
+            },
+            CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        existingOutput.StatusId.Should().Be(OrderStatus.ConfirmedCod);
+        _readRepoMock.Verify(
+            x => x.GetStockQuantityByVariantIdAsync(
+                It.IsAny<int>(),
+                It.IsAny<int?>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+        _updateRepoMock.Verify(
+            x => x.HandleInventoryTransactionAsync(
+                It.IsAny<int>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact(DisplayName = "SO_007B - UpdateOutputStatus vẫn kiểm tồn kho khi chuyển sang chờ lấy hàng")]
+    public async Task UpdateOutputStatus_ToWaitingPickup_ShouldCheckInventory()
+    {
+        var existingOutput = new Output
+        {
+            Id = 1,
+            StatusId = OrderStatus.ConfirmedCod,
+            OutputInfos = []
+        };
+        _readRepoMock.Setup(
+            x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateOutputStatusCommand
+            {
+                Id = 1,
+                StatusId = OrderStatus.WaitingPickup,
+                CurrentUserId = Guid.NewGuid()
+            },
+            CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        _updateRepoMock.Verify(
+            x => x.HandleInventoryTransactionAsync(1, false, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
     [Fact(DisplayName = "SO_008 - UpdateOutputStatus từ ConfirmedCod -> Delivering")]
     public async Task UpdateOutputStatus_ConfirmedCodToDelivering_ShouldSucceed()
     {
@@ -874,6 +953,40 @@ public class SalesOrder
             .ReturnsAsync(existingOutputs);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingOutputs.Should().AllSatisfy(x => x.StatusId.Should().Be("confirmed_cod"));
+    }
+
+    [Fact(DisplayName = "SO_026A - UpdateManyOutputStatus kiểm tồn kho khi chuyển sang chờ lấy hàng")]
+    public async Task UpdateManyOutputStatus_ToWaitingPickup_ShouldCheckInventory()
+    {
+        var existingOutputs = new List<Output>
+        {
+            new() { Id = 1, StatusId = OrderStatus.ConfirmedCod, OutputInfos = [] },
+            new() { Id = 2, StatusId = OrderStatus.ConfirmedCod, OutputInfos = [] }
+        };
+        _readRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutputs);
+        var handler = new UpdateManyOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateManyOutputStatusCommand
+            {
+                Ids = [1, 2],
+                StatusId = OrderStatus.WaitingPickup
+            },
+            CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        _updateRepoMock.Verify(
+            x => x.HandleInventoryTransactionAsync(
+                It.IsAny<int>(),
+                false,
+                It.IsAny<CancellationToken>()),
+            Times.Exactly(2));
     }
 
     [Fact(DisplayName = "SO_027 - GetOutputById trả về đơn hàng")]

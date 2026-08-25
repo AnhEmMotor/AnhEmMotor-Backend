@@ -31,4 +31,16 @@ public interface IGa4AnalyticsService
 
     /// <summary>Phân rã theo loại thiết bị.</summary>
     public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetDeviceBreakdownAsync(DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken);
+
+    /// <summary>Top trang theo TIÊU ĐỀ trang (pageTitle) theo lượt xem.</summary>
+    public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetTopPageTitlesAsync(DateOnly startDate, DateOnly endDate, int limit, CancellationToken cancellationToken);
+
+    /// <summary>Phân rã người dùng theo hệ điều hành (operatingSystem).</summary>
+    public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetOperatingSystemBreakdownAsync(DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken);
+
+    /// <summary>Phân rã người dùng theo trình duyệt (browser).</summary>
+    public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetBrowserBreakdownAsync(DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken);
+
+    /// <summary>Chỉ số realtime 30 phút qua: người dùng hoạt động, lượt xem, nguồn traffic, thiết bị.</summary>
+    public Task<Result<Ga4RealtimeDto>> GetRealtimeAsync(CancellationToken cancellationToken);
 }

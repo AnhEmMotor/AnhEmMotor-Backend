@@ -78,8 +78,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
                     s.DeliveredAt == null &&
                     s.Type == ShipmentType.OrderDelivery &&
                     s.TrackingNumber != null &&
-                    s.TrackingNumber != string.Empty &&
-                    s.OutputId != null)
+                    s.TrackingNumber != string.Empty)
             .Where(s => !s.TrackingNumber.StartsWith("GHN-"))
             .OrderByDescending(s => s.CreatedAt)
             .Take(50)

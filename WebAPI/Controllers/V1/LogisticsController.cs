@@ -111,7 +111,7 @@ public class LogisticsController(IMediator mediator) : ControllerBase
             return BadRequest(new { message = "Vui lòng nhập mã vận đơn, mã đơn hàng hoặc số điện thoại khách hàng" });
         var query = new GetShipmentTrackingQuery { TrackingNumberOrPhone = search.Trim() };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
-        if (result == null)
+        if (result.OrderId == 0)
             return NotFound(new { message = "Không tìm thấy thông tin vận chuyển" });
         return Ok(result);
     }

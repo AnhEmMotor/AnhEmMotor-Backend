@@ -27,6 +27,10 @@ public class Ga4AnalyticsService(
     private const string ReadOnlyScope = "https://www.googleapis.com/auth/analytics.readonly";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
+    // Realtime cần dữ liệu "sống" — chỉ cache 60s để dashboard tự làm mới mỗi phút không tốn quota.
+    private static readonly TimeSpan RealtimeCacheDuration = TimeSpan.FromSeconds(60);
+    private const int RealtimeWindowMinutes = 30;
+
     private static readonly string[] MetricNames =
     [
         "sessions",
@@ -38,6 +42,9 @@ public class Ga4AnalyticsService(
         "averageSessionDuration",
         "keyEvents"
     ];
+
+    // Realtime API chỉ hỗ trợ tập metric hẹp hơn runReport thường.
+    private static readonly string[] RealtimeMetricNames = ["activeUsers", "screenPageViews"];
 
     private static readonly JsonSerializerOptions PayloadOptions = new(JsonSerializerDefaults.Web);
 
@@ -73,7 +80,7 @@ public class Ga4AnalyticsService(
         }
 
         var payload = BuildPayload(request.StartDate, request.EndDate, dimension, request.Limit);
-        var response = await PostRunReportAsync(payload, cancellationToken).ConfigureAwait(false);
+        var response = await PostGa4Async("runReport", payload, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccess)
         {
             return Result<Ga4ReportDto<Ga4DimensionRowDto>>.Failure(response.Error!);
@@ -152,6 +159,194 @@ public class Ga4AnalyticsService(
         new Ga4ReportRequest { StartDate = startDate, EndDate = endDate, Dimension = "deviceCategory", Limit = 10 },
         cancellationToken);
 
+    public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetTopPageTitlesAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        int limit,
+        CancellationToken cancellationToken) => RunReportAsync(
+        new Ga4ReportRequest { StartDate = startDate, EndDate = endDate, Dimension = "pageTitle", Limit = limit },
+        cancellationToken);
+
+    public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetOperatingSystemBreakdownAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken) => RunReportAsync(
+        new Ga4ReportRequest { StartDate = startDate, EndDate = endDate, Dimension = "operatingSystem", Limit = 10 },
+        cancellationToken);
+
+    public Task<Result<Ga4ReportDto<Ga4DimensionRowDto>>> GetBrowserBreakdownAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken) => RunReportAsync(
+        new Ga4ReportRequest { StartDate = startDate, EndDate = endDate, Dimension = "browser", Limit = 10 },
+        cancellationToken);
+
+    /// <summary>
+    /// Chỉ số realtime 30 phút qua qua endpoint runRealtimeReport: tổng người dùng/lượt xem,
+    /// chuỗi theo phút, thành phần truy cập theo nguồn và phân rã thiết bị. Cache 60 giây.
+    /// </summary>
+    public async Task<Result<Ga4RealtimeDto>> GetRealtimeAsync(CancellationToken cancellationToken)
+    {
+        if (!IsConfigured())
+        {
+            return Result<Ga4RealtimeDto>.Failure("Google Analytics 4 chưa được cấu hình trên server.");
+        }
+
+        var cacheKey = $"ga4-realtime:{Options.PropertyId}";
+        if (cache.TryGetValue(cacheKey, out Ga4RealtimeDto? cached) && cached is not null)
+        {
+            return Result<Ga4RealtimeDto>.Success(cached);
+        }
+
+        var minuteRanges = new object[]
+        {
+            new Dictionary<string, int>
+            {
+                // 0-29 phút trước == cửa sổ 30 phút đầy đủ (endMinutesAgo=0 là phút hiện tại).
+                ["startMinutesAgo"] = RealtimeWindowMinutes - 1,
+                ["endMinutesAgo"] = 0
+            }
+        };
+
+        var minutesTask = PostGa4Async(
+            "runRealtimeReport",
+            BuildRealtimePayload("minutesAgo", minuteRanges),
+            cancellationToken);
+        var deviceTask = PostGa4Async(
+            "runRealtimeReport",
+            BuildRealtimePayload("deviceCategory", minuteRanges),
+            cancellationToken);
+        var sourceTask = PostGa4Async(
+            "runRealtimeReport",
+            BuildRealtimePayload("city", minuteRanges),
+            cancellationToken);
+
+        await Task.WhenAll(minutesTask, deviceTask, sourceTask).ConfigureAwait(false);
+
+        // Chuỗi theo phút là bắt buộc — lỗi thì báo failure để client hiển thị "chưa có dữ liệu".
+        if (minutesTask.Result.IsFailure)
+        {
+            return Result<Ga4RealtimeDto>.Failure(minutesTask.Result.Error!);
+        }
+
+        var minuteRows = ParseRealtimeRows(minutesTask.Result.Value.RootElement);
+        // minutesAgo là số (0..29) — sort theo số, tránh "10" đứng trước "2" khi so chuỗi.
+        minuteRows.Sort((a, b) =>
+        {
+            var parseA = long.TryParse(a.Label, out var labelA);
+            var parseB = long.TryParse(b.Label, out var labelB);
+            return parseA && parseB ? labelA.CompareTo(labelB) : string.CompareOrdinal(a.Label, b.Label);
+        });
+
+        // Tổng cả cửa sổ 30 phút: ưu tiên khối "totals" GA4 trả kèm; thiếu thì cộng từ phân rã thiết bị.
+        var totals = ParseRealtimeTotals(minutesTask.Result.Value.RootElement);
+        var deviceRows = deviceTask.Result.IsSuccess ? ParseRealtimeRows(deviceTask.Result.Value.RootElement) : [];
+        var sourceRows = sourceTask.Result.IsSuccess ? ParseRealtimeRows(sourceTask.Result.Value.RootElement) : [];
+
+        if (totals is null)
+        {
+            var baseRows = (IReadOnlyList<Ga4RealtimeRowDto>)deviceRows;
+            if (baseRows.Count == 0)
+            {
+                baseRows = sourceRows.Count > 0 ? sourceRows : minuteRows;
+            }
+
+            totals = (baseRows.Sum(r => r.ActiveUsers), baseRows.Sum(r => r.ScreenPageViews));
+        }
+
+        if (!deviceTask.Result.IsSuccess)
+        {
+            logger.LogWarning("GA4 realtime: lấy phân rã thiết bị thất bại — {Error}", deviceTask.Result.Error);
+        }
+
+        if (!sourceTask.Result.IsSuccess)
+        {
+            logger.LogWarning("GA4 realtime: lấy thành phần truy cập thất bại — {Error}", sourceTask.Result.Error);
+        }
+
+        deviceRows.Sort((a, b) => b.ActiveUsers.CompareTo(a.ActiveUsers));
+        sourceRows.Sort((a, b) => b.ActiveUsers.CompareTo(a.ActiveUsers));
+
+        var dto = new Ga4RealtimeDto
+        {
+            ActiveUsers = totals.Value.activeUsers,
+            ScreenPageViews = totals.Value.screenPageViews,
+            ByMinute = minuteRows,
+            BySource = sourceRows,
+            ByDevice = deviceRows,
+            RetrievedAt = DateTime.UtcNow.ToString("O")
+        };
+        cache.Set(cacheKey, dto, RealtimeCacheDuration);
+        return Result<Ga4RealtimeDto>.Success(dto);
+    }
+
+    /// <summary>Payload cho runRealtimeReport — metric hẹp + cửa sổ minuteRanges 30 phút.</summary>
+    internal static Dictionary<string, object> BuildRealtimePayload(
+        string? dimension,
+        object[] minuteRanges)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["metrics"] = RealtimeMetricNames.Select(name => new Dictionary<string, string> { ["name"] = name }).ToArray(),
+            ["minuteRanges"] = minuteRanges,
+            ["limit"] = 100
+        };
+
+        if (dimension is not null)
+        {
+            payload["dimensions"] = new[] { new Dictionary<string, string> { ["name"] = dimension } };
+        }
+
+        return payload;
+    }
+
+    private static List<Ga4RealtimeRowDto> ParseRealtimeRows(JsonElement root)
+    {
+        var result = new List<Ga4RealtimeRowDto>();
+        if (!root.TryGetProperty("rows", out var rows) || rows.ValueKind != JsonValueKind.Array)
+        {
+            return result;
+        }
+
+        foreach (var row in rows.EnumerateArray())
+        {
+            var label = row.TryGetProperty("dimensionValues", out var dv) &&
+                dv.ValueKind == JsonValueKind.Array &&
+                dv.GetArrayLength() > 0
+                ? dv[0].GetProperty("value").GetString() ?? string.Empty
+                : string.Empty;
+            var metrics = row.TryGetProperty("metricValues", out var mv) && mv.ValueKind == JsonValueKind.Array
+                ? mv.EnumerateArray().Select(m => m.GetProperty("value").GetString() ?? "0").ToArray()
+                : [];
+
+            result.Add(new Ga4RealtimeRowDto
+            {
+                Label = label,
+                ActiveUsers = ParseLong(metrics, 0),
+                ScreenPageViews = ParseLong(metrics, 1)
+            });
+        }
+
+        return result;
+    }
+
+    /// <summary>Đọc khối "totals" của response realtime (tổng trên toàn bộ minuteRanges).</summary>
+    private static (long activeUsers, long screenPageViews)? ParseRealtimeTotals(JsonElement root)
+    {
+        if (!root.TryGetProperty("totals", out var totals) ||
+            totals.ValueKind != JsonValueKind.Array ||
+            totals.GetArrayLength() == 0)
+        {
+            return null;
+        }
+
+        var metrics = totals[0].TryGetProperty("metricValues", out var mv) && mv.ValueKind == JsonValueKind.Array
+            ? mv.EnumerateArray().Select(m => m.GetProperty("value").GetString() ?? "0").ToArray()
+            : [];
+
+        return (ParseLong(metrics, 0), ParseLong(metrics, 1));
+    }
+
     internal static Dictionary<string, object> BuildPayload(
         DateOnly startDate,
         DateOnly endDate,
@@ -193,7 +388,11 @@ public class Ga4AnalyticsService(
         return payload;
     }
 
-    private async Task<Result<JsonDocument>> PostRunReportAsync(
+    /// <summary>
+    /// POST một payload lên GA4 Data API (method: "runReport" hoặc "runRealtimeReport") và trả JsonDocument.
+    /// </summary>
+    private async Task<Result<JsonDocument>> PostGa4Async(
+        string methodName,
         Dictionary<string, object> payload,
         CancellationToken cancellationToken)
     {
@@ -204,7 +403,7 @@ public class Ga4AnalyticsService(
             var client = httpClientFactory.CreateClient("Ga4Analytics");
             using var httpRequest = new HttpRequestMessage(
                 HttpMethod.Post,
-                $"{DataApiBaseUrl}/properties/{Options.PropertyId}:runReport")
+                $"{DataApiBaseUrl}/properties/{Options.PropertyId}:{methodName}")
             {
                 Content = new StringContent(JsonSerializer.Serialize(payload, PayloadOptions), Encoding.UTF8, "application/json")
             };
@@ -215,7 +414,8 @@ public class Ga4AnalyticsService(
             if (!httpResponse.IsSuccessStatusCode)
             {
                 logger.LogError(
-                    "GA4 runReport thất bại ({StatusCode}): {Body}",
+                    "GA4 {Method} thất bại ({StatusCode}): {Body}",
+                    methodName,
                     (int)httpResponse.StatusCode,
                     raw);
                 var reason = ExtractGoogleErrorMessage(raw);

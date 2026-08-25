@@ -910,9 +910,13 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         int months,
         CancellationToken cancellationToken)
     {
-        var currentMonth = new DateOnly(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, 1);
+        var vietnamOffset = TimeSpan.FromHours(7);
+        var now = DateTimeOffset.UtcNow.ToOffset(vietnamOffset);
+        var currentMonth = new DateOnly(now.Year, now.Month, 1);
         var startMonth = currentMonth.AddMonths(-(months - 1));
-        var startDateTimeOffset = new DateTimeOffset(startMonth.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var startDateTimeOffset = new DateTimeOffset(
+            startMonth.ToDateTime(TimeOnly.MinValue),
+            vietnamOffset);
         var monthSeries = Enumerable.Range(0, months).Select(i => startMonth.AddMonths(i)).ToList();
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
@@ -932,8 +936,13 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        var revenueData = rawData
-            .GroupBy(x => new DateOnly(x.CreatedAt.DateTime.Year, x.CreatedAt.DateTime.Month, 1))
+        var orderRevenueData = rawData
+            .GroupBy(
+                x =>
+                {
+                    var localDate = x.CreatedAt.ToOffset(vietnamOffset);
+                    return new DateOnly(localDate.Year, localDate.Month, 1);
+                })
             .Select(
                 g => new
                 {
@@ -941,6 +950,95 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     Revenue = g.Sum(x => x.Price * x.Count),
                     Profit = g.Sum(x => (x.Price - x.CostPrice) * x.Count),
                     HasZeroCostPrice = g.Any(x => x.CostPrice == 0)
+                })
+            .ToList();
+
+        var invoiceQueryStart = startMonth.ToDateTime(TimeOnly.MinValue).AddDays(-1);
+        var invoiceRows = await context.Invoices
+            .Where(
+                i => string.Compare(i.Status, OrderStatus.Completed) == 0 &&
+                    (i.ProcessedAt ?? i.IssueDate) >= invoiceQueryStart)
+            .Select(
+                i => new
+                {
+                    i.IssueDate,
+                    i.ProcessedAt,
+                    i.TotalAmount,
+                    i.VehiclePrice,
+                    i.ChassisNo,
+                    i.EngineNo
+                })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var chassisNumbers = invoiceRows
+            .Select(i => i.ChassisNo)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct()
+            .ToList();
+        var engineNumbers = invoiceRows
+            .Select(i => i.EngineNo)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct()
+            .ToList();
+        var invoiceVehicles = await context.Vehicles
+            .Where(v => chassisNumbers.Contains(v.VinNumber) || engineNumbers.Contains(v.EngineNumber))
+            .Select(v => new { v.VinNumber, v.EngineNumber, v.ImportPrice })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var importPriceByIdentifier = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+        foreach (var vehicle in invoiceVehicles)
+        {
+            if (!string.IsNullOrWhiteSpace(vehicle.VinNumber))
+                importPriceByIdentifier.TryAdd(vehicle.VinNumber, vehicle.ImportPrice);
+            if (!string.IsNullOrWhiteSpace(vehicle.EngineNumber))
+                importPriceByIdentifier.TryAdd(vehicle.EngineNumber, vehicle.ImportPrice);
+        }
+        var invoiceRevenueData = invoiceRows
+            .Select(
+                invoice =>
+                {
+                    var recognizedAt = invoice.ProcessedAt ?? invoice.IssueDate;
+                    if (recognizedAt.Kind == DateTimeKind.Utc)
+                    {
+                        recognizedAt = new DateTimeOffset(recognizedAt, TimeSpan.Zero)
+                            .ToOffset(vietnamOffset)
+                            .DateTime;
+                    }
+                    var month = new DateOnly(recognizedAt.Year, recognizedAt.Month, 1);
+                    var importPrice = 0m;
+                    if (!string.IsNullOrWhiteSpace(invoice.ChassisNo))
+                        importPriceByIdentifier.TryGetValue(invoice.ChassisNo, out importPrice);
+                    if (importPrice <= 0 && !string.IsNullOrWhiteSpace(invoice.EngineNo))
+                        importPriceByIdentifier.TryGetValue(invoice.EngineNo, out importPrice);
+                    return new
+                    {
+                        Month = month,
+                        Revenue = invoice.TotalAmount,
+                        Profit = importPrice > 0 ? Math.Max(0, invoice.VehiclePrice - importPrice) : 0,
+                        HasZeroCostPrice = invoice.VehiclePrice > 0 && importPrice <= 0
+                    };
+                })
+            .Where(row => row.Month >= startMonth)
+            .GroupBy(row => row.Month)
+            .Select(
+                g => new
+                {
+                    Month = g.Key,
+                    Revenue = g.Sum(x => x.Revenue),
+                    Profit = g.Sum(x => x.Profit),
+                    HasZeroCostPrice = g.Any(x => x.HasZeroCostPrice)
+                })
+            .ToList();
+        var revenueData = orderRevenueData
+            .Concat(invoiceRevenueData)
+            .GroupBy(row => row.Month)
+            .Select(
+                g => new
+                {
+                    Month = g.Key,
+                    Revenue = g.Sum(x => x.Revenue),
+                    Profit = g.Sum(x => x.Profit),
+                    HasZeroCostPrice = g.Any(x => x.HasZeroCostPrice)
                 })
             .ToList();
         return monthSeries.Select(
@@ -1543,15 +1641,19 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         DateTimeOffset end,
         CancellationToken cancellationToken)
     {
+        var endAdjusted = end.Hour == 0 && end.Minute == 0 && end.Second == 0
+            ? end.Date.AddDays(1).AddTicks(-1)
+            : end;
         var data = await context.OutputInfos
             .IgnoreQueryFilters()
             .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => x.o.CreatedAt >= start &&
-                    x.o.CreatedAt <= end &&
-                    (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+                    x.o.CreatedAt <= endAdjusted &&
+                    x.o.DeletedAt == null &&
+                    x.oi.DeletedAt == null &&
+                    x.o.StatusId != null &&
+                    x.o.StatusId.ToLower() == OrderStatus.Completed)
             .Select(
                 x => new
                 {
@@ -1583,7 +1685,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         DateTimeOffset end,
         CancellationToken cancellationToken)
     {
-        var days = (end - start).Days;
+        var endAdjusted = end.Hour == 0 && end.Minute == 0 && end.Second == 0
+            ? end.Date.AddDays(1).AddTicks(-1)
+            : end;
+        var days = (endAdjusted - start).Days;
         if (days <= 0)
             days = 1;
         var startDate = DateOnly.FromDateTime(start.DateTime);
@@ -1593,10 +1698,11 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Where(
                 x => x.o.CreatedAt != null &&
                     x.o.CreatedAt >= start &&
-                    x.o.CreatedAt <= end &&
-                    (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+                    x.o.CreatedAt <= endAdjusted &&
+                    x.o.DeletedAt == null &&
+                    x.oi.DeletedAt == null &&
+                    x.o.StatusId != null &&
+                    x.o.StatusId.ToLower() == OrderStatus.Completed)
             .Select(
                 x => new
                 {
@@ -1764,33 +1870,37 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
     private static (DateTimeOffset Start, DateTimeOffset End) KpiRange(string period)
     {
-        var now = DateTimeOffset.UtcNow;
+        var vietnamOffset = TimeSpan.FromHours(7);
+        var now = DateTimeOffset.UtcNow.ToOffset(vietnamOffset);
         var p = period.ToLower();
         if (p == "today")
-            return (now.Date, now.Date.AddDays(1).AddTicks(-1));
+            return (new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, vietnamOffset), now);
         if (p == "week")
         {
             var d = (int)now.DayOfWeek;
-            var mon = now.Date.AddDays(d == 0 ? -6 : 1 - d);
-            return (mon, mon.AddDays(7).AddTicks(-1));
+            var today = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, vietnamOffset);
+            var mon = today.AddDays(d == 0 ? -6 : 1 - d);
+            return (mon, now);
         }
         if (p == "year")
-            return (new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero),
-			         new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero));
-        return (new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero),
-		        new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero).AddMonths(1).AddTicks(-1));
+            return (new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, vietnamOffset),
+                now);
+        return (new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, vietnamOffset), now);
     }
 
     private static (DateTimeOffset Start, DateTimeOffset End) KpiPrev(string period, DateTimeOffset s, DateTimeOffset e)
     {
         var p = period.ToLower();
-        return p switch
-        {
-            "today" => (s.AddDays(-1), e.AddDays(-1)),
-            "week" => (s.AddDays(-7), e.AddDays(-7)),
-            "year" => (s.AddYears(-1), e.AddYears(-1)),
-            _ => (s.AddMonths(-1), e.AddMonths(-1))
-        };
+        if (p == "today")
+            return (s.AddDays(-1), e.AddDays(-1));
+        if (p == "week")
+            return (s.AddDays(-7), e.AddDays(-7));
+        if (p == "year")
+            return (s.AddYears(-1), e.AddYears(-1));
+        var previousStart = s.AddMonths(-1);
+        var previousEnd = previousStart.Add(e - s);
+        var previousMonthEnd = s.AddTicks(-1);
+        return (previousStart, previousEnd < previousMonthEnd ? previousEnd : previousMonthEnd);
     }
 
     private static double Pct(int c, int pv) => pv > 0 ? Math.Round((double)(c - pv) / pv * 100, 1) : 0;

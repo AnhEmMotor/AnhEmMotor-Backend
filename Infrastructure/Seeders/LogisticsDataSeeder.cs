@@ -17,8 +17,6 @@ public static class LogisticsDataSeeder
             .ConfigureAwait(false);
         if (parcels.Count == 0)
         {
-            if (await context.Shipments.AnyAsync(cancellationToken).ConfigureAwait(false))
-                return;
             parcels = new List<ParcelDeliveryOrder>
             {
             new()
