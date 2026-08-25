@@ -119,7 +119,7 @@ public record Ga4RealtimeDto
     [JsonPropertyName("byMinute")]
     public IReadOnlyList<Ga4RealtimeRowDto> ByMinute { get; init; } = [];
 
-    /// <summary>Thành phần truy cập theo nguồn traffic (sessionSource).</summary>
+    /// <summary>Thành phần truy cập theo thành phố (city).</summary>
     [JsonPropertyName("bySource")]
     public IReadOnlyList<Ga4RealtimeRowDto> BySource { get; init; } = [];
 
