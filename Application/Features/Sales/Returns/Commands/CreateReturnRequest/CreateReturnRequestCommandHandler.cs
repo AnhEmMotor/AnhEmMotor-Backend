@@ -2,6 +2,7 @@ using Application.ApiContracts.Sales.Returns.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.ReturnRequest;
 using Domain.Entities;
 using MediatR;
@@ -13,15 +14,18 @@ public class CreateReturnRequestCommandHandler : IRequestHandler<CreateReturnReq
 {
     private readonly IReturnRequestWriteRepository _returnRequestRepository;
     private readonly IOutputReadRepository _outputRepository;
+    private readonly IProductVariantReadRepository _productVariantReadRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateReturnRequestCommandHandler(
         IReturnRequestWriteRepository returnRequestRepository,
         IOutputReadRepository outputRepository,
+        IProductVariantReadRepository productVariantReadRepository,
         IUnitOfWork unitOfWork)
     {
         _returnRequestRepository = returnRequestRepository;
         _outputRepository = outputRepository;
+        _productVariantReadRepository = productVariantReadRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -44,7 +48,38 @@ public class CreateReturnRequestCommandHandler : IRequestHandler<CreateReturnReq
             return Result<ReturnRequestResponse>.Failure("Chỉ áp dụng cho đơn hàng online.");
         }
 
-        var evidenceImagesJson = "[]"; 
+        var evidenceImagesJson = "[]";
+
+        if (request.Items == null || request.Items.Count == 0)
+        {
+            return Result<ReturnRequestResponse>.Failure("Vui lòng chọn ít nhất một mặt hàng cần hoàn.");
+        }
+
+        var variantIds = request.Items
+            .Where(i => i.VariantId.HasValue && i.VariantId.Value > 0)
+            .Select(i => i.VariantId!.Value)
+            .Distinct()
+            .ToList();
+
+        var variantMap = variantIds.Count > 0
+            ? (await _productVariantReadRepository.GetByIdAsync(variantIds, cancellationToken))
+                .ToDictionary(v => v.Id)
+            : new Dictionary<int, ProductVariant>();
+
+        foreach (var item in request.Items)
+        {
+            var productId = item.ProductId;
+            if (item.VariantId.HasValue && variantMap.TryGetValue(item.VariantId.Value, out var variant))
+            {
+                productId = variant.ProductId;
+            }
+
+            if (productId <= 0)
+            {
+                return Result<ReturnRequestResponse>.Failure(
+                    "Mặt hàng hoàn không hợp lệ: không xác định được sản phẩm từ biến thể.");
+            }
+        }
 
         var returnRequest = new ReturnRequest
         {
@@ -58,14 +93,23 @@ public class CreateReturnRequestCommandHandler : IRequestHandler<CreateReturnReq
             Reason = request.Reason,
             Status = "processing",
             EvidenceImagesJson = evidenceImagesJson,
-            Items = request.Items.Select(i => new ReturnRequestItem
+            Items = request.Items.Select(i =>
             {
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                Quantity = i.Quantity,
-                ReturnQuantity = i.Quantity,
-                UnitPrice = i.UnitPrice,
-                Sku = "",
+                var productId = i.ProductId;
+                if (i.VariantId.HasValue && variantMap.TryGetValue(i.VariantId.Value, out var variant))
+                {
+                    productId = variant.ProductId;
+                }
+
+                return new ReturnRequestItem
+                {
+                    ProductId = productId,
+                    ProductName = i.ProductName,
+                    Quantity = i.Quantity,
+                    ReturnQuantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    Sku = "",
+                };
             }).ToList()
         };
 

@@ -218,7 +218,7 @@ public class Ga4AnalyticsService(
             cancellationToken);
         var sourceTask = PostGa4Async(
             "runRealtimeReport",
-            BuildRealtimePayload("city", minuteRanges),
+            BuildRealtimePayload("sessionSource", minuteRanges),
             cancellationToken);
 
         await Task.WhenAll(minutesTask, deviceTask, sourceTask).ConfigureAwait(false);

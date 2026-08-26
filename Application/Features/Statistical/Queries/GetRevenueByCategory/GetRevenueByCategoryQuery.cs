@@ -13,8 +13,16 @@ public class GetRevenueByCategoryQueryHandler(IStatisticalReadRepository repo) :
         GetRevenueByCategoryQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repo.GetRevenueByCategoryAsync(request.Start, request.End, cancellationToken)
+        var result = await repo.GetRevenueByCategoryAsync(
+                NormalizeToUtc(request.Start),
+                NormalizeToUtc(request.End),
+                cancellationToken)
             .ConfigureAwait(false);
         return Result<IEnumerable<RevenueByCategoryResponse>>.Success(result);
     }
+
+    private static DateTimeOffset NormalizeToUtc(DateTimeOffset value) =>
+        value.TimeOfDay == TimeSpan.Zero
+            ? new DateTimeOffset(value.Year, value.Month, value.Day, 0, 0, 0, TimeSpan.Zero)
+            : value.ToUniversalTime();
 }

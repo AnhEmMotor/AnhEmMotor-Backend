@@ -14,7 +14,11 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         DateTime end,
         CancellationToken cancellationToken)
     {
-        var endExclusive = end.TimeOfDay == TimeSpan.Zero ? end.Date.AddDays(1) : end.AddTicks(1);
+        start = DateTime.SpecifyKind(start, DateTimeKind.Utc);
+        end = DateTime.SpecifyKind(end, DateTimeKind.Utc);
+        var endExclusive = end.TimeOfDay == TimeSpan.Zero
+            ? DateTime.SpecifyKind(end.Date.AddDays(1), DateTimeKind.Utc)
+            : end.AddTicks(1);
         var timeSpan = endExclusive - start;
         var prevStart = start.Subtract(timeSpan);
         var prevEndExclusive = start;
@@ -147,7 +151,9 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         DateTime end,
         CancellationToken cancellationToken)
     {
-        var endOfDay = end.Date.AddDays(1).AddTicks(-1);
+        start = DateTime.SpecifyKind(start, DateTimeKind.Utc);
+        var normalizedEnd = DateTime.SpecifyKind(end, DateTimeKind.Utc);
+        var endOfDay = DateTime.SpecifyKind(normalizedEnd.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
         var staffSales = await context.EmployeeProfiles
             .Include(e => e.User)
             .Select(

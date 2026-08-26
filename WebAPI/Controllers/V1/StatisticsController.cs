@@ -379,8 +379,8 @@ public class StatisticsController(
         CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
-        var periodStart = start ?? new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
-        var periodEnd = end ?? now;
+        var periodStart = (start ?? new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero)).ToUniversalTime();
+        var periodEnd = (end ?? now).ToUniversalTime();
         var inProgressCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
             .CountAsync(m => m.TotalCost == 0, cancellationToken)
