@@ -1054,9 +1054,12 @@ public class Statistics
         result.Value.Summary.PeriodRevenue.Should().Be(80000000);
         result.Value.Summary.PeriodProfit.Should().Be(25000000);
 
+        var vnTz = TimeSpan.FromHours(7);
+        var expectedStartUtc = new DateTimeOffset(2026, 8, 1, 0, 0, 0, vnTz).ToUniversalTime();
+        var expectedEndUtc = new DateTimeOffset(2026, 8, 31, 23, 59, 59, 999, vnTz).ToUniversalTime();
         _repositoryMock.Verify(r => r.GetDashboardStatsAsync(
-            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 8 && d.Day == 1),
-            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 8 && d.Day == 31),
+            It.Is<DateTimeOffset>(d => d == expectedStartUtc),
+            It.Is<DateTimeOffset>(d => d == expectedEndUtc),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -1087,9 +1090,12 @@ public class Statistics
         result.Value.Summary.YearlyRevenue.Should().Be(1200000000);
         result.Value.Summary.YearlyProfit.Should().Be(350000000);
 
+        var vnTz = TimeSpan.FromHours(7);
+        var expectedStartUtc = new DateTimeOffset(2026, 1, 1, 0, 0, 0, vnTz).ToUniversalTime();
+        var expectedEndUtc = new DateTimeOffset(2026, 12, 31, 23, 59, 59, 999, vnTz).ToUniversalTime();
         _repositoryMock.Verify(r => r.GetDashboardStatsAsync(
-            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 1 && d.Day == 1),
-            It.Is<DateTimeOffset>(d => d.Year == 2026 && d.Month == 12 && d.Day == 31),
+            It.Is<DateTimeOffset>(d => d == expectedStartUtc),
+            It.Is<DateTimeOffset>(d => d == expectedEndUtc),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -1120,7 +1126,7 @@ public class Statistics
         result.Value.Summary.MonthlyRevenue.Should().Be(0);
     }
 
-    [Fact(DisplayName = "STAT_110 - Unit - Biểu đồ danh mục chuyển đúng khoảng ngày tùy chỉnh")]
+    [Fact(DisplayName = "STAT_110 - Unit - Biểu đồ danh mục chuyển đúng khoảng ngày tùy chỉnh (chuẩn hóa UTC)")]
     public async Task Handle_DailyCategoryRevenue_CustomRange_ForwardsExactRange()
     {
         var start = new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.FromHours(7));
@@ -1138,8 +1144,10 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.IsSuccess.Should().BeTrue();
+        var expectedStartUtc = new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+        var expectedEndUtc = new DateTimeOffset(2026, 8, 31, 0, 0, 0, TimeSpan.Zero);
         _repositoryMock.Verify(
-            r => r.GetDailyCategoryRevenueAsync(start, end, It.IsAny<CancellationToken>()),
+            r => r.GetDailyCategoryRevenueAsync(expectedStartUtc, expectedEndUtc, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

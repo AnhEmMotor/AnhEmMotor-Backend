@@ -7,6 +7,7 @@ using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.ReturnRequest;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services.Logistics;
 using Application.Interfaces.Services.Shipping;
@@ -39,7 +40,8 @@ public class UpdateOutputStatusCommandHandler(
     IShipmentInsertRepository? shipmentInsertRepository = null,
     IGeocodingService? geocodingService = null,
     IInventoryLedgerRepository? ledgerRepository = null,
-    IPublisher? publisher = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
+    IPublisher? publisher = null,
+    IReturnRequestReadRepository? returnRequestReadRepository = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputStatusCommand request,
@@ -63,6 +65,16 @@ public class UpdateOutputStatusCommandHandler(
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
             return Error.BadRequest(
                 $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
+                "StatusId");
+        }
+        if (output.StatusId == OrderStatus.Completed &&
+            request.StatusId == OrderStatus.Refunding &&
+            returnRequestReadRepository != null &&
+            !await returnRequestReadRepository.HasActiveReturnRequestAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false))
+        {
+            return Error.BadRequest(
+                "Đơn hàng đã hoàn thành chỉ có thể chuyển sang 'refunding' khi tồn tại yêu cầu trả hàng chưa bị từ chối.",
                 "StatusId");
         }
         if (OrderVehicleAssignmentStatus.RequiresVehicleAssignment(request.StatusId))

@@ -21,13 +21,15 @@ public class GetAdminDashboardOverviewQueryHandler(IStatisticalReadRepository re
         var end = request.EndDate.HasValue
             ? new DateTimeOffset(request.EndDate.Value.Year, request.EndDate.Value.Month, request.EndDate.Value.Day, 23, 59, 59, 999, vnTz)
             : _now;
+        var startUtc = start.ToUniversalTime();
+        var endUtc = end.ToUniversalTime();
 
-        var summary = await repository.GetDashboardStatsAsync(start, end, cancellationToken).ConfigureAwait(false) ??
+        var summary = await repository.GetDashboardStatsAsync(startUtc, endUtc, cancellationToken).ConfigureAwait(false) ??
             new DashboardStatsResponse();
         var statusCounts = await repository.GetOrderStatusCountsAsync(cancellationToken).ConfigureAwait(false);
-        var dailyRevenue = await repository.GetDailyRevenueAsync(start, end, cancellationToken).ConfigureAwait(false);
+        var dailyRevenue = await repository.GetDailyRevenueAsync(startUtc, endUtc, cancellationToken).ConfigureAwait(false);
         var recentOrders = await repository.GetRecentOrdersAsync(10, cancellationToken).ConfigureAwait(false);
-        var topStaff = await repository.GetTopStaffPerformanceAsync(start, end, 5, cancellationToken)
+        var topStaff = await repository.GetTopStaffPerformanceAsync(startUtc, endUtc, 5, cancellationToken)
             .ConfigureAwait(false);
         var recentTransactions = await repository.GetRecentTransactionsAsync(10, cancellationToken)
             .ConfigureAwait(false);

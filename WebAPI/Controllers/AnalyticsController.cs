@@ -31,8 +31,8 @@ namespace WebAPI.Controllers
             [FromQuery] DateTime? end,
             CancellationToken cancellationToken)
         {
-            var startDate = (start ?? DateTime.Today).ToUniversalTime();
-            var endDate = (end ?? DateTime.Today.AddDays(1).AddTicks(-1)).ToUniversalTime();
+            var startDate = DateTime.SpecifyKind(start ?? DateTime.Today, DateTimeKind.Utc);
+            var endDate = DateTime.SpecifyKind(end ?? DateTime.Today.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
             var result = await mediator.Send(new GetDashboardSummaryQuery(startDate, endDate), cancellationToken);
             return HandleResult(result);
         }

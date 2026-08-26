@@ -196,6 +196,115 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         }
     }
 
+    public async Task<Result<string>> CreateReturnPickupOrderAsync(
+        Output output,
+        ReturnRequest returnRequest,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var token = configuration["GhnSettings:Token"];
+            var shopId = configuration["GhnSettings:ShopId"];
+            var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(shopId) || string.IsNullOrEmpty(baseUrl))
+            {
+                return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
+            }
+            var requestUri = $"{baseUrl}/shiip/public-api/v2/shipping-order/create";
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Add("Token", token);
+            request.Headers.Add("ShopId", shopId);
+
+            var products = returnRequest.Items
+                .Select(
+                    item => new
+                    {
+                        name = item.ProductName,
+                        code = item.Sku ?? item.ProductId.ToString(),
+                        quantity = item.Quantity,
+                        price = (int)item.UnitPrice,
+                        length = 15,
+                        width = 15,
+                        height = 15,
+                        weight = 1000
+                    })
+                .ToList();
+
+            if (products.Count == 0)
+            {
+                products.Add(new
+                {
+                    name = "Hàng hoàn trả",
+                    code = "RETURN-" + returnRequest.Id,
+                    quantity = 1,
+                    price = 0,
+                    length = 15,
+                    width = 15,
+                    height = 15,
+                    weight = 1000
+                });
+            }
+
+            var totalWeight = Math.Min(30000, products.Sum(x => x.weight * x.quantity));
+            var payload = new
+            {
+                payment_type_id = 1, // Người gửi (hoặc Shop thanh toán)
+                note = $"Đơn thu hồi hàng trả về Showroom từ đơn {returnRequest.OrderCode}",
+                required_note = "CHOXEMHANGKHONGTHU",
+                client_order_code = $"GHN-RETURN-{returnRequest.OrderId}-{returnRequest.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+                is_new_from_address = true,
+                from_name = !string.IsNullOrWhiteSpace(returnRequest.CustomerName) ? returnRequest.CustomerName : (output.CustomerName ?? "Khách hàng hoàn hàng"),
+                from_phone = !string.IsNullOrWhiteSpace(returnRequest.CustomerPhone) ? returnRequest.CustomerPhone : (output.CustomerPhone ?? "0987654321"),
+                from_address = !string.IsNullOrWhiteSpace(output.CustomerAddress) ? output.CustomerAddress : "Địa chỉ khách hàng",
+                from_ward_name = !string.IsNullOrWhiteSpace(output.WardName) ? output.WardName : "Phường Phước Thắng",
+                from_province_name = !string.IsNullOrWhiteSpace(output.ProvinceName) ? output.ProvinceName : "Hồ Chí Minh",
+                is_new_to_address = true,
+                to_name = "Showroom / Kho Anh Em Motor",
+                to_phone = "0987654321",
+                to_address = "Kho Anh Em Motor, Biên Hoà, Đồng Nai",
+                to_ward_name = "Phường Trấn Biên",
+                to_province_name = "Đồng Nai",
+                cod_amount = 0,
+                weight = totalWeight,
+                length = 15,
+                width = 15,
+                height = 15,
+                insurance_value = 0,
+                service_type_id = 5,
+                items = products
+            };
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
+            request.Content = JsonContent.Create(payload, null, jsonOptions);
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result<string>.Failure(
+                    Error.BadRequest("Failed to create return pickup order with GHN: " + contentString));
+            }
+            using var jsonDocument = JsonDocument.Parse(contentString);
+            var root = jsonDocument.RootElement;
+            if (root.TryGetProperty("code", out var codeElement) && codeElement.GetInt32() != 200)
+            {
+                var message = root.TryGetProperty("message", out var msgElement)
+                    ? msgElement.GetString()
+                    : "Unknown error";
+                return Result<string>.Failure(Error.BadRequest("GHN Error: " + message));
+            }
+            var orderCode = "Unknown";
+            if (root.TryGetProperty("data", out var dataElement) &&
+                dataElement.TryGetProperty("order_code", out var orderCodeElement))
+            {
+                orderCode = orderCodeElement.GetString() ?? "Unknown";
+            }
+            return Result<string>.Success(orderCode);
+        }
+        catch (Exception ex)
+        {
+            return Result<string>.Failure(Error.Failure("An error occurred while creating return pickup order: " + ex.Message));
+        }
+    }
+
     public async Task<Result<string>> GetShippingOrderStatusAsync(
         string orderCode,
         CancellationToken cancellationToken = default)
@@ -237,6 +346,68 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         } catch (Exception)
         {
             return Result<string>.Failure(Error.Failure("An error occurred while getting order status."));
+        }
+    }
+
+    public async Task<Result<bool>> SwitchToReturnOrderAsync(
+        string orderCode,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var token = configuration["GhnSettings:Token"];
+            var shopId = configuration["GhnSettings:ShopId"];
+            var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(shopId) || string.IsNullOrEmpty(baseUrl))
+            {
+                return Result<bool>.Failure(Error.Failure("GHN configuration is missing."));
+            }
+            var requestUri = $"{baseUrl}/shiip/public-api/v2/switch-status/return";
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Add("Token", token);
+            request.Headers.Add("ShopId", shopId);
+            var payload = new { order_codes = new[] { orderCode } };
+            request.Content = JsonContent.Create(payload);
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result<bool>.Failure(
+                    Error.BadRequest("Failed to switch order to return with GHN: " + contentString));
+            }
+            using var jsonDocument = JsonDocument.Parse(contentString);
+            var root = jsonDocument.RootElement;
+            if (root.TryGetProperty("code", out var codeElement) && codeElement.GetInt32() != 200)
+            {
+                var message = root.TryGetProperty("message", out var msgElement)
+                    ? msgElement.GetString()
+                    : "Unknown error";
+                return Result<bool>.Failure(Error.BadRequest("GHN Error: " + message));
+            }
+            if (root.TryGetProperty("data", out var dataElement) && dataElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in dataElement.EnumerateArray())
+                {
+                    if (!item.TryGetProperty("result", out var resultElement))
+                    {
+                        continue;
+                    }
+                    if (!resultElement.GetBoolean())
+                    {
+                        var itemMessage = item.TryGetProperty("message", out var itemMsgElement)
+                            ? itemMsgElement.GetString()
+                            : "Unknown error";
+                        return Result<bool>.Failure(
+                            Error.BadRequest("GHN refused to switch order to return: " + itemMessage));
+                    }
+                    return Result<bool>.Success(true);
+                }
+            }
+            return Result<bool>.Failure(Error.Failure("Cannot parse switch-status/return response from GHN."));
+        } catch (Exception ex)
+        {
+            return Result<bool>.Failure(
+                Error.Failure("An error occurred while switching the order to return. " + ex.Message));
         }
     }
 

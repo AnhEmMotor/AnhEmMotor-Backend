@@ -505,7 +505,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var endDateTimeOffset = end.Hour == 0 && end.Minute == 0 && end.Second == 0
-            ? end.Date.AddDays(1).AddTicks(-1)
+            ? end.AddDays(1).AddTicks(-1)
             : end;
         var startDateTimeOffset = start;
         var vnStart = startDateTimeOffset.ToOffset(TimeSpan.FromHours(7)).Date;
@@ -570,7 +570,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         // Chuẩn hóa khoảng thời gian do người dùng chọn (start, end)
         var periodStart = start;
         var periodEnd = end.Hour == 0 && end.Minute == 0 && end.Second == 0
-            ? end.Date.AddDays(1).AddTicks(-1)
+            ? end.AddDays(1).AddTicks(-1)
             : end;
 
         var revenueQueryStart = periodStart < lastYearStart ? periodStart : lastYearStart;
@@ -953,7 +953,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .ToList();
 
-        var invoiceQueryStart = startMonth.ToDateTime(TimeOnly.MinValue).AddDays(-1);
+        var invoiceQueryStart = DateTime.SpecifyKind(
+            startMonth.ToDateTime(TimeOnly.MinValue).AddDays(-1),
+            DateTimeKind.Utc);
         var invoiceRows = await context.Invoices
             .Where(
                 i => string.Compare(i.Status, OrderStatus.Completed) == 0 &&
@@ -1642,7 +1644,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var endAdjusted = end.Hour == 0 && end.Minute == 0 && end.Second == 0
-            ? end.Date.AddDays(1).AddTicks(-1)
+            ? end.AddDays(1).AddTicks(-1)
             : end;
         var data = await context.OutputInfos
             .IgnoreQueryFilters()
@@ -1686,7 +1688,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var endAdjusted = end.Hour == 0 && end.Minute == 0 && end.Second == 0
-            ? end.Date.AddDays(1).AddTicks(-1)
+            ? end.AddDays(1).AddTicks(-1)
             : end;
         var days = (endAdjusted - start).Days;
         if (days <= 0)
@@ -1738,7 +1740,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var endAdjusted = end.Hour == 0 && end.Minute == 0 && end.Second == 0
-            ? end.Date.AddDays(1).AddTicks(-1)
+            ? end.AddDays(1).AddTicks(-1)
             : end;
 
         var rawData = await context.OutputInfos
