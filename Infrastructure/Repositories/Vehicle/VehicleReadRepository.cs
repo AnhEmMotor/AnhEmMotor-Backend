@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -113,8 +114,16 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         var ids = productVariantIds.Distinct().ToList();
         return context.Vehicles
             .Include(v => v.InventoryReceiptInfo)
+                .ThenInclude(i => i!.InventoryReceipt)
             .Include(v => v.OutputInfo)
-            .Where(v => v.ProductVariantId.HasValue && ids.Contains(v.ProductVariantId.Value))
+            .Where(
+                v => v.ProductVariantId.HasValue &&
+                    ids.Contains(v.ProductVariantId.Value) &&
+                    v.InventoryReceiptInfo != null &&
+                    v.InventoryReceiptInfo.InventoryReceipt != null &&
+                    v.InventoryReceiptInfo.InventoryReceipt.StatusId != null &&
+                    v.InventoryReceiptInfo.InventoryReceipt.StatusId.ToLower() ==
+                    InventoryReceiptStatus.Approve)
             .ToListAsync(cancellationToken);
     }
 

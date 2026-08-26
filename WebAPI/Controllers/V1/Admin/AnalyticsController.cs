@@ -74,7 +74,7 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
         [FromQuery] DateTimeOffset? fromDate = null,
         CancellationToken ct = default)
     {
-        var cutoff = fromDate ?? DateTimeOffset.UtcNow.AddDays(-30);
+        var cutoff = (fromDate ?? DateTimeOffset.UtcNow.AddDays(-30)).ToUniversalTime();
         var categorySet = categories != null && categories.Length > 0
             ? new HashSet<string>(categories, StringComparer.OrdinalIgnoreCase)
             : null;

@@ -74,12 +74,14 @@ public class ProductViewRepository(ApplicationDBContext context) : IProductViewR
 
         if (from.HasValue)
         {
-            query = query.Where(pv => pv.ViewedAt >= from.Value);
+            var fromUtc = from.Value.ToUniversalTime();
+            query = query.Where(pv => pv.ViewedAt >= fromUtc);
         }
 
         if (to.HasValue)
         {
-            query = query.Where(pv => pv.ViewedAt <= to.Value);
+            var toUtc = to.Value.ToUniversalTime();
+            query = query.Where(pv => pv.ViewedAt <= toUtc);
         }
 
         if (!string.IsNullOrWhiteSpace(searchKeyword))

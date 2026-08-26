@@ -16,10 +16,15 @@ public class GetDailyCategoryRevenueQueryHandler(IStatisticalReadRepository repo
         GetDailyCategoryRevenueQuery request,
         CancellationToken cancellationToken)
     {
-        var end = request.End ?? DateTimeOffset.UtcNow;
+        var end = NormalizeToUtc(request.End ?? DateTimeOffset.UtcNow);
         var days = request.Days > 0 ? request.Days : 30;
-        var start = request.Start ?? end.AddDays(-days);
+        var start = NormalizeToUtc(request.Start ?? end.AddDays(-days));
         var result = await repo.GetDailyCategoryRevenueAsync(start, end, cancellationToken).ConfigureAwait(false);
         return Result<IEnumerable<DailyCategoryRevenueResponse>>.Success(result);
     }
+
+    private static DateTimeOffset NormalizeToUtc(DateTimeOffset value) =>
+        value.TimeOfDay == TimeSpan.Zero
+            ? new DateTimeOffset(value.Year, value.Month, value.Day, 0, 0, 0, TimeSpan.Zero)
+            : value.ToUniversalTime();
 }

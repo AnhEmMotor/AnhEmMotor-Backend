@@ -1,4 +1,5 @@
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
+using Application.Features.Sales.Returns.Commands.ProcessReturnArrival;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Services.Shipping;
@@ -74,6 +75,12 @@ public class GhnStatusPollingWorker : BackgroundService
             }
             if (!string.IsNullOrEmpty(newStatus) && shipment.OutputId.HasValue)
             {
+                if (newStatus == OrderStatus.Refunding)
+                {
+                    await sender.Send(
+                        new ProcessReturnArrivalCommand { OutputId = shipment.OutputId.Value },
+                        stoppingToken);
+                }
                 var command = new UpdateOutputStatusCommand
                 {
                     Id = shipment.OutputId.Value,

@@ -16,7 +16,19 @@ public interface IShippingService
     /// </summary>
     public Task<Result<string>> CreateShippingOrderAsync(Output output, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Creates a reverse pickup shipping order from customer to warehouse/showroom on GHN.
+    /// </summary>
+    public Task<Result<string>> CreateReturnPickupOrderAsync(Output output, ReturnRequest returnRequest, CancellationToken cancellationToken = default);
+
     public Task<Result<string>> GetShippingOrderStatusAsync(
+        string orderCode,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Converts an existing carrier order into a return (reverse pickup) order. Returns true on success.
+    /// </summary>
+    public Task<Result<bool>> SwitchToReturnOrderAsync(
         string orderCode,
         CancellationToken cancellationToken = default);
 

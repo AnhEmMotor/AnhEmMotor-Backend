@@ -3,10 +3,12 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Domain.Entities;
 using MediatR;
+using InventoryReceiptStatuses = Domain.Constants.InventoryReceipt.InventoryReceiptStatus;
 
 namespace Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 
@@ -75,7 +77,9 @@ public class GetVehicleAssignmentRequirementsQueryHandler(
                         string.Equals(v.Status, VehicleStatus.Available, StringComparison.OrdinalIgnoreCase) &&
                         v.OutputInfoId == null &&
                         v.IsActive &&
-                        v.InventoryReceiptInfoId != null)
+                        v.InventoryReceiptInfo != null &&
+                        v.InventoryReceiptInfo.InventoryReceipt != null &&
+                        InventoryReceiptStatuses.IsFinished(v.InventoryReceiptInfo.InventoryReceipt.StatusId))
                 .Select(ToOption)
                 .ToList();
             var requiredCount = info.Count ?? 0;

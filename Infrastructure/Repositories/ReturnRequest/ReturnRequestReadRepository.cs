@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.ReturnRequest;
+using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -48,5 +49,39 @@ public class ReturnRequestReadRepository : IReturnRequestReadRepository
         var page = sieveModel.Page ?? 1;
         var pageSize = sieveModel.PageSize ?? 10;
         return new PagedResult<ReturnRequestEntity>(items, totalCount, page, pageSize);
+    }
+
+    public Task<bool> HasActiveReturnRequestAsync(int orderId, CancellationToken cancellationToken = default)
+    {
+        return _context.ReturnRequests.AnyAsync(
+            x => x.OrderId == orderId && x.Status != "rejected",
+            cancellationToken);
+    }
+
+    public async Task<List<ReturnRequestEntity>> GetCompletedRestockAwaitingArrivalAsync(
+        int orderId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.ReturnRequests
+            .Include(x => x.Items)
+            .AsNoTracking()
+            .Where(
+                x => x.OrderId == orderId &&
+                    x.Status == "completed" &&
+                    x.ReturnAction == "restock" &&
+                    !_context.InventoryReceipts.Any(
+                        i => i.SourceOrderId == x.OrderId &&
+                            i.Notes == $"Restock from Return Request #{x.Id}"))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<ReturnRequestEntity>> GetByOrderIdAsync(
+        int orderId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.ReturnRequests
+            .Include(x => x.Items)
+            .Where(x => x.OrderId == orderId)
+            .ToListAsync(cancellationToken);
     }
 }

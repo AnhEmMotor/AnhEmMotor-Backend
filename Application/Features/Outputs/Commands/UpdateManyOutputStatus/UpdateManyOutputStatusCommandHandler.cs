@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Application.Interfaces.Repositories.ReturnRequest;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Domain.Constants.Logistics;
@@ -19,7 +20,8 @@ public class UpdateManyOutputStatusCommandHandler(
     ICommissionUpdateRepository commissionUpdateRepository,
     IUnitOfWork unitOfWork,
     IShipmentReadRepository? shipmentReadRepository = null,
-    IShipmentInsertRepository? shipmentInsertRepository = null) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
+    IShipmentInsertRepository? shipmentInsertRepository = null,
+    IReturnRequestReadRepository? returnRequestReadRepository = null) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
 {
     public async Task<Result<List<OutputItemResponse>?>> Handle(
         UpdateManyOutputStatusCommand request,
@@ -43,6 +45,17 @@ public class UpdateManyOutputStatusCommandHandler(
                 errors.Add(
                     Error.BadRequest(
                         $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
+                        "StatusId"));
+            }
+            if (output.StatusId == OrderStatus.Completed &&
+                request.StatusId == OrderStatus.Refunding &&
+                returnRequestReadRepository != null &&
+                !await returnRequestReadRepository.HasActiveReturnRequestAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false))
+            {
+                errors.Add(
+                    Error.BadRequest(
+                        $"Đơn hàng ID {output.Id}: đã hoàn thành chỉ có thể chuyển sang 'refunding' khi tồn tại yêu cầu trả hàng chưa bị từ chối.",
                         "StatusId"));
             }
             if (OrderVehicleAssignmentStatus.RequiresVehicleAssignment(request.StatusId))

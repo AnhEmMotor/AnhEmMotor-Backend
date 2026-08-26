@@ -76,7 +76,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
             .Where(
                 s => s.Status == ParcelDeliveryStatus.Shipping &&
                     s.DeliveredAt == null &&
-                    s.Type == ShipmentType.OrderDelivery &&
+                    (s.Type == ShipmentType.OrderDelivery || s.Type == ShipmentType.ReturnDelivery) &&
                     s.TrackingNumber != null &&
                     s.TrackingNumber != string.Empty)
             .Where(s => !s.TrackingNumber.StartsWith("GHN-"))
