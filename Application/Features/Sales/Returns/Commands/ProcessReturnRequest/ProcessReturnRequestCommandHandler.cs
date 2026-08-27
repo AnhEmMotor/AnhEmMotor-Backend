@@ -10,6 +10,7 @@ using Domain.Entities;
 using Domain.Entities.Logistics;
 using Domain.Enums;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Sales.Returns.Commands.ProcessReturnRequest;
 
@@ -24,6 +25,7 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
     private readonly IOutputReadRepository _outputReadRepository;
     private readonly IShippingService _shippingService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<ProcessReturnRequestCommandHandler>? _logger;
 
     public ProcessReturnRequestCommandHandler(
         IReturnRequestReadRepository readRepository,
@@ -34,7 +36,8 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
         IShipmentUpdateRepository shipmentUpdateRepository,
         IOutputReadRepository outputReadRepository,
         IShippingService shippingService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<ProcessReturnRequestCommandHandler>? logger = null)
     {
         _readRepository = readRepository;
         _writeRepository = writeRepository;
@@ -45,6 +48,7 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
         _outputReadRepository = outputReadRepository;
         _shippingService = shippingService;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<Result<ReturnRequestResponse>> Handle(ProcessReturnRequestCommand request, CancellationToken cancellationToken)
@@ -91,7 +95,18 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
                     await _shipmentInsertRepository.AddAsync(returnShipment, cancellationToken);
                     returnRequest.OriginalTrackingNumber = carrierResult.Value;
                     deferredRestock = true; // Hàng sẽ được nhập kho khi Webhook GHN báo hàng hoàn về kho
+                    _logger?.LogInformation("Successfully created GHN return shipment {TrackingNumber} for ReturnRequest #{ReturnRequestId}", carrierResult.Value, returnRequest.Id);
                 }
+                else
+                {
+                    _logger?.LogWarning("Failed to create GHN reverse shipping order for ReturnRequest #{ReturnRequestId}, Order #{OrderId}. Error: {Error}. Proceeding with offline/direct return flow.",
+                        returnRequest.Id, returnRequest.OrderId, carrierResult?.Error?.Message ?? "Unknown error");
+                }
+            }
+            else
+            {
+                _logger?.LogWarning("Output order #{OrderId} not found for ReturnRequest #{ReturnRequestId}. Skipping GHN carrier order creation.",
+                    returnRequest.OrderId, returnRequest.Id);
             }
         }
 
