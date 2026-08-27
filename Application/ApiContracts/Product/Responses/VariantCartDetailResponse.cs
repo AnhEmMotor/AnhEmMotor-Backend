@@ -18,6 +18,9 @@ public class VariantCartDetailResponse
     [JsonPropertyName("effectiveMax")]
     public int? EffectiveMax { get; set; }
 
+    [JsonPropertyName("stock")]
+    public int Stock { get; set; }
+
     [JsonPropertyName("managementType")]
     public string? ManagementType { get; set; }
 

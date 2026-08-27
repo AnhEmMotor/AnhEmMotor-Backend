@@ -15,6 +15,8 @@ namespace Application.ApiContracts.Product.Responses
 
         public int? MaxPurchaseQuantity { get; set; }
 
+        public int Stock { get; set; }
+
         public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
     }
 }

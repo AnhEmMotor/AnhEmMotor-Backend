@@ -484,6 +484,7 @@ public class ProductMappingConfig : IRegister
             CoverImageUrl = ResolveVariantCoverImageUrl(variant),
             CategoryId = variant.Product?.CategoryId,
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
+            Stock = CalculateVariantAvailableStock(variant, null),
             Colors = MapVariantColors(variant)
         };
     }
@@ -515,7 +516,8 @@ public class ProductMappingConfig : IRegister
                     ColorName = c.ColorName,
                     ColorCode = c.ColorCode,
                     CoverImageUrl = c.CoverImageUrl,
-                    MaxPurchaseQuantity = c.MaxPurchaseQuantity
+                    MaxPurchaseQuantity = c.MaxPurchaseQuantity,
+                    Stock = CalculateVariantAvailableStock(variant, c.Id)
                 })
             .ToList();
     }
@@ -576,6 +578,7 @@ public class ProductMappingConfig : IRegister
             CoverImageUrl = coverImage,
             ProductLimit = effectiveMax,
             EffectiveMax = effectiveMax,
+            Stock = CalculateVariantAvailableStock(variant, null),
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
             Colors = MapVariantColors(variant)
         };
@@ -622,61 +625,52 @@ public class ProductMappingConfig : IRegister
 
     public static long CalculateVariantStock(ProductVariantEntity variant)
     {
-        if (variant.ProductVariantColors != null && variant.ProductVariantColors.Count != 0)
-        {
-            long total = 0;
-            foreach (var c in variant.ProductVariantColors)
-            {
-                if (variant.InventoryReceiptInfos != null)
-                {
-                    total += variant.InventoryReceiptInfos
-                            .Where(
-                                ii => ii.InventoryReceipt != null &&
-                                        InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) &&
-                                        (ii.PurchaseRequestItem != null &&
-                                            ii.PurchaseRequestItem.ProductVariantColorId == c.Id))
-                            .Sum(ii => ii.RemainingCount) ??
-                        0;
-                }
-            }
-            return total;
-        }
-        return variant.InventoryReceiptInfos != null
-            ? variant.InventoryReceiptInfos
-                    .Where(
-                        ii => ii.InventoryReceipt != null &&
-                                    InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
-                    .Sum(ii => ii.RemainingCount) ??
-                0
-            : 0;
+        if (variant.InventoryReceiptInfos == null) return 0;
+        return variant.InventoryReceiptInfos
+            .Where(
+                ii => ii.InventoryReceipt != null &&
+                      InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
+            .Sum(ii => ii.RemainingCount) ?? 0;
     }
 
     public static long CalculateVariantBooked(ProductVariantEntity variant)
     {
-        if (variant.ProductVariantColors != null && variant.ProductVariantColors.Count != 0)
+        if (variant.OutputInfos == null) return 0;
+        return variant.OutputInfos
+            .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+            .Sum(oi => (long?)oi.Count) ?? 0;
+    }
+
+    public static long CalculateVariantColorStock(ProductVariantEntity variant, int colorId)
+    {
+        if (variant.InventoryReceiptInfos == null) return 0;
+        return variant.InventoryReceiptInfos
+            .Where(
+                ii => ii.InventoryReceipt != null &&
+                      InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) &&
+                      ((ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantColorId == colorId) ||
+                       (ii.PurchaseRequestItem == null || ii.PurchaseRequestItem.ProductVariantColorId == null)))
+            .Sum(ii => ii.RemainingCount) ?? 0;
+    }
+
+    public static long CalculateVariantColorBooked(ProductVariantEntity variant, int colorId)
+    {
+        if (variant.OutputInfos == null) return 0;
+        return variant.OutputInfos
+            .Where(
+                oi => oi.OutputOrder != null &&
+                      OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId) &&
+                      (oi.ProductVariantColorId == colorId || oi.ProductVariantColorId == null))
+            .Sum(oi => (long?)oi.Count) ?? 0;
+    }
+
+    public static int CalculateVariantAvailableStock(ProductVariantEntity variant, int? colorId = null)
+    {
+        if (colorId.HasValue)
         {
-            long total = 0;
-            foreach (var c in variant.ProductVariantColors)
-            {
-                if (variant.OutputInfos != null)
-                {
-                    total += variant.OutputInfos
-                            .Where(
-                                oi => oi.OutputOrder != null &&
-                                        OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId) &&
-                                        oi.ProductVariantColorId == c.Id)
-                            .Sum(oi => (long?)oi.Count) ??
-                        0;
-                }
-            }
-            return total;
+            return (int)Math.Max(0, CalculateVariantColorStock(variant, colorId.Value) - CalculateVariantColorBooked(variant, colorId.Value));
         }
-        return variant.OutputInfos != null
-            ? variant.OutputInfos
-                    .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                    .Sum(oi => (long?)oi.Count) ??
-                0
-            : 0;
+        return (int)Math.Max(0, CalculateVariantStock(variant) - CalculateVariantBooked(variant));
     }
 
     private static List<ProductTechnologyResponse> MapProductTechnologiesList(ProductEntity product)
