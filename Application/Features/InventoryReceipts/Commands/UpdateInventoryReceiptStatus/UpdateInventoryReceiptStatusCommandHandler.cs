@@ -23,23 +23,18 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         IInventoryLedgerRepository ledgerRepository,
         ISupplierDebtInsertRepository supplierDebtInsertRepository,
         IUnitOfWork unitOfWork,
-        IPublisher publisher,
-        ILogger<UpdateInventoryReceiptStatusCommandHandler>? logger = null) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
+        IPublisher publisher) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
         public async Task<Result<InventoryReceiptDetailResponse>> Handle(
             UpdateInventoryReceiptStatusCommand request,
             CancellationToken cancellationToken)
         {
-            logger?.LogInformation("[UpdateInventoryReceiptStatus] Request: Id={Id}, StatusId={StatusId}", request.Id, request.StatusId);
-
             var receipt = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken)
                 .ConfigureAwait(false);
             if (receipt is null)
             {
-                logger?.LogWarning("[UpdateInventoryReceiptStatus] Receipt #{Id} not found", request.Id);
                 return Error.NotFound($"Không tìm thấy phiếu nhập kho với ID {request.Id}.", "Id");
             }
-            logger?.LogInformation("[UpdateInventoryReceiptStatus] Current status of Receipt #{Id}: '{StatusId}'", request.Id, receipt.StatusId);
             if (string.Compare(receipt.StatusId, Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent) != 0)
             {
                 return Error.BadRequest(

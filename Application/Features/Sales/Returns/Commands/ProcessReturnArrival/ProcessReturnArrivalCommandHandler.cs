@@ -21,14 +21,10 @@ public class ProcessReturnArrivalCommandHandler(
     IInventoryReceiptUpdateRepository? receiptUpdateRepository = null,
     IOutputReadRepository? outputReadRepository = null,
     IInventoryLedgerRepository? ledgerRepository = null,
-    IPublisher? publisher = null,
-    ILogger<ProcessReturnArrivalCommandHandler>? logger = null) : IRequestHandler<ProcessReturnArrivalCommand, Result<int>>
+    IPublisher? publisher = null) : IRequestHandler<ProcessReturnArrivalCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(ProcessReturnArrivalCommand request, CancellationToken cancellationToken)
     {
-        logger?.LogInformation("[ProcessReturnArrival] Handling arrival for OutputId={OutputId}, ReturnRequestId={ReturnRequestId}, TrackingNumber={TrackingNumber}",
-            request.OutputId, request.ReturnRequestId, request.TrackingNumber);
-
         var returnRequests = await readRepository
             .GetByOrderIdAsync(request.OutputId, cancellationToken)
             .ConfigureAwait(false);
@@ -38,9 +34,6 @@ public class ProcessReturnArrivalCommandHandler(
             .Where(x => !request.ReturnRequestId.HasValue || x.Id == request.ReturnRequestId.Value)
             .Where(x => string.IsNullOrEmpty(request.TrackingNumber) || x.OriginalTrackingNumber == request.TrackingNumber)
             .ToList();
-
-        logger?.LogInformation("[ProcessReturnArrival] Found {Count} matching return requests for OutputId={OutputId}",
-            activeOrCompletedReturns.Count, request.OutputId);
 
         if (activeOrCompletedReturns.Count == 0)
         {
@@ -55,9 +48,6 @@ public class ProcessReturnArrivalCommandHandler(
             ? await receiptReadRepository.GetBySourceOrderIdAsync(request.OutputId, cancellationToken, Domain.Constants.DataFetchMode.All).ConfigureAwait(false)
             : new List<InventoryReceipt>();
 
-        logger?.LogInformation("[ProcessReturnArrival] Found {Count} existing inventory receipts for OutputId={OutputId}",
-            existingReceipts.Count, request.OutputId);
-
         int processedCount = 0;
         var combosToUpdate = new HashSet<(int VariantId, int? ColorId)>();
 
@@ -68,7 +58,6 @@ public class ProcessReturnArrivalCommandHandler(
                 returnRequest.Status = "completed";
                 returnRequest.ReturnAction ??= "restock";
                 await writeRepository.UpdateAsync(returnRequest, cancellationToken).ConfigureAwait(false);
-                logger?.LogInformation("[ProcessReturnArrival] ReturnRequest #{ReturnRequestId} updated to completed", returnRequest.Id);
             }
 
             if (returnRequest.ReturnAction == "restock")
@@ -79,8 +68,6 @@ public class ProcessReturnArrivalCommandHandler(
 
                 if (existingReceipt != null)
                 {
-                    logger?.LogInformation("[ProcessReturnArrival] Existing receipt #{ReceiptId} found for ReturnRequest #{ReturnRequestId}. Updating status from '{OldStatus}' to 'approve'",
-                        existingReceipt.Id, returnRequest.Id, existingReceipt.StatusId);
                     existingReceipt.StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve;
                     if (receiptUpdateRepository != null)
                     {
@@ -89,8 +76,6 @@ public class ProcessReturnArrivalCommandHandler(
                 }
                 else
                 {
-                    logger?.LogInformation("[ProcessReturnArrival] No existing receipt found. Creating new approved receipt for ReturnRequest #{ReturnRequestId}",
-                        returnRequest.Id);
                     var receipt = new InventoryReceipt
                     {
                         InventoryReceiptDate = DateTimeOffset.UtcNow,
@@ -148,8 +133,6 @@ public class ProcessReturnArrivalCommandHandler(
                         };
                         await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
                         combosToUpdate.Add((variantId.Value, colorId));
-                        logger?.LogInformation("[ProcessReturnArrival] Restocked VariantId={VariantId}, ColorId={ColorId}, Qty={Qty}, CurrentStock={OldStock}, NewStock={NewStock}",
-                            variantId.Value, colorId, importQty, currentStock, currentStock + importQty);
                     }
                 }
 
@@ -158,11 +141,9 @@ public class ProcessReturnArrivalCommandHandler(
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        logger?.LogInformation("[ProcessReturnArrival] Saved changes to database successfully.");
 
         if (publisher != null && combosToUpdate.Count > 0)
         {
-            logger?.LogInformation("[ProcessReturnArrival] Publishing InventoryChangedNotification for {Count} combos", combosToUpdate.Count);
             await publisher.Publish(new InventoryChangedNotification(combosToUpdate), cancellationToken)
                 .ConfigureAwait(false);
         }

@@ -25,8 +25,6 @@ public class ShippingWebhookController(
     [HttpPost("ghn")]
     public async Task<IActionResult> HandleGhnWebhook([FromBody] GhnWebhookRequest request)
     {
-        logger.LogInformation("[GHN Webhook] Received webhook payload: ClientOrderCode={ClientOrderCode}, OrderCode={OrderCode}, Status={Status}",
-            request.ClientOrderCode, request.OrderCode, request.Status);
         int outputIdInt = 0;
         int returnRequestIdInt = 0;
         bool isReturnOrder = false;
@@ -79,13 +77,9 @@ public class ShippingWebhookController(
         }
 
         var lowerStatus = request.Status?.ToLower();
-        logger.LogInformation("[GHN Webhook] Parsed: OutputId={OutputId}, ReturnRequestId={ReturnRequestId}, IsReturn={IsReturn}, LowerStatus={Status}, ShipmentFound={ShipmentFound}",
-            outputIdInt, returnRequestIdInt, isReturnOrder, lowerStatus, shipment != null);
 
         if (outputIdInt == 0)
         {
-            logger.LogWarning("[GHN Webhook] Failed to resolve OutputId for request: ClientOrderCode={ClientOrderCode}, OrderCode={OrderCode}",
-                request.ClientOrderCode, request.OrderCode);
             return BadRequest();
         }
 
@@ -105,7 +99,6 @@ public class ShippingWebhookController(
                     shipmentUpdateRepository.Update(shipment);
                     await unitOfWork.SaveChangesAsync();
                 }
-                logger.LogInformation("[GHN Webhook] Sending ProcessReturnArrivalCommand for OutputId={OutputId}, ReturnRequestId={ReturnRequestId}", outputIdInt, returnRequestIdInt);
                 // Tự động duyệt phiếu nhập kho và cộng tồn kho tức thì
                 await sender.Send(new ProcessReturnArrivalCommand
                 {
