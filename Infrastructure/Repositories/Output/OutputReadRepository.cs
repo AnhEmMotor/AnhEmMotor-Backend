@@ -117,20 +117,16 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
                         .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) +
                     (item.ShippingFee ?? 0),
                 DepositAmount = item.DepositRatio.HasValue && item.DepositRatio != 0
-                    ? (item.OutputInfos
+                    ? ((item.OutputInfos
                         .Where(info => info.DeletedAt == null)
-                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) *
-                        (item.DepositRatio.Value / 100m)
+                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) + (item.ShippingFee ?? 0)) *
+                      (item.DepositRatio / 100m)
                     : null,
                 RemainingAmount = item.DepositRatio.HasValue && item.DepositRatio != 0
                     ? ((item.OutputInfos
                         .Where(info => info.DeletedAt == null)
                         .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) +
-                        (item.ShippingFee ?? 0)) -
-                        ((item.OutputInfos
-                            .Where(info => info.DeletedAt == null)
-                            .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) *
-                            (item.DepositRatio.Value / 100m))
+                        (item.ShippingFee ?? 0)) * (1 - item.DepositRatio.Value / 100m)
                     : null,
                 IsInventoryLocked = item.StatusId != null &&
                     item.StatusId != "pending" &&

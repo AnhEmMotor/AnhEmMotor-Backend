@@ -119,8 +119,8 @@ public class OutputMappingConfig : IRegister
     {
         if (src.DepositRatio == null || src.DepositRatio == 0)
             return null;
-        var subtotal = CalculateSubtotal(src);
-        return subtotal * (src.DepositRatio.Value / 100m);
+        var total = CalculateTotal(src);
+        return total * (src.DepositRatio.Value / 100m);
     }
 
     private static decimal? CalculateRemaining(Output src)
