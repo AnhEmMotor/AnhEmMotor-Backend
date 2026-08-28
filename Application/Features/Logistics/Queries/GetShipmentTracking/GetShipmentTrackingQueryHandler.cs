@@ -34,6 +34,9 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                 dto.CodAmount = order.CodAmount;
                 dto.ShippingCost = order.ShippingCost;
                 dto.Status = order.DeliveredAt.HasValue ? "Delivered" : "InTransit";
+                dto.ShipmentType = order.Type.ToString();
+                dto.OriginAddress = order.OriginAddress;
+                dto.DestinationAddress = order.DestinationAddress;
                 dto.OriginLatitude = order.OriginLatitude;
                 dto.OriginLongitude = order.OriginLongitude;
                 dto.DestinationLatitude = order.DestinationLatitude;
@@ -70,13 +73,15 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
             {
                 var milestones = new List<TrackingMilestoneResponse>();
                 var baseDate = order.CreatedAt?.UtcDateTime ?? DateTime.UtcNow.AddDays(-2);
+                var isReturn = order.Type == Domain.Constants.Logistics.ShipmentType.ReturnDelivery;
+
                 milestones.Add(
                     new TrackingMilestoneResponse
                     {
                         Timestamp = baseDate,
-                        Location = "Showroom AnhEmMotor Biên Hòa",
-                        Status = "Đã lấy hàng",
-                        Description = "Đã lấy hàng",
+                        Location = isReturn ? (order.OriginAddress ?? "Địa chỉ khách hàng") : (order.OriginAddress ?? "Showroom AnhEmMotor Biên Hòa"),
+                        Status = isReturn ? "Đã tiếp nhận hàng hoàn từ khách" : "Đã lấy hàng xuất kho",
+                        Description = isReturn ? "Đã tiếp nhận hàng hoàn từ khách" : "Đã lấy hàng",
                         StatusType = "picked_up",
                         IsCurrent = false,
                         Latitude = dto.OriginLatitude,
@@ -103,9 +108,9 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                         new TrackingMilestoneResponse
                         {
                             Timestamp = order.DeliveredAt.Value.UtcDateTime,
-                            Location = order.DestinationAddress ?? "Địa chỉ người nhận",
-                            Status = "Giao hàng thành công",
-                            Description = "Giao hàng thành công",
+                            Location = isReturn ? (order.DestinationAddress ?? "Kho AnhEmMotor Biên Hòa") : (order.DestinationAddress ?? "Địa chỉ người nhận"),
+                            Status = isReturn ? "Hoàn hàng về kho thành công" : "Giao hàng thành công",
+                            Description = isReturn ? "Hoàn hàng về kho thành công" : "Giao hàng thành công",
                             StatusType = "delivered",
                             IsCurrent = true,
                             Latitude = dto.DestinationLatitude,

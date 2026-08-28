@@ -6,6 +6,10 @@ public class ReturnRequestItemResponse
 
     public int ProductId { get; set; }
 
+    public int? VariantId { get; set; }
+
+    public int? ColorId { get; set; }
+
     public string ProductName { get; set; } = string.Empty;
 
     public string Sku { get; set; } = string.Empty;

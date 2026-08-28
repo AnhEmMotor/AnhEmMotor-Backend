@@ -50,6 +50,12 @@ public class ShipmentTrackingResponse
 
     public decimal ShippingCost { get; set; }
 
+    public string? ShipmentType { get; set; }
+
+    public string? OriginAddress { get; set; }
+
+    public string? DestinationAddress { get; set; }
+
     public List<TrackingItemResponse> Items { get; set; } = [];
 }
 

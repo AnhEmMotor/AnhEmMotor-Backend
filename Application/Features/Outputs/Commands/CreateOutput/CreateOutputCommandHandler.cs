@@ -9,6 +9,7 @@ using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Voucher;
 using Application.Interfaces.Services.Shipping;
 using Application.Interfaces.Services.Shipping.Models;
+using Application.Features.InventoryOnHand.Notifications;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -29,7 +30,8 @@ public class CreateOutputCommandHandler(
     IVoucherReadRepository voucherReadRepository,
     IVoucherUsageRepository voucherUsageRepository,
     IUnitOfWork unitOfWork,
-    IInventoryOnHandReadRepository? inventoryOnHandRepository = null) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
+    IInventoryOnHandReadRepository? inventoryOnHandRepository = null,
+    IPublisher? publisher = null) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         CreateOutputCommand request,
@@ -110,11 +112,11 @@ public class CreateOutputCommandHandler(
                 if (group.Key.ProductVariantColorId.HasValue)
                 {
                     var colorOnHand = vOnHands.FirstOrDefault(x => x.ProductVariantColorId == group.Key.ProductVariantColorId.Value);
-                    availableStock = colorOnHand?.StockQty ?? 0;
+                    availableStock = Math.Max(0, (colorOnHand?.StockQty ?? 0) - (colorOnHand?.OrderedQty ?? 0));
                 }
                 else
                 {
-                    availableStock = vOnHands.Sum(x => x.StockQty);
+                    availableStock = Math.Max(0, vOnHands.Sum(x => x.StockQty - x.OrderedQty));
                 }
             }
             else
@@ -313,6 +315,19 @@ public class CreateOutputCommandHandler(
             }
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var combos = new HashSet<(int VariantId, int? ColorId)>();
+        foreach (var info in output.OutputInfos)
+        {
+            if (info.ProductVariantId.HasValue)
+            {
+                combos.Add((info.ProductVariantId.Value, info.ProductVariantColorId));
+            }
+        }
+        if (publisher != null && combos.Count > 0)
+        {
+            await publisher.Publish(new InventoryChangedNotification(combos), cancellationToken)
+                .ConfigureAwait(false);
+        }
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);
         return created.Adapt<OrderDetailResponse>();

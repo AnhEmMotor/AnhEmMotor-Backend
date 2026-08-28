@@ -85,4 +85,17 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
             .ToListAsync(cancellationToken);
         return shipments;
     }
+
+    public async Task<Domain.Entities.Logistics.Shipment?> GetByTrackingNumberAsync(
+        string trackingNumber,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Shipments
+            .Include(s => s.Items)
+            .ThenInclude(i => i.ProductVariant)
+            .ThenInclude(pv => pv!.Product)
+            .Include(s => s.Items)
+            .ThenInclude(i => i.ProductVariantColor)
+            .FirstOrDefaultAsync(s => s.TrackingNumber == trackingNumber, cancellationToken);
+    }
 }

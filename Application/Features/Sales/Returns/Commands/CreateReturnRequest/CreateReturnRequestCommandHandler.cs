@@ -31,7 +31,7 @@ public class CreateReturnRequestCommandHandler : IRequestHandler<CreateReturnReq
 
     public async Task<Result<ReturnRequestResponse>> Handle(CreateReturnRequestCommand request, CancellationToken cancellationToken)
     {
-        var order = await _outputRepository.GetByIdAsync(request.OrderId, cancellationToken);
+        var order = await _outputRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken);
         if (order == null)
         {
             return Result<ReturnRequestResponse>.Failure("Order not found");
@@ -101,13 +101,23 @@ public class CreateReturnRequestCommandHandler : IRequestHandler<CreateReturnReq
                     productId = variant.ProductId;
                 }
 
+                var matchingOutputInfo = order.OutputInfos.FirstOrDefault(oi =>
+                    (i.VariantId.HasValue && oi.ProductVariantId == i.VariantId && (!i.ColorId.HasValue || oi.ProductVariantColorId == i.ColorId)) ||
+                    (oi.ProductVariant != null && oi.ProductVariant.ProductId == productId));
+
+                var variantId = i.VariantId ?? matchingOutputInfo?.ProductVariantId;
+                var colorId = i.ColorId ?? matchingOutputInfo?.ProductVariantColorId;
+                var unitPrice = i.UnitPrice > 0 ? i.UnitPrice : (matchingOutputInfo?.Price ?? 0);
+
                 return new ReturnRequestItem
                 {
                     ProductId = productId,
-                    ProductName = i.ProductName,
+                    ProductVariantId = variantId,
+                    ProductVariantColorId = colorId,
+                    ProductName = !string.IsNullOrWhiteSpace(i.ProductName) ? i.ProductName : (matchingOutputInfo?.ProductVariant?.Product?.Name ?? ""),
                     Quantity = i.Quantity,
                     ReturnQuantity = i.Quantity,
-                    UnitPrice = i.UnitPrice,
+                    UnitPrice = unitPrice,
                     Sku = "",
                 };
             }).ToList()
@@ -132,6 +142,8 @@ public class CreateReturnRequestCommandHandler : IRequestHandler<CreateReturnReq
             {
                 Id = i.Id,
                 ProductId = i.ProductId,
+                VariantId = i.ProductVariantId,
+                ColorId = i.ProductVariantColorId,
                 ProductName = i.ProductName,
                 Quantity = i.Quantity,
                 ReturnQuantity = i.ReturnQuantity,

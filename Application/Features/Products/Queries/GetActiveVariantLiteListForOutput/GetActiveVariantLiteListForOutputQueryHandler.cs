@@ -42,13 +42,13 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
                     var response = ProductMappingConfig.BuildVariantLiteResponseForInventoryReceipt(v, translations);
                     if (onHandsByVariant.TryGetValue(v.Id, out var vOnHands))
                     {
-                        response.Stock = vOnHands.Sum(x => x.StockQty);
+                        response.Stock = Math.Max(0, vOnHands.Sum(x => x.StockQty - x.OrderedQty));
                         foreach (var colorResp in response.Colors)
                         {
                             var colorOnHand = vOnHands.FirstOrDefault(x => x.ProductVariantColorId == colorResp.Id);
                             if (colorOnHand != null)
                             {
-                                colorResp.Stock = colorOnHand.StockQty;
+                                colorResp.Stock = Math.Max(0, colorOnHand.StockQty - colorOnHand.OrderedQty);
                             }
                         }
                     }
