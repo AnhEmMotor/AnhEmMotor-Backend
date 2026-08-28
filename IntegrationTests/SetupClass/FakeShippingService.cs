@@ -35,4 +35,9 @@ public class FakeShippingService : IShippingService
     public Task<Result<bool>> SwitchToReturnOrderAsync(
         string orderCode,
         CancellationToken cancellationToken = default) => Task.FromResult(Result<bool>.Success(true));
+
+    public Task<Result<string>> CreateReturnPickupOrderAsync(
+        Output output,
+        ReturnRequest returnRequest,
+        CancellationToken cancellationToken = default) => Task.FromResult(Result<string>.Success("MockReturnTrackingNumber"));
 }

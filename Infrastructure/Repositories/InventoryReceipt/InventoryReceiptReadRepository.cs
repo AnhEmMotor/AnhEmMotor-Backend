@@ -237,6 +237,20 @@ namespace Infrastructure.Repositories.InventoryReceipt
             return query.ToListAsync(cancellationToken);
         }
 
+        public async Task<List<InventoryReceiptInfoEntity>> GetInfosByVariantIdsAsync(
+            IEnumerable<int> variantIds,
+            CancellationToken cancellationToken)
+        {
+            var ids = variantIds.Distinct().ToList();
+            if (ids.Count == 0) return [];
+            return await context.InventoryReceiptInfos
+                .Where(x => x.DeletedAt == null && x.InventoryReceipt != null && x.InventoryReceipt.DeletedAt == null)
+                .Include(x => x.InventoryReceipt)
+                .Include(x => x.PurchaseRequestItem)
+                .Where(x => x.PurchaseRequestItem != null && ids.Contains(x.PurchaseRequestItem.ProductVariantId))
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<List<InventoryReceiptAuditLog>> GetAuditLogsAsync(
             int inventoryReceiptId,
             CancellationToken cancellationToken)

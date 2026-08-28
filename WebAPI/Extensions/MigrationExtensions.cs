@@ -62,6 +62,7 @@ public static class MigrationExtensions
         await FinanceContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await SalesContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await ReturnableOrderSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
