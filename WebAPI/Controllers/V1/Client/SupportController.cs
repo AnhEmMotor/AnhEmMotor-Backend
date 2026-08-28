@@ -1,10 +1,10 @@
 using Application.ApiContracts.Client.Support;
 using Application.Features.Client.Support;
 using Application.Features.Contacts.Queries.GetMyFeedbacks;
+using Application.Interfaces.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1.Client;
 
@@ -16,8 +16,13 @@ namespace WebAPI.Controllers.V1.Client;
 public class SupportController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserContext _currentUserContext;
 
-    public SupportController(IMediator mediator) => _mediator = mediator;
+    public SupportController(IMediator mediator, ICurrentUserContext currentUserContext)
+    {
+        _mediator = mediator;
+        _currentUserContext = currentUserContext;
+    }
 
     /// <summary>
     /// Lấy danh sách câu hỏi thường gặp (FAQ), có thể tìm kiếm.
@@ -54,17 +59,13 @@ public class SupportController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách ý kiến đóng góp của khách hàng. Nếu chưa có sẽ tự tạo data mẫu để test.
+    /// Lấy danh sách ý kiến đóng góp của khách hàng đang đăng nhập.
     /// </summary>
     [HttpGet("my-feedbacks")]
     [Authorize]
     public async Task<IActionResult> GetMyFeedbacks()
     {
-        var phone = User.FindFirst(ClaimTypes.MobilePhone)?.Value ?? User.FindFirst("phone_number")?.Value ?? string.Empty;
-        var name = User.Identity?.Name ?? "Khách hàng";
-        var email = User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
-
-        var result = await _mediator.Send(new GetMyFeedbacksQuery(phone, name, email));
+        var result = await _mediator.Send(new GetMyFeedbacksQuery(_currentUserContext.GetUserId()));
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }
