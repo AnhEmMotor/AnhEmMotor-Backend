@@ -92,4 +92,37 @@ public class WorkshopPaymentsController(IMediator mediator) : ApiController
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Tạo mới phiếu thu xưởng.
+    /// </summary>
+    [HttpPost]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.Create)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] Application.Features.WorkshopPayments.Commands.CreateWorkshopPaymentCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật phiếu thu xưởng.
+    /// </summary>
+    [HttpPut("{id:int}")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.Create)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] Application.Features.WorkshopPayments.Commands.UpdateWorkshopPaymentCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest(new ErrorResponse("ID không khớp."));
+        }
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 }
