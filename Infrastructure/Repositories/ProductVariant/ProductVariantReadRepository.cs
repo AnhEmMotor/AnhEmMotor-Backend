@@ -104,6 +104,16 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
+                .Include(
+                    v => v.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
+                .Include(
+                    v => v.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
+                .ThenInclude(oi => oi.OutputOrder)
                 .AsSplitQuery()
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<ProductVariantEntity>>(t => t.Result, cancellationToken);
@@ -186,6 +196,10 @@ namespace Infrastructure.Repositories.ProductVariant
                     v => v.InventoryReceiptInfos
                         .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
                 .ThenInclude(ii => ii.InventoryReceipt)
+                .Include(
+                    v => v.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.PurchaseRequestItem)
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder)
                 .AsSplitQuery();

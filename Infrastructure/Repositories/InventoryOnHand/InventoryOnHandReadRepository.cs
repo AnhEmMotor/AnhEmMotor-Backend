@@ -27,6 +27,22 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                 cancellationToken);
     }
 
+    public async Task<List<InventoryOnHandEntity>> GetByVariantIdsAsync(
+        IEnumerable<int> variantIds,
+        int? month,
+        int? year,
+        CancellationToken cancellationToken)
+    {
+        var ids = variantIds.Distinct().ToList();
+        if (ids.Count == 0) return [];
+        var targetMonth = month ?? DateTimeOffset.UtcNow.Month;
+        var targetYear = year ?? DateTimeOffset.UtcNow.Year;
+        return await context.InventoryOnHands
+            .AsNoTracking()
+            .Where(x => ids.Contains(x.ProductVariantId) && x.Month == targetMonth && x.Year == targetYear)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<List<InventoryReportSummaryRowResponse>> GetInventoryReportSummaryRowsAsync(
         string? searchTerm,
         int? month,

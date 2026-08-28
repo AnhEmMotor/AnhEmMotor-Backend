@@ -1,6 +1,8 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Features.Products.Mappings;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.InventoryOnHand;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
@@ -26,7 +28,8 @@ public class CreateOutputCommandHandler(
     IShippingService shippingService,
     IVoucherReadRepository voucherReadRepository,
     IVoucherUsageRepository voucherUsageRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
+    IUnitOfWork unitOfWork,
+    IInventoryOnHandReadRepository? inventoryOnHandRepository = null) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         CreateOutputCommand request,
@@ -57,6 +60,11 @@ public class CreateOutputCommandHandler(
                     "Products");
             }
         }
+        var onHands = inventoryOnHandRepository != null
+            ? await inventoryOnHandRepository.GetByVariantIdsAsync(variantIds, null, null, cancellationToken).ConfigureAwait(false)
+            : [];
+        var onHandsByVariant = onHands.GroupBy(x => x.ProductVariantId).ToDictionary(g => g.Key, g => g.ToList());
+
         var errors = new List<Error>();
         for (int i = 0; i < request.OutputInfos.Count; i++)
         {
@@ -95,21 +103,49 @@ public class CreateOutputCommandHandler(
             {
                 continue;
             }
+            var totalCount = group.Sum(x => x.Info.Count ?? 0);
+            int availableStock = 0;
+            if (inventoryOnHandRepository != null && onHandsByVariant.TryGetValue(group.Key.ProductVariantId, out var vOnHands))
+            {
+                if (group.Key.ProductVariantColorId.HasValue)
+                {
+                    var colorOnHand = vOnHands.FirstOrDefault(x => x.ProductVariantColorId == group.Key.ProductVariantColorId.Value);
+                    availableStock = colorOnHand?.StockQty ?? 0;
+                }
+                else
+                {
+                    availableStock = vOnHands.Sum(x => x.StockQty);
+                }
+            }
+            else
+            {
+                availableStock = ProductMappingConfig.CalculateVariantAvailableStock(variant, group.Key.ProductVariantColorId);
+            }
+            if (totalCount > availableStock)
+            {
+                var nameParts = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
+                    part => !string.IsNullOrWhiteSpace(part));
+                errors.Add(
+                    Error.BadRequest(
+                        $"Sản phẩm '{string.Join(" - ", nameParts)}' không đủ tồn kho (Còn lại: {availableStock}, yêu cầu: {totalCount}).",
+                        $"products[{group.Min(x => x.Index)}]"));
+                continue;
+            }
+
             var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant, color);
             if (!effectiveMax.HasValue)
             {
                 continue;
             }
-            var totalCount = group.Sum(x => x.Info.Count ?? 0);
             if (totalCount <= effectiveMax.Value)
             {
                 continue;
             }
-            var nameParts = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
+            var namePartsMax = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
                 part => !string.IsNullOrWhiteSpace(part));
             errors.Add(
                 Error.BadRequest(
-                    $"Số lượng mua tối đa cho sản phẩm '{string.Join(" - ", nameParts)}' là {effectiveMax.Value} sản phẩm.",
+                    $"Số lượng mua tối đa cho sản phẩm '{string.Join(" - ", namePartsMax)}' là {effectiveMax.Value} sản phẩm.",
                     $"products[{group.Min(x => x.Index)}]"));
         }
         if (errors.Count > 0)
