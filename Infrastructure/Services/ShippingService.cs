@@ -56,7 +56,7 @@ public class ShippingService(
                 to_address_v2 = req.ToAddressV2,
                 is_new_to_address = req.IsNewToAddress,
                 to_ward_code = req.ToWardCode,
-                service_type_id = 5,
+                service_type_id = 2,
                 weight = totalWeight,
                 length = maxLength,
                 width = maxWidth,
@@ -168,7 +168,7 @@ public class ShippingService(
                 width = maxWidth,
                 height = totalHeight,
                 insurance_value = (int)output.Total,
-                service_type_id = 5,
+                service_type_id = 2,
                 items = products
             };
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
@@ -283,7 +283,7 @@ public class ShippingService(
                 width = 15,
                 height = 15,
                 insurance_value = 0,
-                service_type_id = 5,
+                service_type_id = 2,
                 items = products
             };
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
