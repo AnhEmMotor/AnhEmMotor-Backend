@@ -67,5 +67,6 @@ public static class MigrationExtensions
         await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
         await ReturnRequestSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await InvoiceSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
     }
 }
