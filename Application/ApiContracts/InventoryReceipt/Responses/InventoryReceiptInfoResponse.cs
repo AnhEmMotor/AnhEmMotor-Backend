@@ -17,6 +17,8 @@ public class InventoryReceiptInfoResponse
 
     public string? Name { get; set; }
 
+    public string? VariantName { get; set; }
+
     public int? Quantity { get; set; }
 
     public int? RemainingCount { get; set; }

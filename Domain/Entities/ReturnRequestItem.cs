@@ -14,6 +14,12 @@ namespace Domain.Entities
 
         public int ProductId { get; set; }
 
+        [NotMapped]
+        public int? ProductVariantId { get; set; }
+
+        [NotMapped]
+        public int? ProductVariantColorId { get; set; }
+
         public string ProductName { get; set; } = string.Empty;
 
         public string Sku { get; set; } = string.Empty;
@@ -32,5 +38,11 @@ namespace Domain.Entities
 
         [ForeignKey("ProductId")]
         public virtual Product? Product { get; set; }
+
+        [NotMapped]
+        public virtual ProductVariant? ProductVariant { get; set; }
+
+        [NotMapped]
+        public virtual ProductVariantColor? ProductVariantColor { get; set; }
     }
 }

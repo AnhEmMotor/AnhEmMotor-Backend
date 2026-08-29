@@ -87,21 +87,11 @@ public class InventoryOnHandUpdateRepository(ApplicationDBContext context) : IIn
                 int orderedQty = 0;
                 if (y == currentYear && m == currentMonth)
                 {
-                    var orderedStatuses = new[]
-                    {
-                        OrderStatus.Pending,
-                        OrderStatus.WaitingDeposit,
-                        OrderStatus.DepositPaid,
-                        OrderStatus.WaitingInstallment,
-                        OrderStatus.InstallmentApproved,
-                        OrderStatus.ConfirmedCod,
-                        OrderStatus.PaidProcessing
-                    };
                     orderedQty = await context.OutputInfos
                         .Where(
                             x => x.ProductVariantId == productVariantId &&
                                 x.ProductVariantColorId == productVariantColorId)
-                        .Where(x => x.OutputOrder != null && orderedStatuses.Contains(x.OutputOrder.StatusId))
+                        .Where(x => x.OutputOrder != null && x.OutputOrder.StatusId != null && OrderStatus.BookingPhases.Contains(x.OutputOrder.StatusId))
                         .SumAsync(x => x.Count ?? 0, cancellationToken)
                         .ConfigureAwait(false);
                 }

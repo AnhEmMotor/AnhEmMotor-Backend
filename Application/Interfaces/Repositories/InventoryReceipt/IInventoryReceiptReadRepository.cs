@@ -74,5 +74,10 @@ public interface IInventoryReceiptReadRepository
     public Task<List<VehicleAuditLog>> GetVehicleAuditLogsAsync(
         int inventoryReceiptId,
         CancellationToken cancellationToken);
+
+    public Task<List<InventoryReceiptEntity>> GetBySourceOrderIdAsync(
+        int sourceOrderId,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 }
 

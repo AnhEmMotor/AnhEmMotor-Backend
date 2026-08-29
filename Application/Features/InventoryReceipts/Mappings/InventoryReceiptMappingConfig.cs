@@ -32,7 +32,7 @@ namespace Application.Features.InventoryReceipts.Mappings
                         ? src.InventoryReceiptInfos
                             .FirstOrDefault(
                                 x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.Supplier!.Name
-                        : null)
+                        : (src.SourceOrderId != null ? "Khách hàng hoàn hàng" : null))
                 .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
                 .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
                 .Map(
@@ -66,7 +66,7 @@ namespace Application.Features.InventoryReceipts.Mappings
                         ? src.InventoryReceiptInfos
                             .FirstOrDefault(
                                 x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.Supplier!.Name
-                        : null)
+                        : (src.SourceOrderId != null ? "Khách hàng hoàn hàng" : null))
                 .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
                 .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
                 .Map(
@@ -80,15 +80,21 @@ namespace Application.Features.InventoryReceipts.Mappings
             config.NewConfig<InventoryReceiptInfo, InventoryReceiptInfoResponse>()
                 .Map(
                     dest => dest.ProductVariantId,
-                    src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.ProductVariantId : (int?)null)
+                    src => src.PurchaseRequestItem != null
+                        ? src.PurchaseRequestItem.ProductVariantId
+                        : (src.ParentOutputInfo != null ? src.ParentOutputInfo.ProductVariantId : (int?)null))
                 .Map(
                     dest => dest.ProductVariantColorId,
-                    src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.ProductVariantColorId : (int?)null)
+                    src => src.PurchaseRequestItem != null
+                        ? src.PurchaseRequestItem.ProductVariantColorId
+                        : (src.ParentOutputInfo != null ? src.ParentOutputInfo.ProductVariantColorId : (int?)null))
                 .Map(
                     dest => dest.ProductVariantColorName,
                     src => src.PurchaseRequestItem != null && src.PurchaseRequestItem.ProductVariantColor != null
                         ? src.PurchaseRequestItem.ProductVariantColor.ColorName
-                        : null)
+                        : (src.ParentOutputInfo != null && src.ParentOutputInfo.ProductVariantColor != null
+                            ? src.ParentOutputInfo.ProductVariantColor.ColorName
+                            : null))
                 .Map(
                     dest => dest.SupplierId,
                     src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.SupplierId : (int?)null)
@@ -96,21 +102,38 @@ namespace Application.Features.InventoryReceipts.Mappings
                     dest => dest.SupplierName,
                     src => src.PurchaseRequestItem != null && src.PurchaseRequestItem.Supplier != null
                         ? src.PurchaseRequestItem.Supplier.Name
-                        : null)
+                        : (src.ParentOutputInfo != null ? "Khách hàng hoàn hàng" : null))
                 .Map(
                     dest => dest.Name,
                     src => src.PurchaseRequestItem != null &&
                             src.PurchaseRequestItem.ProductVariant != null &&
                             src.PurchaseRequestItem.ProductVariant.Product != null
                         ? src.PurchaseRequestItem.ProductVariant.Product.Name
-                        : null)
+                        : (src.ParentOutputInfo != null &&
+                                src.ParentOutputInfo.ProductVariant != null &&
+                                src.ParentOutputInfo.ProductVariant.Product != null
+                            ? src.ParentOutputInfo.ProductVariant.Product.Name
+                            : (src.PurchaseRequestItem != null && src.PurchaseRequestItem.ProductVariant != null
+                                ? src.PurchaseRequestItem.ProductVariant.VariantName
+                                : (src.ParentOutputInfo != null && src.ParentOutputInfo.ProductVariant != null
+                                    ? src.ParentOutputInfo.ProductVariant.VariantName
+                                    : null))))
+                .Map(
+                    dest => dest.VariantName,
+                    src => src.PurchaseRequestItem != null && src.PurchaseRequestItem.ProductVariant != null
+                        ? src.PurchaseRequestItem.ProductVariant.VariantName
+                        : (src.ParentOutputInfo != null && src.ParentOutputInfo.ProductVariant != null
+                            ? src.ParentOutputInfo.ProductVariant.VariantName
+                            : null))
                 .Map(dest => dest.Quantity, src => src.Count)
                 .Map(
                     dest => dest.UnitPrice,
-                    src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.UnitPrice : null)
+                    src => src.PurchaseRequestItem != null
+                        ? src.PurchaseRequestItem.UnitPrice
+                        : (src.ParentOutputInfo != null ? (src.ParentOutputInfo.Price ?? src.ParentOutputInfo.CostPrice) : null))
                 .Map(
                     dest => dest.OrderedQuantity,
-                    src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.Quantity : (int?)null)
+                    src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.Quantity : src.Count)
                 .Map(
                     dest => dest.MaxAllowedQuantity,
                     src => src.PurchaseRequestItem != null
@@ -134,7 +157,7 @@ namespace Application.Features.InventoryReceipts.Mappings
                                                             Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase)))
                                 .Sum(ii => ii.Count ?? 0)
-                        : (int?)null)
+                        : src.Count)
                 .Map(dest => dest.PurchaseRequestItemId, src => src.PurchaseRequestItemId)
                 .Map(dest => dest.Vehicles, src => src.Vehicles);
         }

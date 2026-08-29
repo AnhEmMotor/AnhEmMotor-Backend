@@ -60,9 +60,11 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
         }
 
         bool deferredRestock = false;
+        var output = await _outputReadRepository.GetByIdWithDetailsAsync(returnRequest.OrderId, cancellationToken, Domain.Constants.DataFetchMode.All)
+            ?? await _outputReadRepository.GetByIdAsync(returnRequest.OrderId, cancellationToken, Domain.Constants.DataFetchMode.All);
+
         if (request.Status == "completed")
         {
-            var output = await _outputReadRepository.GetByIdAsync(returnRequest.OrderId, cancellationToken, Domain.Constants.DataFetchMode.All);
             if (output != null)
             {
                 // Gọi GHN tạo đơn thu hồi (từ địa chỉ khách/đơn hàng về Kho / Showroom)
@@ -86,16 +88,23 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
                         Type = Domain.Constants.Logistics.ShipmentType.ReturnDelivery,
                         OutputId = output.Id,
                         Status = ParcelDeliveryStatus.Shipping,
-                        Items = returnRequest.Items.Select(i => new ShipmentItem
+                        Items = returnRequest.Items.Select(i =>
                         {
-                            Quantity = i.Quantity,
-                            ProductVariantId = null,
+                            var matchingInfo = output.OutputInfos.FirstOrDefault(oi =>
+                                (i.ProductVariantId.HasValue && oi.ProductVariantId == i.ProductVariantId && (!i.ProductVariantColorId.HasValue || oi.ProductVariantColorId == i.ProductVariantColorId)) ||
+                                (oi.ProductVariant != null && oi.ProductVariant.ProductId == i.ProductId));
+
+                            return new ShipmentItem
+                            {
+                                Quantity = i.Quantity,
+                                ProductVariantId = i.ProductVariantId ?? matchingInfo?.ProductVariantId,
+                                ProductVariantColorId = i.ProductVariantColorId ?? matchingInfo?.ProductVariantColorId,
+                            };
                         }).ToList()
                     };
                     await _shipmentInsertRepository.AddAsync(returnShipment, cancellationToken);
                     returnRequest.OriginalTrackingNumber = carrierResult.Value;
-                    deferredRestock = true; // Hàng sẽ được nhập kho khi Webhook GHN báo hàng hoàn về kho
-                    _logger?.LogInformation("Successfully created GHN return shipment {TrackingNumber} for ReturnRequest #{ReturnRequestId}", carrierResult.Value, returnRequest.Id);
+                    deferredRestock = true;
                 }
                 else
                 {
@@ -115,18 +124,34 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
         returnRequest.RejectionReason = request.RejectionReason;
         returnRequest.Note = request.Note;
 
-        if (request.Status == "completed" && request.ReturnAction == "restock" && !deferredRestock)
+        if (request.Status != "rejected" && request.ReturnAction == "restock")
         {
+            var receiptStatus = deferredRestock
+                ? Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent
+                : Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve;
+
             var receipt = new InventoryReceipt
             {
                 InventoryReceiptDate = DateTimeOffset.UtcNow,
                 Notes = $"Restock from Return Request #{returnRequest.Id}",
-                StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
+                StatusId = receiptStatus,
                 SourceOrderId = returnRequest.OrderId,
-                InventoryReceiptInfos = returnRequest.Items.Select(i => new InventoryReceiptInfo
+                InventoryReceiptInfos = returnRequest.Items.Select(i =>
                 {
-                    Count = i.Quantity,
-                    RemainingCount = i.Quantity
+                    var matchingInfo = output?.OutputInfos.FirstOrDefault(oi =>
+                        (i.ProductVariantId.HasValue && oi.ProductVariantId == i.ProductVariantId && (!i.ProductVariantColorId.HasValue || oi.ProductVariantColorId == i.ProductVariantColorId)) ||
+                        (oi.ProductVariant != null && oi.ProductVariant.ProductId == i.ProductId));
+
+                    var variantId = i.ProductVariantId ?? matchingInfo?.ProductVariantId;
+                    var colorId = i.ProductVariantColorId ?? matchingInfo?.ProductVariantColorId;
+                    var unitPrice = i.UnitPrice > 0 ? i.UnitPrice : (matchingInfo?.Price ?? 0);
+
+                    return new InventoryReceiptInfo
+                    {
+                        ParentOutputInfoId = matchingInfo?.Id,
+                        Count = i.Quantity,
+                        RemainingCount = i.Quantity
+                    };
                 }).ToList()
             };
 

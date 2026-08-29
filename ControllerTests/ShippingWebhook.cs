@@ -81,4 +81,46 @@ public class ShippingWebhook
         shipment.DeliveredAt.Should().NotBeNull();
         _shipmentUpdateMock.Verify(repository => repository.Update(shipment), Times.Once);
     }
+
+    [Fact(DisplayName = "HOOK_003 - Webhook Return Delivery 'delivered': gửi arrival restock + chuyển đơn sang refunded")]
+    public async Task ReturnDelivery_DeliveredStatus_TriggersArrivalAndRefunded()
+    {
+        var shipment = new Shipment
+        {
+            TrackingNumber = "GHN-RET-42",
+            OutputId = 42,
+            Type = Domain.Constants.Logistics.ShipmentType.ReturnDelivery
+        };
+        _shipmentReadMock
+            .Setup(repository => repository.GetByTrackingNumberAsync("GHN-RET-42", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(shipment);
+        _shipmentReadMock
+            .Setup(repository => repository.GetByOutputIdAsync(42, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(shipment);
+        _unitOfWorkMock
+            .Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var request = new GhnWebhookRequest
+        {
+            ClientOrderCode = "GHN-RETURN-42-1-1717000000",
+            OrderCode = "GHN-RET-42",
+            Status = "delivered"
+        };
+
+        var result = await _controller.HandleGhnWebhook(request);
+
+        result.Should().BeOfType<OkResult>();
+        _senderMock.Verify(
+            sender => sender.Send(
+                It.Is<ProcessReturnArrivalCommand>(command => command.OutputId == 42),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+        _senderMock.Verify(
+            sender => sender.Send(
+                It.Is<UpdateOutputStatusCommand>(command =>
+                    command.Id == 42 && command.StatusId == "refunded"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }
