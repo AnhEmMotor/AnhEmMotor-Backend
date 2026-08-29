@@ -84,9 +84,7 @@ public sealed class GetPaymentLinkQueryHandler(
         {
             return Result<PaymentLinkResponse>.Success(new PaymentLinkResponse(order.PaymentUrl!));
         }
-        var amountToPay = string.Compare(order.StatusId, OrderStatus.WaitingDeposit) == 0
-            ? order.DepositAmount
-            : order.Total;
+        var amountToPay = Application.Common.Payments.OrderPaymentAmountCalculator.GetAmountToPay(order);
         if (string.Compare(paymentMethod, PaymentMethod.VNPay) == 0)
         {
             var vnpayRequest = new VNPayPaymentRequest

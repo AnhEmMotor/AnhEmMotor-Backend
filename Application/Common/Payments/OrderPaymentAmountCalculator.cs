@@ -13,7 +13,7 @@ public static class OrderPaymentAmountCalculator
     public static decimal GetTotal(Output order)
     {
         var subtotal = GetSubtotal(order);
-        var shippingFee = subtotal > 0 && subtotal <= 10000000 ? 200000 : 0;
+        var shippingFee = order.ShippingFee ?? 0;
         return subtotal + shippingFee;
     }
 

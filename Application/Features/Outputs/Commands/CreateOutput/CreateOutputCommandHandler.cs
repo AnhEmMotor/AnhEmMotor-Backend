@@ -208,7 +208,7 @@ public class CreateOutputCommandHandler(
                 output.ShippingFee = feeResult.Value;
         }
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
+        var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0)) + (output.ShippingFee ?? 0);
         bool hasVehicle = false;
         bool hasPart = false;
         bool hasAccessory = false;
