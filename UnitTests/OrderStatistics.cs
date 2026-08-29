@@ -28,6 +28,9 @@ public class OrderStatistics
                     new() { Id = 4, StatusId = "cancelled", PaymentStatus = "Failed", CreatedAt = today.AddHours(2) }
                 });
         returnRequestRepository
+            .Setup(repository => repository.GetActiveReturnRequestsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ReturnRequest>());
+        returnRequestRepository
             .Setup(repository => repository.CountAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(2);
 
@@ -52,6 +55,9 @@ public class OrderStatistics
         outputRepository
             .Setup(repository => repository.GetOrderStatisticsDataAsync(It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new List<Output>());
+        returnRequestRepository
+            .Setup(repository => repository.GetActiveReturnRequestsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ReturnRequest>());
         returnRequestRepository
             .Setup(repository => repository.CountAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(0);

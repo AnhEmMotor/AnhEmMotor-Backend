@@ -75,6 +75,18 @@ public class ReturnRequestReadRepository : IReturnRequestReadRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<ReturnRequestEntity>> GetActiveReturnRequestsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ReturnRequests
+            .Include(x => x.Order)
+            .ThenInclude(o => o!.OutputInfos)
+            .AsNoTracking()
+            .Where(x => x.Status == "pending" || x.Status == "inspecting")
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<List<ReturnRequestEntity>> GetByOrderIdAsync(
         int orderId,
         CancellationToken cancellationToken = default)

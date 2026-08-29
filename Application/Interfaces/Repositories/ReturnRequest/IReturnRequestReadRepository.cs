@@ -20,6 +20,8 @@ public interface IReturnRequestReadRepository
         int orderId,
         CancellationToken cancellationToken = default);
 
+    public Task<List<ReturnRequestEntity>> GetActiveReturnRequestsAsync(CancellationToken cancellationToken = default);
+
     public Task<List<ReturnRequestEntity>> GetByOrderIdAsync(
         int orderId,
         CancellationToken cancellationToken = default);

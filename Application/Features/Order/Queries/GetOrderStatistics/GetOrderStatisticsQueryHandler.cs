@@ -15,7 +15,21 @@ public class GetOrderStatisticsQueryHandler(
         CancellationToken cancellationToken)
     {
         var allOrders = (await outputRepository.GetOrderStatisticsDataAsync(cancellationToken).ConfigureAwait(false)).ToList();
-        var returnRequestCount = await returnRequestRepository.CountAsync(cancellationToken).ConfigureAwait(false);
+        List<Domain.Entities.ReturnRequest> activeReturnRequests = [];
+        try
+        {
+            activeReturnRequests = await returnRequestRepository.GetActiveReturnRequestsAsync(cancellationToken).ConfigureAwait(false) ?? [];
+        }
+        catch
+        {
+            // Fallback for mocks/implementations that don't support GetActiveReturnRequestsAsync yet
+            activeReturnRequests = [];
+        }
+
+        var returnRequestCount = activeReturnRequests.Count > 0
+            ? activeReturnRequests.Count
+            : await returnRequestRepository.CountAsync(cancellationToken).ConfigureAwait(false);
+
         var now = DateTimeOffset.UtcNow;
         var today = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
 
@@ -24,6 +38,7 @@ public class GetOrderStatisticsQueryHandler(
             OrderStatus.Pending,
             OrderStatus.WaitingDeposit,
             OrderStatus.WaitingInstallment,
+            OrderStatus.InstallmentApproved,
             OrderStatus.PaidProcessing,
             OrderStatus.DepositPaid,
             OrderStatus.ConfirmedCod,
@@ -38,7 +53,8 @@ public class GetOrderStatisticsQueryHandler(
             o.StatusId != null && pendingStatuses.Contains(o.StatusId) && o.CreatedAt.HasValue && o.CreatedAt.Value < now.AddHours(-24));
         var paymentErrors = allOrders.Count(o =>
             string.Equals(o.PaymentStatus, OrderPaymentStatus.Failed, StringComparison.OrdinalIgnoreCase) ||
-            (string.Equals(o.StatusId, OrderStatus.Cancelled, StringComparison.OrdinalIgnoreCase) && (o.PaidAmount ?? 0) > 0));
+            (string.Equals(o.StatusId, OrderStatus.Cancelled, StringComparison.OrdinalIgnoreCase) && (o.PaidAmount ?? 0) > 0) ||
+            string.Equals(o.StatusId, OrderStatus.Refunding, StringComparison.OrdinalIgnoreCase));
         var completedToday = allOrders.Count(o =>
             string.Equals(o.StatusId, OrderStatus.Completed, StringComparison.OrdinalIgnoreCase) &&
             (o.LastStatusChangedAt ?? o.CreatedAt) >= today);
@@ -207,6 +223,32 @@ public class GetOrderStatisticsQueryHandler(
 
         // 7. Critical / Exception Orders
         var exceptionList = new List<ExceptionOrder>();
+
+        // A. Add active return requests (type: return)
+        foreach (var r in activeReturnRequests)
+        {
+            decimal orderTotal = (r.Order?.OutputInfos?.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)) ?? 0) + (r.Order?.ShippingFee ?? 0);
+            exceptionList.Add(new ExceptionOrder
+            {
+                Id = r.OrderId,
+                OrderCode = !string.IsNullOrWhiteSpace(r.OrderCode) ? r.OrderCode : $"ORD-{r.OrderId:D5}",
+                CustomerName = !string.IsNullOrWhiteSpace(r.CustomerName) ? r.CustomerName : (!string.IsNullOrWhiteSpace(r.Order?.CustomerName) ? r.Order.CustomerName : "Khách hàng"),
+                CustomerPhone = !string.IsNullOrWhiteSpace(r.CustomerPhone) ? r.CustomerPhone : (r.Order?.CustomerPhone ?? "-"),
+                TotalAmount = orderTotal,
+                PaidAmount = r.Order?.PaidAmount ?? 0,
+                StatusId = r.Order?.StatusId ?? OrderStatus.Delivering,
+                StatusName = OrderStatus.GetDisplayName(r.Order?.StatusId ?? string.Empty),
+                PaymentStatus = r.Order?.PaymentStatus ?? string.Empty,
+                PaymentMethod = !string.IsNullOrWhiteSpace(r.Order?.PaymentMethod) ? r.Order.PaymentMethod : "Chưa chọn",
+                Issue = $"Yêu cầu đổi trả #{r.Id}: {(!string.IsNullOrWhiteSpace(r.Reason) ? r.Reason : "Đang chờ xử lý")}",
+                Type = "return",
+                WaitTime = FormatWaitTime(r.CreatedAt, now),
+                CreatedAt = r.CreatedAt,
+                DeliveryType = (r.Order?.ShippingFee.HasValue == true && r.Order.ShippingFee.Value > 0) ? "Giao tận nhà" : "Nhận tại showroom"
+            });
+        }
+
+        // B. Add pending & exception orders
         foreach (var o in allOrders.OrderByDescending(o => o.CreatedAt))
         {
             string? issue = null;
@@ -216,9 +258,6 @@ public class GetOrderStatisticsQueryHandler(
             bool isPaymentError = string.Equals(o.PaymentStatus, OrderPaymentStatus.Failed, StringComparison.OrdinalIgnoreCase);
             bool isCancelRefund = string.Equals(o.StatusId, OrderStatus.Cancelled, StringComparison.OrdinalIgnoreCase) && (o.PaidAmount ?? 0) > 0;
             bool isRefunding = string.Equals(o.StatusId, OrderStatus.Refunding, StringComparison.OrdinalIgnoreCase);
-            bool isNewPending = string.Equals(o.StatusId, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase) && o.CreatedAt.HasValue && o.CreatedAt.Value < now.AddHours(-2);
-            bool isWaitingDepositExpired = string.Equals(o.StatusId, OrderStatus.WaitingDeposit, StringComparison.OrdinalIgnoreCase) &&
-                ((o.PaymentExpiredAt.HasValue && o.PaymentExpiredAt.Value < now) || (o.CreatedAt.HasValue && o.CreatedAt.Value < now.AddHours(-12)));
 
             if (isSlaDelayed)
             {
@@ -235,15 +274,69 @@ public class GetOrderStatisticsQueryHandler(
                 issue = "Đã hủy đơn - Cần hoàn tiền cọc";
                 type = "payment";
             }
-            else if (isWaitingDepositExpired)
+            else if (string.Equals(o.StatusId, OrderStatus.WaitingDeposit, StringComparison.OrdinalIgnoreCase))
             {
-                issue = "Chờ đặt cọc quá hạn";
+                if ((o.PaymentExpiredAt.HasValue && o.PaymentExpiredAt.Value < now) || (o.CreatedAt.HasValue && o.CreatedAt.Value < now.AddHours(-12)))
+                {
+                    issue = "Chờ đặt cọc quá hạn";
+                    type = "pending";
+                }
+                else
+                {
+                    issue = "Chờ khách đặt cọc";
+                    type = "pending";
+                }
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.WaitingInstallment, StringComparison.OrdinalIgnoreCase))
+            {
+                issue = "Chờ duyệt hồ sơ trả góp";
                 type = "pending";
             }
-            else if (isNewPending)
+            else if (string.Equals(o.StatusId, OrderStatus.InstallmentApproved, StringComparison.OrdinalIgnoreCase))
             {
-                issue = "Đơn mới chờ duyệt (> 2h)";
+                issue = "Đã duyệt trả góp - Chờ xử lý đơn";
                 type = "pending";
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase))
+            {
+                if (o.CreatedAt.HasValue && o.CreatedAt.Value < now.AddHours(-2))
+                {
+                    issue = "Đơn mới chờ duyệt (> 2h)";
+                    type = "pending";
+                }
+                else
+                {
+                    issue = "Đơn mới chờ tiếp nhận";
+                    type = "pending";
+                }
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.PaidProcessing, StringComparison.OrdinalIgnoreCase))
+            {
+                issue = "Đã thanh toán - Chờ chuẩn bị hàng";
+                type = "pending";
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.DepositPaid, StringComparison.OrdinalIgnoreCase))
+            {
+                issue = "Đã đặt cọc - Chờ thanh toán & xuất kho";
+                type = "pending";
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.ConfirmedCod, StringComparison.OrdinalIgnoreCase))
+            {
+                issue = "Đã xác nhận COD - Chờ đóng gói & giao";
+                type = "pending";
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.WaitingPickup, StringComparison.OrdinalIgnoreCase))
+            {
+                issue = "Chờ khách đến nhận tại showroom";
+                type = "pending";
+            }
+            else if (string.Equals(o.StatusId, OrderStatus.Delivering, StringComparison.OrdinalIgnoreCase))
+            {
+                if (o.CreatedAt.HasValue && o.CreatedAt.Value < now.AddHours(-48))
+                {
+                    issue = "Giao hàng kéo dài (> 48h)";
+                    type = "sla";
+                }
             }
 
             if (issue != null)
@@ -272,6 +365,18 @@ public class GetOrderStatisticsQueryHandler(
             }
         }
 
+        var sortedExceptionList = exceptionList
+            .OrderBy(e => e.Type switch
+            {
+                "sla" => 1,
+                "payment" => 2,
+                "return" => 3,
+                _ => 4
+            })
+            .ThenByDescending(e => e.CreatedAt)
+            .Take(100)
+            .ToList();
+
         var response = new OrderStatisticsResponse
         {
             PendingOrders = pendingOrders,
@@ -290,7 +395,7 @@ public class GetOrderStatisticsQueryHandler(
             DeliveryMethodData = deliveryMethodData,
             PaymentMethodData = paymentMethodData,
             ChannelData = channelData,
-            ExceptionOrders = exceptionList.Take(50).ToList()
+            ExceptionOrders = sortedExceptionList
         };
 
         return Result<OrderStatisticsResponse>.Success(response);
