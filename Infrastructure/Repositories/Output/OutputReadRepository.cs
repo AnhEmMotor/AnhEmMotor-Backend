@@ -197,11 +197,23 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             {
                 Id = o.Id,
                 CustomerName = o.CustomerName,
+                CustomerPhone = o.CustomerPhone,
                 StatusId = o.StatusId,
                 PaymentStatus = o.PaymentStatus,
+                PaymentMethod = o.PaymentMethod,
                 PaidAmount = o.PaidAmount,
+                ShippingFee = o.ShippingFee,
+                CreatedBy = o.CreatedBy,
+                LeadId = o.LeadId,
                 CreatedAt = o.CreatedAt,
-                LastStatusChangedAt = o.LastStatusChangedAt
+                LastStatusChangedAt = o.LastStatusChangedAt,
+                PaymentExpiredAt = o.PaymentExpiredAt,
+                OutputInfos = o.OutputInfos.Select(oi => new Domain.Entities.OutputInfo
+                {
+                    Id = oi.Id,
+                    Price = oi.Price,
+                    Count = oi.Count
+                }).ToList()
             })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

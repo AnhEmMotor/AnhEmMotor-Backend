@@ -61,7 +61,8 @@ public class OrderStatistics
 
         result.Value.PendingOrders.Should().Be(0);
         result.Value.CompletedToday.Should().Be(0);
-        result.Value.HourlyData.Should().BeEmpty();
+        result.Value.HourlyData.Should().HaveCount(24);
+        result.Value.HourlyData.All(h => h.Count == 0).Should().BeTrue();
         result.Value.ExceptionOrders.Should().BeEmpty();
     }
-}
+}

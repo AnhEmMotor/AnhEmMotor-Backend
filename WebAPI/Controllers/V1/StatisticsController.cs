@@ -295,6 +295,11 @@ public class StatisticsController(
     /// <summary>
     /// Lấy thống kê tổng quan về đơn hàng (hàng đợi, SLA, lỗi, ngoại lệ).
     /// </summary>
+    /// <param name="startDate">Ngày bắt đầu lọc (tuỳ chọn, ISO 8601).</param>
+    /// <param name="endDate">Ngày kết thúc lọc (tuỳ chọn, ISO 8601).</param>
+    /// <param name="channel">Kênh bán hàng (online/offline, tuỳ chọn).</param>
+    /// <param name="paymentMethod">Phương thức thanh toán (tuỳ chọn).</param>
+    /// <param name="statusId">Trạng thái đơn hàng (tuỳ chọn).</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Dữ liệu thống kê đơn hàng chi tiết.</returns>
     /// <response code="200">Trả về thống kê đơn hàng thành công.</response>
@@ -302,11 +307,25 @@ public class StatisticsController(
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
         Permissions.Accountant.DashboardManagement.View,
-        Permissions.Factory.DashboardManagement.View)]
+        Permissions.Factory.DashboardManagement.View,
+        Permissions.Order.OrderManagement.View)]
     [ProducesResponseType(typeof(OrderStatisticsResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOrderStatisticsAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOrderStatisticsAsync(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] string? channel,
+        [FromQuery] string? paymentMethod,
+        [FromQuery] string? statusId,
+        CancellationToken cancellationToken)
     {
-        var query = new GetOrderStatisticsQuery();
+        var query = new GetOrderStatisticsQuery
+        {
+            StartDate = startDate,
+            EndDate = endDate,
+            Channel = channel,
+            PaymentMethod = paymentMethod,
+            StatusId = statusId
+        };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
