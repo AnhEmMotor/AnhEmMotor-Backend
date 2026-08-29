@@ -12,6 +12,7 @@ using Domain.Constants.Order;
 using Domain.Entities;
 using Domain.Entities.Logistics;
 using Domain.Constants.Logistics;
+using Application.Features.InventoryOnHand.Notifications;
 using Mapster;
 using MediatR;
 
@@ -26,7 +27,8 @@ public class CreateOutputByManagerCommandHandler(
     ISettingRepository settingRepository,
     IShippingService shippingService,
     IUnitOfWork unitOfWork,
-    IShipmentInsertRepository? shipmentInsertRepository = null) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
+    IShipmentInsertRepository? shipmentInsertRepository = null,
+    IPublisher? publisher = null) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         CreateOutputByManagerCommand request,
@@ -205,6 +207,23 @@ public class CreateOutputByManagerCommandHandler(
                     cancellationToken).ConfigureAwait(false);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+        }
+        else
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        var combos = new HashSet<(int VariantId, int? ColorId)>();
+        foreach (var info in output.OutputInfos)
+        {
+            if (info.ProductVariantId.HasValue)
+            {
+                combos.Add((info.ProductVariantId.Value, info.ProductVariantColorId));
+            }
+        }
+        if (publisher != null && combos.Count > 0)
+        {
+            await publisher.Publish(new InventoryChangedNotification(combos), cancellationToken)
+                .ConfigureAwait(false);
         }
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);

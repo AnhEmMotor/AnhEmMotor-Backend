@@ -23,6 +23,7 @@ using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
+using Application.Features.Outputs.Queries.GetReturnableOutputById;
 using Application.Features.Outputs.Queries.GetProvinces;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
@@ -281,6 +282,26 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     public async Task<IActionResult> GetOutputByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetOutputByIdQuery() { Id = id };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết đơn hàng cho mục đích hoàn trả, chỉ lấy các sản phẩm đủ điều kiện hoàn hàng (không phải xe máy và chưa gán mã VIN).
+    /// </summary>
+    /// <param name="id">ID của đơn hàng/phiếu xuất.</param>
+    /// <param name="cancellationToken">Token hủy tác vụ.</param>
+    /// <returns>Chi tiết đơn hàng kèm danh sách sản phẩm hợp lệ để hoàn trả.</returns>
+    [HttpGet("{id:int}/returnable-items")]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.DraftOrderManagement.View,
+        Permissions.Order.SalesInvoiceManagement.View)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetReturnableOutputByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var query = new GetReturnableOutputByIdQuery(id);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

@@ -1,12 +1,15 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Features.Products.Mappings;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.InventoryOnHand;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Voucher;
 using Application.Interfaces.Services.Shipping;
 using Application.Interfaces.Services.Shipping.Models;
+using Application.Features.InventoryOnHand.Notifications;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -26,7 +29,9 @@ public class CreateOutputCommandHandler(
     IShippingService shippingService,
     IVoucherReadRepository voucherReadRepository,
     IVoucherUsageRepository voucherUsageRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
+    IUnitOfWork unitOfWork,
+    IInventoryOnHandReadRepository? inventoryOnHandRepository = null,
+    IPublisher? publisher = null) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         CreateOutputCommand request,
@@ -57,6 +62,11 @@ public class CreateOutputCommandHandler(
                     "Products");
             }
         }
+        var onHands = inventoryOnHandRepository != null
+            ? await inventoryOnHandRepository.GetByVariantIdsAsync(variantIds, null, null, cancellationToken).ConfigureAwait(false)
+            : [];
+        var onHandsByVariant = onHands.GroupBy(x => x.ProductVariantId).ToDictionary(g => g.Key, g => g.ToList());
+
         var errors = new List<Error>();
         for (int i = 0; i < request.OutputInfos.Count; i++)
         {
@@ -95,21 +105,49 @@ public class CreateOutputCommandHandler(
             {
                 continue;
             }
+            var totalCount = group.Sum(x => x.Info.Count ?? 0);
+            int availableStock = 0;
+            if (inventoryOnHandRepository != null && onHandsByVariant.TryGetValue(group.Key.ProductVariantId, out var vOnHands))
+            {
+                if (group.Key.ProductVariantColorId.HasValue)
+                {
+                    var colorOnHand = vOnHands.FirstOrDefault(x => x.ProductVariantColorId == group.Key.ProductVariantColorId.Value);
+                    availableStock = Math.Max(0, (colorOnHand?.StockQty ?? 0) - (colorOnHand?.OrderedQty ?? 0));
+                }
+                else
+                {
+                    availableStock = Math.Max(0, vOnHands.Sum(x => x.StockQty - x.OrderedQty));
+                }
+            }
+            else
+            {
+                availableStock = ProductMappingConfig.CalculateVariantAvailableStock(variant, group.Key.ProductVariantColorId);
+            }
+            if (totalCount > availableStock)
+            {
+                var nameParts = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
+                    part => !string.IsNullOrWhiteSpace(part));
+                errors.Add(
+                    Error.BadRequest(
+                        $"Sản phẩm '{string.Join(" - ", nameParts)}' không đủ tồn kho (Còn lại: {availableStock}, yêu cầu: {totalCount}).",
+                        $"products[{group.Min(x => x.Index)}]"));
+                continue;
+            }
+
             var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant, color);
             if (!effectiveMax.HasValue)
             {
                 continue;
             }
-            var totalCount = group.Sum(x => x.Info.Count ?? 0);
             if (totalCount <= effectiveMax.Value)
             {
                 continue;
             }
-            var nameParts = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
+            var namePartsMax = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
                 part => !string.IsNullOrWhiteSpace(part));
             errors.Add(
                 Error.BadRequest(
-                    $"Số lượng mua tối đa cho sản phẩm '{string.Join(" - ", nameParts)}' là {effectiveMax.Value} sản phẩm.",
+                    $"Số lượng mua tối đa cho sản phẩm '{string.Join(" - ", namePartsMax)}' là {effectiveMax.Value} sản phẩm.",
                     $"products[{group.Min(x => x.Index)}]"));
         }
         if (errors.Count > 0)
@@ -277,6 +315,19 @@ public class CreateOutputCommandHandler(
             }
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var combos = new HashSet<(int VariantId, int? ColorId)>();
+        foreach (var info in output.OutputInfos)
+        {
+            if (info.ProductVariantId.HasValue)
+            {
+                combos.Add((info.ProductVariantId.Value, info.ProductVariantColorId));
+            }
+        }
+        if (publisher != null && combos.Count > 0)
+        {
+            await publisher.Publish(new InventoryChangedNotification(combos), cancellationToken)
+                .ConfigureAwait(false);
+        }
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);
         return created.Adapt<OrderDetailResponse>();

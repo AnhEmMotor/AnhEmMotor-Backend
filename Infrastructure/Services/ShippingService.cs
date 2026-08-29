@@ -3,6 +3,7 @@ using Application.Interfaces.Services.Shipping;
 using Application.Interfaces.Services.Shipping.Models;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Net.Http.Json;
@@ -11,7 +12,10 @@ using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services;
 
-public class ShippingService(HttpClient httpClient, IConfiguration configuration) : IShippingService
+public class ShippingService(
+    HttpClient httpClient,
+    IConfiguration configuration,
+    ILogger<ShippingService>? logger = null) : IShippingService
 {
     public async Task<Result<decimal>> CalculateShippingFeeAsync(
         CalculateShippingFeeRequest req,
@@ -105,6 +109,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(shopId) || string.IsNullOrEmpty(baseUrl))
             {
+                logger?.LogError("[GHN] Missing configuration for CreateShippingOrder: Token={HasToken}, ShopId={HasShopId}, BaseUrl={BaseUrl}",
+                    !string.IsNullOrEmpty(token), !string.IsNullOrEmpty(shopId), baseUrl);
                 return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
             }
             var requestUri = $"{baseUrl}/shiip/public-api/v2/shipping-order/create";
@@ -115,8 +121,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 .Select(
                     oi =>
                     {
+                        var p = oi.ProductVariant?.Product;
                         var v = oi.ProductVariant;
-                        var p = v?.Product;
                         var length = v?.Length ?? p?.Length ?? 12;
                         var width = v?.Width ?? p?.Width ?? 12;
                         var height = v?.Height ?? p?.Height ?? 12;
@@ -171,6 +177,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
+                logger?.LogError("[GHN] CreateShippingOrder failed with StatusCode {StatusCode} for Order #{OrderId}. Response: {Response}",
+                    response.StatusCode, output.Id, contentString);
                 return Result<string>.Failure(
                     Error.BadRequest("Failed to create shipping order with GHN: " + contentString));
             }
@@ -181,6 +189,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 var message = root.TryGetProperty("message", out var msgElement)
                     ? msgElement.GetString()
                     : "Unknown error";
+                logger?.LogError("[GHN] CreateShippingOrder API error code {Code} for Order #{OrderId}: {Message}",
+                    codeElement.GetInt32(), output.Id, message);
                 return Result<string>.Failure(Error.BadRequest("GHN Error: " + message));
             }
             var orderCode = "Unknown";
@@ -190,9 +200,10 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 orderCode = orderCodeElement.GetString() ?? "Unknown";
             }
             return Result<string>.Success(orderCode);
-        } catch (Exception)
+        } catch (Exception ex)
         {
-            return Result<string>.Failure(Error.Failure("An error occurred while creating the shipping order."));
+            logger?.LogError(ex, "[GHN] Exception occurred while creating shipping order for Order #{OrderId}", output.Id);
+            return Result<string>.Failure(Error.Failure("An error occurred while creating the shipping order: " + ex.Message));
         }
     }
 
@@ -208,6 +219,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(shopId) || string.IsNullOrEmpty(baseUrl))
             {
+                logger?.LogError("[GHN] Missing configuration: Token={HasToken}, ShopId={HasShopId}, BaseUrl={BaseUrl}",
+                    !string.IsNullOrEmpty(token), !string.IsNullOrEmpty(shopId), baseUrl);
                 return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
             }
             var requestUri = $"{baseUrl}/shiip/public-api/v2/shipping-order/create";
@@ -279,6 +292,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
+                logger?.LogError("[GHN] CreateReturnPickupOrder failed with StatusCode {StatusCode} for ReturnRequest #{ReturnRequestId}. Response: {Response}",
+                    response.StatusCode, returnRequest.Id, contentString);
                 return Result<string>.Failure(
                     Error.BadRequest("Failed to create return pickup order with GHN: " + contentString));
             }
@@ -289,6 +304,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 var message = root.TryGetProperty("message", out var msgElement)
                     ? msgElement.GetString()
                     : "Unknown error";
+                logger?.LogError("[GHN] CreateReturnPickupOrder API error code {Code} for ReturnRequest #{ReturnRequestId}: {Message}",
+                    codeElement.GetInt32(), returnRequest.Id, message);
                 return Result<string>.Failure(Error.BadRequest("GHN Error: " + message));
             }
             var orderCode = "Unknown";
@@ -301,6 +318,7 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         }
         catch (Exception ex)
         {
+            logger?.LogError(ex, "[GHN] Exception occurred while creating return pickup order for ReturnRequest #{ReturnRequestId}", returnRequest.Id);
             return Result<string>.Failure(Error.Failure("An error occurred while creating return pickup order: " + ex.Message));
         }
     }

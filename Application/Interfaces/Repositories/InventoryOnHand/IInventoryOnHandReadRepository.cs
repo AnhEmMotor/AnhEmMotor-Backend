@@ -13,6 +13,12 @@ public interface IInventoryOnHandReadRepository
         int? year,
         CancellationToken cancellationToken);
 
+    public Task<List<InventoryOnHandEntity>> GetByVariantIdsAsync(
+        IEnumerable<int> variantIds,
+        int? month,
+        int? year,
+        CancellationToken cancellationToken);
+
     public Task<List<InventoryReportSummaryRowResponse>> GetInventoryReportSummaryRowsAsync(
         string? searchTerm,
         int? month,

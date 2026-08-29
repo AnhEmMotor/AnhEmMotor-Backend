@@ -1,5 +1,6 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Features.InventoryOnHand.Notifications;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
@@ -12,7 +13,8 @@ namespace Application.Features.Outputs.Commands.CancelOrderByBuyer;
 public class CancelOrderByBuyerCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CancelOrderByBuyerCommand, Result<OrderDetailResponse>>
+    IUnitOfWork unitOfWork,
+    IPublisher? publisher = null) : IRequestHandler<CancelOrderByBuyerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         CancelOrderByBuyerCommand request,
@@ -41,6 +43,19 @@ public class CancelOrderByBuyerCommandHandler(
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var combos = new HashSet<(int VariantId, int? ColorId)>();
+        foreach (var info in output.OutputInfos)
+        {
+            if (info.ProductVariantId.HasValue)
+            {
+                combos.Add((info.ProductVariantId.Value, info.ProductVariantColorId));
+            }
+        }
+        if (publisher != null && combos.Count > 0)
+        {
+            await publisher.Publish(new InventoryChangedNotification(combos), cancellationToken)
+                .ConfigureAwait(false);
+        }
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
         return updated.Adapt<OrderDetailResponse>();

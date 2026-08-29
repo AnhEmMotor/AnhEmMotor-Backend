@@ -13,4 +13,8 @@ public interface IShipmentReadRepository
 
     public Task<List<Domain.Entities.Logistics.Shipment>> GetActiveDeliveryShipmentsAsync(
         CancellationToken cancellationToken = default);
+
+    public Task<Domain.Entities.Logistics.Shipment?> GetByTrackingNumberAsync(
+        string trackingNumber,
+        CancellationToken cancellationToken = default);
 }

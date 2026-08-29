@@ -18,6 +18,8 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? ManagementType { get; set; }
 
+        public int Stock { get; set; }
+
         public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
     }
 }

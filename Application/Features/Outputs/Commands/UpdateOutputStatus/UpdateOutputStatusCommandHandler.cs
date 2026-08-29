@@ -245,9 +245,20 @@ public class UpdateOutputStatusCommandHandler(
         {
             await commissionUpdateRepository.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                 .ConfigureAwait(false);
-            if (publisher != null && exportedCombos.Count > 0)
+        }
+        if (publisher != null)
+        {
+            var statusCombos = new HashSet<(int VariantId, int? ColorId)>(exportedCombos);
+            foreach (var info in output.OutputInfos)
             {
-                await publisher.Publish(new InventoryChangedNotification(exportedCombos), cancellationToken)
+                if (info.ProductVariantId.HasValue)
+                {
+                    statusCombos.Add((info.ProductVariantId.Value, info.ProductVariantColorId));
+                }
+            }
+            if (statusCombos.Count > 0)
+            {
+                await publisher.Publish(new InventoryChangedNotification(statusCombos), cancellationToken)
                     .ConfigureAwait(false);
             }
         }

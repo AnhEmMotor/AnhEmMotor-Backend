@@ -9,6 +9,7 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 
@@ -82,28 +83,35 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                 receipt.RejectedBy = null;
                 foreach (var info in receipt.InventoryReceiptInfos)
                 {
-                    var variantId = info.PurchaseRequestItem?.ProductVariantId ?? 0;
-                    var colorId = info.PurchaseRequestItem?.ProductVariantColorId;
-                    var lastEntry = await ledgerRepository.GetLastEntryAsync(variantId, colorId, cancellationToken)
-                        .ConfigureAwait(false);
-                    var currentStock = lastEntry?.StockAfter ?? 0;
-                    var importQty = info.Count ?? 0;
-                    var newStock = currentStock + importQty;
-                    var ledger = new InventoryLedger
+                    var variantId = info.PurchaseRequestItem?.ProductVariantId ?? info.ParentOutputInfo?.ProductVariantId ?? 0;
+                    var colorId = info.PurchaseRequestItem?.ProductVariantColorId ?? info.ParentOutputInfo?.ProductVariantColorId;
+                    var unitPrice = info.PurchaseRequestItem?.UnitPrice ?? (info.ParentOutputInfo?.Price ?? info.ParentOutputInfo?.CostPrice ?? 0);
+                    var partnerName = info.PurchaseRequestItem?.Supplier?.Name ?? (info.ParentOutputInfo != null ? "Khách hàng hoàn hàng" : null);
+                    var transactionType = info.ParentOutputInfo != null ? "Nhập kho hoàn hàng" : "Nhập kho";
+
+                    if (variantId > 0)
                     {
-                        TransactionDate = DateTimeOffset.UtcNow,
-                        DocumentCode = $"IR-{receipt.Id}",
-                        TransactionType = "Nhập kho",
-                        ProductVariantId = variantId,
-                        ProductVariantColorId = colorId,
-                        PartnerName = info.PurchaseRequestItem?.Supplier?.Name,
-                        ImportQty = importQty,
-                        ExportQty = 0,
-                        UnitPrice = info.PurchaseRequestItem?.UnitPrice ?? 0,
-                        TotalAmount = importQty * (info.PurchaseRequestItem?.UnitPrice ?? 0),
-                        StockAfter = newStock
-                    };
-                    await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
+                        var lastEntry = await ledgerRepository.GetLastEntryAsync(variantId, colorId, cancellationToken)
+                            .ConfigureAwait(false);
+                        var currentStock = lastEntry?.StockAfter ?? 0;
+                        var importQty = info.Count ?? 0;
+                        var newStock = currentStock + importQty;
+                        var ledger = new InventoryLedger
+                        {
+                            TransactionDate = DateTimeOffset.UtcNow,
+                            DocumentCode = $"IR-{receipt.Id}",
+                            TransactionType = transactionType,
+                            ProductVariantId = variantId,
+                            ProductVariantColorId = colorId,
+                            PartnerName = partnerName,
+                            ImportQty = importQty,
+                            ExportQty = 0,
+                            UnitPrice = unitPrice,
+                            TotalAmount = importQty * unitPrice,
+                            StockAfter = newStock
+                        };
+                        await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
+                    }
                 }
                 var debtsToCreate = receipt.InventoryReceiptInfos
                     .Where(
@@ -163,10 +171,11 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
             var combos = new HashSet<(int VariantId, int? ColorId)>();
             foreach (var info in receipt.InventoryReceiptInfos)
             {
-                if (info.PurchaseRequestItem != null)
+                var variantId = info.PurchaseRequestItem?.ProductVariantId ?? info.ParentOutputInfo?.ProductVariantId ?? 0;
+                var colorId = info.PurchaseRequestItem?.ProductVariantColorId ?? info.ParentOutputInfo?.ProductVariantColorId;
+                if (variantId > 0)
                 {
-                    combos.Add(
-                        (info.PurchaseRequestItem.ProductVariantId, info.PurchaseRequestItem.ProductVariantColorId));
+                    combos.Add((variantId, colorId));
                 }
             }
             if (combos.Count > 0)

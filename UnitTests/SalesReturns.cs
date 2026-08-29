@@ -113,7 +113,8 @@ public class SalesReturns
         var result = await BuildHandler().Handle(BuildCommand("completed"), TestContext.Current.CancellationToken);
 
         result.IsSuccess.Should().BeTrue();
-        insertedReceipt.Should().BeNull(); // Chưa nhập kho ngay, đợi hàng về kho qua webhook
+        insertedReceipt.Should().NotBeNull();
+        insertedReceipt!.StatusId.Should().Be(Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent);
         _shipmentInsertRepository.Verify(repo => repo.AddAsync(It.Is<Shipment>(s => s.TrackingNumber == "GHN-RET-123456"), It.IsAny<CancellationToken>()), Times.Once);
         returnRequest.OriginalTrackingNumber.Should().Be("GHN-RET-123456");
     }
