@@ -49,7 +49,7 @@ public class ShippingWebhook
         _senderMock.Verify(
             sender => sender.Send(
                 It.Is<UpdateOutputStatusCommand>(command =>
-                    command.Id == 42 && command.StatusId == "refunding"),
+                    command.Id == 42 && command.StatusId == "refunded"),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

@@ -78,7 +78,67 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"slug-{uniqueId}" };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        db.InventoryOnHands.Add(OnHand(variant.Id));
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await SeedInboundStockAsync(variant.Id, cancellationToken: cancellationToken).ConfigureAwait(false);
         return variant.Id;
+    }
+
+    // Helper: an InventoryOnHand record (for the current month/year) that grants the variant positive
+    // stock so CreateOutput's stock validation passes when creating an order.
+    private static InventoryOnHand OnHand(int variantId, int stock = 1000)
+    {
+        var now = DateTimeOffset.UtcNow;
+        return new InventoryOnHand
+        {
+            ProductVariantId = variantId,
+            Month = now.Month,
+            Year = now.Year,
+            StockQty = stock,
+            OrderedQty = 0
+        };
+    }
+
+    // Helper: seed a real approved inbound-goods record (purchase request -> item -> inventory receipt -> info)
+    // so the inventory-on-hand recalculator keeps positive stock even after an order is created (the recalculator
+    // recomputes StockQty from DB receipts, so a bare InventoryOnHand row alone would be wiped to 0).
+    private async Task SeedInboundStockAsync(int variantId, int qty = 1000, CancellationToken cancellationToken = default)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        // The first test in this class runs against a schema-only database (the statuses are seeded by
+        // ResetDatabaseAsync in DisposeAsync of the previous test). Ensure the inbound statuses exist so the
+        // FK on InventoryReceipt.StatusId is always satisfied, regardless of execution order.
+        await db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO \"InventoryReceiptStatus\" (\"Key\") VALUES ('draft'), ('sent'), ('approve'), ('reject') ON CONFLICT (\"Key\") DO NOTHING;",
+            cancellationToken).ConfigureAwait(false);
+        var purchaseRequest = new PurchaseRequest { Status = "draft" };
+        db.Add(purchaseRequest);
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var item = new PurchaseRequestItem
+        {
+            PurchaseRequestId = purchaseRequest.Id,
+            ProductVariantId = variantId,
+            Quantity = qty
+        };
+        db.Add(item);
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var receipt = new InventoryReceipt
+        {
+            StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        db.Add(receipt);
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        db.Add(
+            new InventoryReceiptInfo
+            {
+                InventoryReceiptId = receipt.Id,
+                Count = qty,
+                RemainingCount = qty,
+                PurchaseRequestItemId = item.Id
+            });
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     #pragma warning disable IDE0079
@@ -371,6 +431,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             var v1 = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"slug1-{uniqueId}" };
             var v2 = new ProductVariant { ProductId = product.Id, Price = 200000, UrlSlug = $"slug2-{uniqueId}" };
             db.ProductVariants.AddRange(v1, v2);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            db.InventoryOnHands.AddRange(OnHand(v1.Id), OnHand(v2.Id));
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             variantId1 = v1.Id;
             variantId2 = v2.Id;
@@ -1261,6 +1323,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"slug-{uniqueId}" };
             db.ProductVariants.Add(variant);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            db.InventoryOnHands.Add(OnHand(variant.Id));
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             variantId = variant.Id;
         }

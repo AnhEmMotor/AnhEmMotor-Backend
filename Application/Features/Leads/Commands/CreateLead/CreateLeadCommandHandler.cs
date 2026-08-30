@@ -38,7 +38,18 @@ namespace Application.Features.Leads.Commands.CreateLead
                 PhoneNumber = request.PhoneNumber,
                 IdentificationNumber = request.IdentificationNumber,
                 Birthday = request.Birthday,
-                Gender = request.Gender
+                Gender = request.Gender,
+                Source = request.Source,
+                Status = request.Status,
+                InterestedVehicle = request.InterestedVehicle,
+                AddressDetail = request.AddressDetail,
+                Ward = request.Ward,
+                Province = request.Province,
+                District = request.District,
+                Score = request.Score,
+                Notes = request.Notes,
+                Priority = request.Priority,
+                IsVerified = request.IsVerified
             };
             await leadInsertRepository.AddAsync(lead, cancellationToken).ConfigureAwait(false);
             string email = string.IsNullOrWhiteSpace(request.Email) ? string.Empty : request.Email.Trim();

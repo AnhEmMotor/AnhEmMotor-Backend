@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Domain.Constants.Lead;
 using MediatR;
 using System;
 
@@ -17,5 +18,26 @@ public record CreateLeadCommand : IRequest<Result<int>>
     public DateTime? Birthday { get; set; }
 
     public string Gender { get; set; } = string.Empty;
-}
 
+    public string AddressDetail { get; set; } = string.Empty;
+
+    public string Ward { get; set; } = string.Empty;
+
+    public string Province { get; set; } = LeadAddressDefaults.Province;
+
+    public string District { get; set; } = LeadAddressDefaults.District;
+
+    public string Status { get; set; } = LeadStatus.New;
+
+    public string Source { get; set; } = LeadSource.WebStore;
+
+    public string InterestedVehicle { get; set; } = string.Empty;
+
+    public string Notes { get; set; } = string.Empty;
+
+    public string Priority { get; set; } = string.Empty;
+
+    public int Score { get; set; }
+
+    public bool IsVerified { get; set; }
+}

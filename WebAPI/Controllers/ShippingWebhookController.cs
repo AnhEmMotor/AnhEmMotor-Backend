@@ -8,7 +8,6 @@ using Domain.Constants.Order;
 using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 
 namespace WebAPI.Controllers;
@@ -19,8 +18,7 @@ public class ShippingWebhookController(
     ISender sender,
     IShipmentReadRepository shipmentReadRepository,
     IShipmentUpdateRepository shipmentUpdateRepository,
-    IUnitOfWork unitOfWork,
-    ILogger<ShippingWebhookController> logger) : ControllerBase
+    IUnitOfWork unitOfWork) : ControllerBase
 {
     [HttpPost("ghn")]
     public async Task<IActionResult> HandleGhnWebhook([FromBody] GhnWebhookRequest request)

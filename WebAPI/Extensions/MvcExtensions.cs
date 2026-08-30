@@ -1,5 +1,7 @@
 using Application.Common.Converters;
+using Application.Common.Models;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WebAPI.Converters;
@@ -56,6 +58,36 @@ public static class MvcExtensions
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         services.AddControllers()
+            .ConfigureApiBehaviorOptions(
+                options =>
+                {
+                    // Standardise model validation errors so every client receives the app's canonical error shape
+                    // (ErrorResponse with a top-level Message + Errors list) instead of ASP.NET Core's RFC 7807
+                    // ProblemDetails. This keeps the response "in the correct framework" across all frontends.
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        var details = context.ModelState
+                            .Where(kv => kv.Value?.Errors is { Count: > 0 })
+                            .SelectMany(
+                                kv => kv.Value!.Errors.Select(
+                                    err => new ErrorDetail
+                                    {
+                                        Field = kv.Key,
+                                        Message = string.IsNullOrWhiteSpace(err.ErrorMessage)
+                                            ? "Invalid value."
+                                            : err.ErrorMessage
+                                    }))
+                            .ToList();
+
+                        var response = new ErrorResponse(
+                            details.FirstOrDefault()?.Message ?? "One or more validation errors occurred.")
+                        {
+                            Type = "Validation",
+                            Errors = details
+                        };
+                        return new BadRequestObjectResult(response);
+                    };
+                })
             .AddJsonOptions(
                 options =>
                 {
@@ -66,6 +98,7 @@ public static class MvcExtensions
                         .Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper));
                     options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
                     options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
+                    options.JsonSerializerOptions.Converters.Add(new NullableDateTimeConverter());
                 });
         return services;
     }

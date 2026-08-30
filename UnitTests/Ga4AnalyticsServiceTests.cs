@@ -85,8 +85,9 @@ public class Ga4AnalyticsServiceTests
         result.Value.ByMinute.Select(r => r.Label).Should().Equal("0", "1", "2");
         result.Value.ByMinute.Sum(r => r.ActiveUsers).Should().Be(7);
         result.Value.ByDevice.Select(r => r.Label).Should().Equal("DESKTOP", "MOBILE");
-        result.Value.BySource.Select(r => r.Label).Should().Equal("google", "facebook");
-        handler.RealtimeCalls.Should().Be(3);
+        // GA4 Realtime API không hỗ trợ dimension "sessionSource" nên BySource luôn rỗng.
+        result.Value.BySource.Should().BeEmpty();
+        handler.RealtimeCalls.Should().Be(2);
         handler.TokenCalls.Should().Be(1);
     }
 
@@ -111,7 +112,7 @@ public class Ga4AnalyticsServiceTests
         first.IsSuccess.Should().BeTrue();
         second.IsSuccess.Should().BeTrue();
         second.Value.ActiveUsers.Should().Be(first.Value.ActiveUsers);
-        handler.RealtimeCalls.Should().Be(3);
+        handler.RealtimeCalls.Should().Be(2);
     }
 
     [Fact(DisplayName = "GA4SVC_04 - GetRealtimeAsync thiếu khối totals thì cộng từ phân rã thiết bị")]

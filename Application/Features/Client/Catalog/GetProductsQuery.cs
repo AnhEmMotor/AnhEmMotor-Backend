@@ -7,6 +7,7 @@ using MediatR;
 using System;
 using System.Linq;
 using ProductStatus = Domain.Constants.Product.ProductStatus;
+using ProductTechnologyResponse = Application.ApiContracts.Product.Responses.ProductTechnologyResponse;
 
 namespace Application.Features.Client.Catalog;
 
@@ -112,7 +113,7 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
         return items;
     }
 
-    private static string BuildPromotionText(Product product, ProductVariant? firstVariant)
+    internal static string BuildPromotionText(Product product, ProductVariant? firstVariant)
     {
         var parts = new List<string> { "Chính hãng" };
         if (product.ProductTechnologies != null && product.ProductTechnologies.Any())
@@ -163,7 +164,7 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
                 CompatibilityNote = string.Empty
             };
         }
-        
+
         var sortedVariants = product.ProductVariants.ToList();
         sortedVariants.Sort((a, b) => (a.Price ?? decimal.MaxValue).CompareTo(b.Price ?? decimal.MaxValue));
         var firstVariant = sortedVariants.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v.VariantName) || v.ProductVariantColors.Count > 0) ?? sortedVariants.FirstOrDefault();
@@ -203,23 +204,112 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
             .Take(8)
             .Cast<string>()
             .ToList();
+
+        var technologies = (product.ProductTechnologies ?? [])
+            .OrderBy(t => t.DisplayOrder)
+            .Select(t => new ProductTechnologyResponse
+            {
+                TechnologyId = t.TechnologyId,
+                CustomTitle = t.CustomTitle,
+                CustomDescription = t.CustomDescription,
+                CustomImageUrl = t.CustomImageUrl,
+                DisplayOrder = t.DisplayOrder,
+                Title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name ?? string.Empty,
+                Description = t.CustomDescription ?? t.Technology?.DefaultDescription ?? string.Empty,
+                ImageUrl = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl ?? string.Empty,
+                DefaultTitle = t.Technology?.DefaultTitle,
+                DefaultDescription = t.Technology?.DefaultDescription,
+                DefaultImageUrl = t.Technology?.DefaultImageUrl,
+                CategoryName = t.Technology?.Category?.Name ?? "TECHNOLOGY"
+            })
+            .ToList();
+
+        string BuildVariantOptionValuesText(Domain.Entities.ProductVariant v)
+        {
+            var parts = v.VariantOptionValues
+                .Where(vov => vov.OptionValue != null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
+                .Select(vov => vov.OptionValue!.Name)
+                .ToList();
+            return parts.Count > 0 ? string.Join(" - ", parts) : string.Empty;
+        }
+
+        string BuildVariantDisplayName(Domain.Entities.ProductVariant v)
+        {
+            if (!string.IsNullOrWhiteSpace(v.VariantName))
+                return v.VariantName;
+            var optText = BuildVariantOptionValuesText(v);
+            if (!string.IsNullOrWhiteSpace(optText))
+                return optText;
+            var firstColor = v.ProductVariantColors.FirstOrDefault()?.ColorName;
+            return firstColor ?? string.Empty;
+        }
+
         bool IsCompatible = product.CategoryId == 8;
         return new ProductDetailResponse
         {
             Id = product.Id,
             Name = product.Name,
+            CategoryId = product.CategoryId,
+            Category = product.ProductCategory?.Name,
+            BrandId = product.BrandId,
+            Brand = product.Brand?.Name,
+            Displacement = product.Displacement,
+            ShortDescription = product.ShortDescription,
             Description = product.Description ?? string.Empty,
             ImageUrl = mainImage,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
+            Origin = product.Origin,
+            Unit = product.Unit,
+            Weight = product.Weight,
+            Length = product.Length,
+            Width = product.Width,
+            Height = product.Height,
+            Wheelbase = product.Wheelbase,
+            SeatHeight = product.SeatHeight,
+            GroundClearance = product.GroundClearance,
+            FuelCapacity = product.FuelCapacity,
+            TireSize = product.TireSize,
+            FrontSuspension = product.FrontSuspension,
+            RearSuspension = product.RearSuspension,
+            EngineType = product.EngineType,
+            MaxPower = product.MaxPower,
+            TransmissionType = product.TransmissionType,
+            StarterSystem = product.StarterSystem,
+            MaxTorque = product.MaxTorque,
+            BoreStroke = product.BoreStroke,
+            CompressionRatio = product.CompressionRatio,
+            FuelSystem = product.FuelSystem,
+            FrameType = product.FrameType,
+            FrontTireSize = product.FrontTireSize,
+            RearTireSize = product.RearTireSize,
+            FrontBrake = product.FrontBrake,
+            RearBrake = product.RearBrake,
+            BatteryType = product.BatteryType,
+            LightingSystem = product.LightingSystem,
+            DashboardType = product.DashboardType,
+            Material = product.Material,
+            WarrantyPeriod = product.WarrantyPeriod,
+            OilCapacity = product.OilCapacity,
+            FuelConsumption = product.FuelConsumption,
+            ProductLimit = product.MaxPurchaseQuantity,
+            EffectiveMax = product.MaxPurchaseQuantity,
             ReferencePrice = firstVariant?.Price ?? 0,
-            Features = techList,
-            IsCompatibleWithMyVehicle = IsCompatible,
-            CompatibilityNote = IsCompatible ? "Liên hệ để kiểm tra tương thích với xe của bạn" : string.Empty,
+            PromotionText = GetProductsHandler.BuildPromotionText(product, firstVariant),
+            Technologies = technologies,
             Variants = product.ProductVariants.Select(v => new ProductVariantSummaryResponse
             {
                 Id = v.Id,
+                UrlSlug = v.UrlSlug,
                 VariantName = v.VariantName,
+                OptionValuesText = BuildVariantOptionValuesText(v),
+                DisplayName = BuildVariantDisplayName(v),
                 Price = v.Price,
                 CoverImageUrl = _fileReadService.GetPublicUrl(v.CoverImageUrl ?? string.Empty),
+                Photos = v.ProductCollectionPhotos
+                    .Select(p => _fileReadService.GetPublicUrl(p.ImageUrl ?? string.Empty))
+                    .Where(url => !string.IsNullOrWhiteSpace(url))
+                    .ToList(),
                 Colors = v.ProductVariantColors.Select(c => new ProductColorSummaryResponse
                 {
                     Id = c.Id,
@@ -227,8 +317,13 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
                     ColorCode = c.ColorCode,
                     CoverImageUrl = _fileReadService.GetPublicUrl(c.CoverImageUrl ?? string.Empty),
                     MaxPurchaseQuantity = c.MaxPurchaseQuantity
-                }).ToList()
-            }).ToList()
+                }).ToList(),
+                ProductLimit = v.MaxPurchaseQuantity,
+                EffectiveMax = v.MaxPurchaseQuantity
+            }).ToList(),
+            Features = techList,
+            IsCompatibleWithMyVehicle = IsCompatible,
+            CompatibilityNote = IsCompatible ? "Liên hệ để kiểm tra tương thích với xe của bạn" : string.Empty
         };
     }
 }
