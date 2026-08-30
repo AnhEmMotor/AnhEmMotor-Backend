@@ -143,7 +143,8 @@ jobs:
           host: ${{ secrets.PRODUCTION_SERVER_IP }}
           username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
-          port: 22
+          port: ${{ secrets.PRODUCTION_SERVER_PORT || 22 }}
+          timeout: 60s
           script: |
             # Xoá tất cả trừ thư mục uploads để tránh mất ảnh khi deploy
             find /var/www/anhemmotor/backend -mindepth 1 -maxdepth 1 -not -name 'wwwroot' -exec rm -rf {} +
@@ -153,7 +154,8 @@ jobs:
           host: ${{ secrets.PRODUCTION_SERVER_IP }}
           username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
-          port: 22
+          port: ${{ secrets.PRODUCTION_SERVER_PORT || 22 }}
+          timeout: 60s
           source: ./publish/*
           target: /var/www/anhemmotor/backend
           strip_components: 1
@@ -163,7 +165,8 @@ jobs:
           host: ${{ secrets.PRODUCTION_SERVER_IP }}
           username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
-          port: 22
+          port: ${{ secrets.PRODUCTION_SERVER_PORT || 22 }}
+          timeout: 60s
           script: >
             if [ -f /var/www/anhemmotor/backend/postgres_bundle ]; then
               chmod +x /var/www/anhemmotor/backend/postgres_bundle
