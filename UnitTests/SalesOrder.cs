@@ -90,6 +90,15 @@ public class SalesOrder
         new OutputMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
+    // Helper: an approved inventory receipt that gives the variant available stock so
+    // CreateOutput's stock validation passes. Mirrors a real finished inbound-goods record.
+    private static List<InventoryReceiptInfo> FinishedStock(int qty = 1000)
+        => [new InventoryReceiptInfo
+        {
+            RemainingCount = qty,
+            InventoryReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+        }];
+
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
     [Fact(DisplayName = "SO_001 - CreateOutput tạo đơn hàng thành công")]
@@ -101,7 +110,8 @@ public class SalesOrder
         {
             Id = productId,
             Price = 100,
-            Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+            Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+            InventoryReceiptInfos = FinishedStock()
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -133,7 +143,8 @@ public class SalesOrder
         {
             Id = productId,
             Price = 100,
-            Product = new ProductEntity { StatusId = ProductStatus.ForSale, Name = "Test Product" }
+            Product = new ProductEntity { StatusId = ProductStatus.ForSale, Name = "Test Product" },
+            InventoryReceiptInfos = FinishedStock()
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -169,13 +180,15 @@ public class SalesOrder
         {
             Id = 1,
             Price = 50,
-            Product = new ProductEntity { StatusId = ProductStatus.ForSale, Name = "P1" }
+            Product = new ProductEntity { StatusId = ProductStatus.ForSale, Name = "P1" },
+            InventoryReceiptInfos = FinishedStock()
         };
         var product2 = new ProductVariant
         {
             Id = 2,
             Price = 100,
-            Product = new ProductEntity { StatusId = ProductStatus.ForSale, Name = "P2" }
+            Product = new ProductEntity { StatusId = ProductStatus.ForSale, Name = "P2" },
+            InventoryReceiptInfos = FinishedStock()
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -217,7 +230,8 @@ public class SalesOrder
             {
                 Id = id,
                 Price = 100,
-                Product = new ProductEntity { Name = $"Product {id}", StatusId = ProductStatus.ForSale }
+                Product = new ProductEntity { Name = $"Product {id}", StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
             })
             .ToList();
         _variantRepoMock.Setup(
@@ -256,7 +270,7 @@ public class SalesOrder
         var productId = 1;
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId, Price = 500, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new() { Id = productId, Price = 500, Product = new ProductEntity { StatusId = ProductStatus.ForSale }, InventoryReceiptInfos = FinishedStock() }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -606,7 +620,13 @@ public class SalesOrder
         var productId = 1;
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId, Price = 100, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new()
+            {
+                Id = productId,
+                Price = 100,
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
+            }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -644,7 +664,13 @@ public class SalesOrder
             .ReturnsAsync(new UserAuth());
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId, Price = 100, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new()
+            {
+                Id = productId,
+                Price = 100,
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
+            }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -719,7 +745,13 @@ public class SalesOrder
             .ReturnsAsync(existingOutput);
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId, Price = 100, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new()
+            {
+                Id = productId,
+                Price = 100,
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
+            }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -810,7 +842,8 @@ public class SalesOrder
         {
             Id = productId,
             Price = 100,
-            Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+            Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+            InventoryReceiptInfos = FinishedStock()
         };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
@@ -834,7 +867,7 @@ public class SalesOrder
             _unitOfWorkMock.Object);
         var command = new DeleteOutputCommand() { Id = 1 };
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<Output>()), Times.Once);
@@ -850,7 +883,7 @@ public class SalesOrder
             _unitOfWorkMock.Object);
         var command = new DeleteOutputCommand() { Id = 1 };
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingOutput.DeletedAt.Should().NotBeNull();
@@ -863,7 +896,7 @@ public class SalesOrder
         var outputId = 1;
         var command = new RestoreOutputCommand { Id = outputId };
         var deletedOutput = new Output { Id = outputId, DeletedAt = DateTime.UtcNow };
-        _readRepoMock.Setup(x => x.GetByIdAsync(outputId, It.IsAny<CancellationToken>(), DataFetchMode.DeletedOnly))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), DataFetchMode.DeletedOnly))
             .ReturnsAsync(deletedOutput);
         _updateRepoMock.Setup(x => x.Restore(It.IsAny<Output>())).Callback<Output>(o => o.DeletedAt = null);
         var handler = new RestoreOutputCommandHandler(
@@ -1147,10 +1180,10 @@ public class SalesOrder
         };
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId1, Price = 10, Product = new ProductEntity { StatusId = ProductStatus.ForSale } },
-            new() { Id = productId2, Price = 20, Product = new ProductEntity { StatusId = ProductStatus.ForSale } },
-            new() { Id = productId3, Price = 30, Product = new ProductEntity { StatusId = ProductStatus.ForSale } },
-            new() { Id = productId4, Price = 40, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new() { Id = productId1, Price = 10, Product = new ProductEntity { StatusId = ProductStatus.ForSale }, InventoryReceiptInfos = FinishedStock() },
+            new() { Id = productId2, Price = 20, Product = new ProductEntity { StatusId = ProductStatus.ForSale }, InventoryReceiptInfos = FinishedStock() },
+            new() { Id = productId3, Price = 30, Product = new ProductEntity { StatusId = ProductStatus.ForSale }, InventoryReceiptInfos = FinishedStock() },
+            new() { Id = productId4, Price = 40, Product = new ProductEntity { StatusId = ProductStatus.ForSale }, InventoryReceiptInfos = FinishedStock() }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -1196,13 +1229,15 @@ public class SalesOrder
             {
                 Id = product1.Id,
                 Price = product1.Price,
-                Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
             },
             new()
             {
                 Id = product2.Id,
                 Price = product2.Price,
-                Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
             }
         };
         _variantRepoMock.Setup(
@@ -1368,7 +1403,13 @@ public class SalesOrder
         };
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId, Price = 100, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new()
+            {
+                Id = productId,
+                Price = 100,
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
+            }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -1646,7 +1687,13 @@ public class SalesOrder
         };
         var variants = new List<ProductVariant>
         {
-            new() { Id = productId, Price = 100, Product = new ProductEntity { StatusId = ProductStatus.ForSale } }
+            new()
+            {
+                Id = productId,
+                Price = 100,
+                Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                InventoryReceiptInfos = FinishedStock()
+            }
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -1783,7 +1830,8 @@ public class SalesOrder
                 {
                     Id = productId,
                     Price = 50000000,
-                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                    InventoryReceiptInfos = FinishedStock()
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
@@ -1817,7 +1865,8 @@ public class SalesOrder
                 {
                     Id = productId,
                     Price = 150000000,
-                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                    InventoryReceiptInfos = FinishedStock()
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
@@ -1851,7 +1900,8 @@ public class SalesOrder
                 {
                     Id = productId,
                     Price = 120000000,
-                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale },
+                    InventoryReceiptInfos = FinishedStock()
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1932,7 +1982,7 @@ public class SalesOrder
     [Fact(DisplayName = "CALC_002 - Kiểm tra tính Total khi thêm phí ship (Subtotal <= 10tr)")]
     public void GetTotal_WithShippingFee_WhenSubtotalUnder10M()
     {
-        var order = new Output { OutputInfos = new List<OutputInfo> { new OutputInfo { Price = 5000000m, Count = 1 } } };
+        var order = new Output { ShippingFee = 200000m, OutputInfos = new List<OutputInfo> { new OutputInfo { Price = 5000000m, Count = 1 } } };
         var total = OrderPaymentAmountCalculator.GetTotal(order);
         total.Should().Be(5200000m);
     }

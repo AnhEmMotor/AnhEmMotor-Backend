@@ -216,12 +216,10 @@ public class Ga4AnalyticsService(
             "runRealtimeReport",
             BuildRealtimePayload("deviceCategory", minuteRanges),
             cancellationToken);
-        var sourceTask = PostGa4Async(
-            "runRealtimeReport",
-            BuildRealtimePayload("sessionSource", minuteRanges),
-            cancellationToken);
+        // GA4 Realtime API KHÔNG hỗ trợ dimension "sessionSource" — chỉ dùng được trong runReport thường.
+        // Dữ liệu nguồn realtime hiện trả rỗng; frontend cần hiển thị "Chưa có dữ liệu realtime cho nguồn".
 
-        await Task.WhenAll(minutesTask, deviceTask, sourceTask).ConfigureAwait(false);
+        await Task.WhenAll(minutesTask, deviceTask).ConfigureAwait(false);
 
         // Chuỗi theo phút là bắt buộc — lỗi thì báo failure để client hiển thị "chưa có dữ liệu".
         if (minutesTask.Result.IsFailure)
@@ -241,7 +239,7 @@ public class Ga4AnalyticsService(
         // Tổng cả cửa sổ 30 phút: ưu tiên khối "totals" GA4 trả kèm; thiếu thì cộng từ phân rã thiết bị.
         var totals = ParseRealtimeTotals(minutesTask.Result.Value.RootElement);
         var deviceRows = deviceTask.Result.IsSuccess ? ParseRealtimeRows(deviceTask.Result.Value.RootElement) : [];
-        var sourceRows = sourceTask.Result.IsSuccess ? ParseRealtimeRows(sourceTask.Result.Value.RootElement) : [];
+        var sourceRows = new List<Ga4RealtimeRowDto>();
 
         if (totals is null)
         {
@@ -257,11 +255,6 @@ public class Ga4AnalyticsService(
         if (!deviceTask.Result.IsSuccess)
         {
             logger.LogWarning("GA4 realtime: lấy phân rã thiết bị thất bại — {Error}", deviceTask.Result.Error);
-        }
-
-        if (!sourceTask.Result.IsSuccess)
-        {
-            logger.LogWarning("GA4 realtime: lấy thành phần truy cập thất bại — {Error}", sourceTask.Result.Error);
         }
 
         deviceRows.Sort((a, b) => b.ActiveUsers.CompareTo(a.ActiveUsers));
