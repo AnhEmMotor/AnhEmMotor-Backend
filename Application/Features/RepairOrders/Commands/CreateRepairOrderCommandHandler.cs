@@ -54,7 +54,8 @@ public class CreateRepairOrderCommandHandler(
             await uow.SaveChangesAsync(ct);
             vehicleId = vehicle.Id;
         }
-        var totalCost = req.PartsCost + req.LaborCost;
+        var initialLaborCost = req.LaborCost == 0 ? 200000m : req.LaborCost;
+        var totalCost = req.PartsCost + initialLaborCost;
         var dateStr = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
         var number = $"RO-{dateStr}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
         var entity = new MaintenanceHistory
@@ -65,7 +66,7 @@ public class CreateRepairOrderCommandHandler(
             Mileage = req.Mileage,
             TechnicianId = req.TechnicianId,
             PartsCost = req.PartsCost,
-            LaborCost = req.LaborCost,
+            LaborCost = initialLaborCost,
             TotalCost = totalCost,
             PartsJson = req.PartsJson,
             NextMaintenanceDate = req.NextMaintenanceDate,

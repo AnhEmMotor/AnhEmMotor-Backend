@@ -580,6 +580,7 @@ public class ProductMappingConfig : IRegister
             EffectiveMax = effectiveMax,
             Stock = CalculateVariantAvailableStock(variant, null),
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
+            CategoryName = variant.Product?.ProductCategory?.Name,
             Colors = MapVariantColors(variant)
         };
     }

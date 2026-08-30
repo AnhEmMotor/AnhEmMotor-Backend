@@ -208,7 +208,51 @@ public class CreateOutputCommandHandler(
                 output.ShippingFee = feeResult.Value;
         }
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0)) + (output.ShippingFee ?? 0);
+        var grossTotal = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0)) + (output.ShippingFee ?? 0);
+        decimal discountAmount = 0;
+        OrderVoucher? orderVoucherToSave = null;
+
+        if (!string.IsNullOrWhiteSpace(request.VoucherCode))
+        {
+            var voucher = await voucherReadRepository.GetByCodeAsync(request.VoucherCode, cancellationToken)
+                .ConfigureAwait(false);
+            if (voucher != null)
+            {
+                var today = DateTime.UtcNow.Date;
+                var totalUsed = await voucherUsageRepository.GetTotalUsageCountAsync(voucher.Id, cancellationToken);
+                var userUsedCount = request.BuyerId.HasValue
+                    ? await voucherUsageRepository.GetUserUsageCountAsync(
+                        voucher.Id,
+                        request.BuyerId.Value,
+                        cancellationToken)
+                    : 0;
+                var isValid = today >= voucher.ValidFrom.Date &&
+                    today <= voucher.ValidTo.Date &&
+                    (voucher.TotalUsageLimit == 0 || totalUsed < voucher.TotalUsageLimit) &&
+                    (voucher.UsageLimitPerUser == 0 || userUsedCount < voucher.UsageLimitPerUser) &&
+                    (voucher.MinOrderValue == 0 || grossTotal >= voucher.MinOrderValue);
+                if (isValid)
+                {
+                    discountAmount = voucher.DiscountType == DiscountType.Percent
+                        ? voucher.DiscountValue * grossTotal / 100
+                        : voucher.DiscountValue;
+                    if (voucher.MaxDiscountAmount > 0 && discountAmount > voucher.MaxDiscountAmount)
+                        discountAmount = voucher.MaxDiscountAmount.Value;
+                    discountAmount = Math.Min(discountAmount, grossTotal);
+                    orderVoucherToSave = new OrderVoucher
+                    {
+                        VoucherId = voucher.Id,
+                        Output = output,
+                        DiscountApplied = discountAmount,
+                        AppliedAt = DateTimeOffset.UtcNow,
+                        AppliedBy = request.BuyerId?.ToString() ?? "System"
+                    };
+                }
+            }
+        }
+
+        var totalPrice = Math.Max(0, grossTotal - discountAmount);
+
         bool hasVehicle = false;
         bool hasPart = false;
         bool hasAccessory = false;
@@ -274,45 +318,11 @@ public class CreateOutputCommandHandler(
         output.PaymentMethod = request.PaymentMethod ?? PaymentMethod.COD;
         output.PaymentStatus = "Pending";
         insertRepository.Add(output);
-        if (!string.IsNullOrWhiteSpace(request.VoucherCode))
+
+        if (orderVoucherToSave != null)
         {
-            var voucher = await voucherReadRepository.GetByCodeAsync(request.VoucherCode, cancellationToken)
-                .ConfigureAwait(false);
-            if (voucher != null)
-            {
-                var today = DateTime.UtcNow.Date;
-                var totalUsed = await voucherUsageRepository.GetTotalUsageCountAsync(voucher.Id, cancellationToken);
-                var userUsedCount = request.BuyerId.HasValue
-                    ? await voucherUsageRepository.GetUserUsageCountAsync(
-                        voucher.Id,
-                        request.BuyerId.Value,
-                        cancellationToken)
-                    : 0;
-                var isValid = today >= voucher.ValidFrom.Date &&
-                    today <= voucher.ValidTo.Date &&
-                    (voucher.TotalUsageLimit == 0 || totalUsed < voucher.TotalUsageLimit) &&
-                    (voucher.UsageLimitPerUser == 0 || userUsedCount < voucher.UsageLimitPerUser) &&
-                    (voucher.MinOrderValue == 0 || totalPrice >= voucher.MinOrderValue);
-                if (isValid)
-                {
-                    var discountAmount = voucher.DiscountType == DiscountType.Percent
-                        ? voucher.DiscountValue * totalPrice / 100
-                        : voucher.DiscountValue;
-                    if (voucher.MaxDiscountAmount > 0 && discountAmount > voucher.MaxDiscountAmount)
-                        discountAmount = voucher.MaxDiscountAmount.Value;
-                    discountAmount = Math.Min(discountAmount, totalPrice);
-                    var orderVoucher = new OrderVoucher
-                    {
-                        VoucherId = voucher.Id,
-                        OutputId = output.Id,
-                        Output = output,
-                        DiscountApplied = discountAmount,
-                        AppliedAt = DateTimeOffset.UtcNow,
-                        AppliedBy = request.BuyerId?.ToString() ?? "System"
-                    };
-                    await voucherUsageRepository.AddAsync(orderVoucher, cancellationToken);
-                }
-            }
+            orderVoucherToSave.OutputId = output.Id;
+            await voucherUsageRepository.AddAsync(orderVoucherToSave, cancellationToken);
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var combos = new HashSet<(int VariantId, int? ColorId)>();

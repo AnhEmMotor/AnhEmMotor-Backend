@@ -32,7 +32,7 @@ public class CalculateShippingFeeQueryHandler(
                 {
                     Name = variant.VariantName ?? product.Name ?? string.Empty,
                     Quantity = item.Quantity,
-                    Weight = (int)weight!,
+                    Weight = (int)(weight! * 1000),
                     Length = (int)length!,
                     Width = (int)width!,
                     Height = (int)height!

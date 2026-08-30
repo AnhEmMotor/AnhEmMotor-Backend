@@ -36,10 +36,19 @@ public class GetRepairOrdersListQueryHandler(
                 {
                     item.VoucherDiscount = pm.DiscountAmount > 0 ? pm.DiscountAmount : null;
                     item.VoucherFinalTotal = pm.TotalAmount;
+                    item.Status = "Completed";
                 }
                 else
                 {
                     item.VoucherFinalTotal = item.TotalCost;
+                    if (item.TechnicianId.HasValue) 
+                    {
+                        item.Status = string.IsNullOrEmpty(item.PartsJson) ? "InProgress" : "QcPending";
+                    } 
+                    else 
+                    {
+                        item.Status = "Pending";
+                    }
                 }
 
                 if (vehicleDict.TryGetValue(item.VehicleId, out var vehicle))
