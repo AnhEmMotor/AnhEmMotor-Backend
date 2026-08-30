@@ -10,7 +10,8 @@ namespace Application.Features.RepairOrders.Queries;
 public class GetRepairOrderDetailQueryHandler(
     IMaintenanceHistoryReadRepository repo,
     IVehicleReadRepository vehicleRepo,
-    IEmployeeReadRepository employeeRepo) : IRequestHandler<GetRepairOrderDetailQuery, Result<RepairOrderResponse>>
+    IEmployeeReadRepository employeeRepo,
+    Application.Interfaces.Repositories.WorkshopPayment.IWorkshopPaymentReadRepository paymentRepo) : IRequestHandler<GetRepairOrderDetailQuery, Result<RepairOrderResponse>>
 {
     public async Task<Result<RepairOrderResponse>> Handle(GetRepairOrderDetailQuery req, CancellationToken ct)
     {
@@ -30,6 +31,13 @@ public class GetRepairOrderDetailQueryHandler(
         }
         string? customerName = vehicle?.Lead?.FullName;
         string? customerPhone = vehicle?.Lead?.PhoneNumber;
+        
+        var allPayments = await paymentRepo.GetAllAsync(ct);
+        var payment = allPayments.FirstOrDefault(x => x.SourceType == "Maintenance" && x.SourceId == entity.Id);
+        string calcStatus = "Pending";
+        if (payment != null) calcStatus = "Completed";
+        else if (entity.TechnicianId.HasValue) calcStatus = string.IsNullOrEmpty(entity.PartsJson) ? "InProgress" : "QcPending";
+
         return Result<RepairOrderResponse>.Success(
             new RepairOrderResponse
             {
@@ -51,6 +59,7 @@ public class GetRepairOrderDetailQueryHandler(
                 NextMaintenanceDate = entity.NextMaintenanceDate,
                 NextMaintenanceOdo = entity.NextMaintenanceOdo,
                 ServiceType = entity.ServiceType,
+                Status = calcStatus,
                 CreatedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt
             });

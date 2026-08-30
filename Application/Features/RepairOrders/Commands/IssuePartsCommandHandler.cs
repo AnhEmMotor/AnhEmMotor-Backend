@@ -19,7 +19,7 @@ public class IssuePartsCommandHandler(
         if (req.TechnicianId.HasValue)
             history.TechnicianId = req.TechnicianId.Value;
         var partsCost = req.Parts.Sum(p => p.Price * p.Count);
-        var laborCost = req.Services.Sum(s => s.LaborCost);
+        var laborCost = req.Services.Sum(s => s.LaborCost) + 200000m;
         history.PartsCost = partsCost;
         history.LaborCost = laborCost;
         history.TotalCost = partsCost + laborCost;
