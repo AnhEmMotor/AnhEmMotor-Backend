@@ -14,7 +14,8 @@ public static class OrderPaymentAmountCalculator
     {
         var subtotal = GetSubtotal(order);
         var shippingFee = order.ShippingFee ?? 0;
-        return subtotal + shippingFee;
+        var discount = order.OrderVouchers?.Sum(v => v.DiscountApplied) ?? 0m;
+        return Math.Max(0, subtotal + shippingFee - discount);
     }
 
     public static decimal GetDepositAmount(Output order) => GetTotal(order) * (order.DepositRatio ?? 0) / 100m;

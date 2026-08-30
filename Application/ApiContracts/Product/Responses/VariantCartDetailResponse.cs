@@ -24,6 +24,9 @@ public class VariantCartDetailResponse
     [JsonPropertyName("managementType")]
     public string? ManagementType { get; set; }
 
+    [JsonPropertyName("categoryName")]
+    public string? CategoryName { get; set; }
+
     [JsonPropertyName("colors")]
     public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
 }

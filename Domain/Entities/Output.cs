@@ -130,7 +130,7 @@ namespace Domain.Entities
         public ICollection<OrderVoucher> OrderVouchers { get; set; } = [];
 
         [NotMapped]
-        public decimal Total => (OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0) + (ShippingFee ?? 0);
+        public decimal Total => Math.Max(0, (OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0) + (ShippingFee ?? 0) - (OrderVouchers?.Sum(v => v.DiscountApplied) ?? 0m));
 
         [NotMapped]
         public decimal DepositAmount => Total * (DepositRatio ?? 0) / 100;
