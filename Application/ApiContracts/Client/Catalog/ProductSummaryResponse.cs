@@ -145,25 +145,13 @@ namespace Application.ApiContracts.Client.Catalog
         public int? MaxPurchaseQuantity { get; set; }
     }
 
-    public class ProductDetailResponse
+    public class ProductDetailResponse : ProductSummaryResponse
     {
-        public int Id { get; set; }
-
-        public string? Name { get; set; }
-
-        public string? Description { get; set; }
-
-        public string? ImageUrl { get; set; }
-
-        public decimal ReferencePrice { get; set; }
-
         public List<string> Features { get; set; } = new();
 
         public bool IsCompatibleWithMyVehicle { get; set; }
 
         public string? CompatibilityNote { get; set; }
-
-        public List<ProductVariantSummaryResponse> Variants { get; set; } = new();
     }
 
     public class ConsultationRequest
