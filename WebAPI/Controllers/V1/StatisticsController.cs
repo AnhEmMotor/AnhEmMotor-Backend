@@ -416,9 +416,9 @@ public class StatisticsController(
             .ConfigureAwait(false);
         var activeOrders = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .Where(m => m.TotalCost == 0)
+            .Where(m => (m.CreatedAt >= periodStart && m.CreatedAt <= periodEnd) || m.TotalCost == 0)
             .OrderByDescending(m => m.CreatedAt)
-            .Take(20)
+            .Take(50)
             .Select(
                 m => new
                 {
@@ -428,6 +428,8 @@ public class StatisticsController(
                     m.Description,
                     m.LaborCost,
                     m.PartsCost,
+                    m.TotalCost,
+                    m.PartsJson,
                     m.CreatedAt,
                     m.TechnicianId
                 })
@@ -464,21 +466,54 @@ public class StatisticsController(
                     cancellationToken)
                 .ConfigureAwait(false);
         }
-        var vehicleFees = activeOrders.Select(o => new { o.Id, o.VehicleId, Fee = o.LaborCost + o.PartsCost }).ToList();
-        var vehicleFeeDict = vehicleFees.ToDictionary(x => x.Id, x => x.Fee);
         var repairOrders = activeOrders.Select(
-            o => new
+            o =>
             {
-                id = o.Id,
-                orderCode = o.MaintenanceNumber,
-                customerName = customerDict.TryGetValue(o.VehicleId, out var cn) ? cn : "-",
-                vehicleInfo = vehicleDict.TryGetValue(o.VehicleId, out var vi) ? vi : "-",
-                technicianName = (o.TechnicianId is int tid && empDict.TryGetValue(tid, out var tn))
-                    ? tn
-                    : "Chưa phân công",
-                status = "Đang sửa chữa",
-                startedAt = o.CreatedAt,
-                laborFee = vehicleFeeDict.TryGetValue(o.Id, out var f) ? f : 0m
+                decimal totalFee = o.TotalCost > 0 ? o.TotalCost : (o.LaborCost + o.PartsCost);
+                if (totalFee == 0 && !string.IsNullOrEmpty(o.PartsJson))
+                {
+                    try
+                    {
+                        using var doc = System.Text.Json.JsonDocument.Parse(o.PartsJson);
+                        if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            foreach (var elem in doc.RootElement.EnumerateArray())
+                            {
+                                if (elem.TryGetProperty("Price", out var pProp) || elem.TryGetProperty("price", out pProp))
+                                {
+                                    decimal p = pProp.GetDecimal();
+                                    int q = 1;
+                                    if (elem.TryGetProperty("Quantity", out var qProp) || elem.TryGetProperty("quantity", out qProp) || elem.TryGetProperty("Qty", out qProp) || elem.TryGetProperty("qty", out qProp))
+                                    {
+                                        q = qProp.GetInt32();
+                                    }
+                                    totalFee += p * q;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                string status = o.TotalCost > 0 ? "Đã hoàn thành" : (o.TechnicianId.HasValue ? "Đang sửa chữa" : "Chờ sửa chữa");
+                if (!string.IsNullOrEmpty(o.Description) && o.Description.Contains("bảo hành", StringComparison.OrdinalIgnoreCase))
+                {
+                    status = "Bảo hành";
+                }
+
+                return new
+                {
+                    id = o.Id,
+                    orderCode = o.MaintenanceNumber,
+                    customerName = customerDict.TryGetValue(o.VehicleId, out var cn) ? cn : "-",
+                    vehicleInfo = vehicleDict.TryGetValue(o.VehicleId, out var vi) ? vi : "-",
+                    technicianName = (o.TechnicianId is int tid && empDict.TryGetValue(tid, out var tn))
+                        ? tn
+                        : "Chưa phân công",
+                    status = status,
+                    startedAt = o.CreatedAt,
+                    laborFee = totalFee
+                };
             })
             .ToList();
         var chartData = new List<object>();
