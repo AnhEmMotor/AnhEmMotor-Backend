@@ -64,19 +64,54 @@ public class GetVehiclePortfolioQueryHandler(
                 {
                     if (!string.IsNullOrWhiteSpace(h.PartsJson))
                     {
-                        var parsedList = JsonSerializer.Deserialize<List<MaintenanceHistoryItemDto>>(h.PartsJson);
-                        if (parsedList != null)
+                        if (h.PartsJson.TrimStart().StartsWith("["))
                         {
-                            foreach (var p in parsedList)
+                            var parsedList = JsonSerializer.Deserialize<List<MaintenanceHistoryItemDto>>(h.PartsJson);
+                            if (parsedList != null)
                             {
-                                details.Add(
-                                    new PortfolioPartItem
-                                    {
-                                        Type = p.Type == "Product" ? "Part" : "Service",
-                                        VariantName = p.Name,
-                                        ProductCode = null,
-                                        Count = p.Count
-                                    });
+                                foreach (var p in parsedList)
+                                {
+                                    details.Add(
+                                        new PortfolioPartItem
+                                        {
+                                            Type = p.Type == "Product" ? "Part" : "Service",
+                                            VariantName = p.Name,
+                                            ProductCode = null,
+                                            Count = p.Count
+                                        });
+                                }
+                            }
+                        }
+                        else if (h.PartsJson.TrimStart().StartsWith("{"))
+                        {
+                            var oldFormat = JsonSerializer.Deserialize<OldMaintenancePartsJsonDto>(h.PartsJson);
+                            if (oldFormat?.Parts != null)
+                            {
+                                foreach (var p in oldFormat.Parts)
+                                {
+                                    details.Add(
+                                        new PortfolioPartItem
+                                        {
+                                            Type = "Part",
+                                            VariantName = p.ProductVariantName ?? $"Sản phẩm ID: {p.ProductVariantId}",
+                                            ProductCode = null,
+                                            Count = p.Count
+                                        });
+                                }
+                            }
+                            if (oldFormat?.Services != null)
+                            {
+                                foreach (var s in oldFormat.Services)
+                                {
+                                    details.Add(
+                                        new PortfolioPartItem
+                                        {
+                                            Type = "Service",
+                                            VariantName = s.ServiceName ?? $"Dịch vụ ID: {s.ServiceId}",
+                                            ProductCode = null,
+                                            Count = s.Count
+                                        });
+                                }
                             }
                         }
                     }
@@ -124,4 +159,25 @@ public class MaintenanceHistoryItemDto
 
     public int Count { get; set; }
 }
+
+public class OldMaintenancePartsJsonDto
+{
+    public List<OldPartItem>? Parts { get; set; }
+    public List<OldServiceItem>? Services { get; set; }
+}
+
+public class OldPartItem
+{
+    public int ProductVariantId { get; set; }
+    public string? ProductVariantName { get; set; }
+    public int Count { get; set; }
+}
+
+public class OldServiceItem
+{
+    public int ServiceId { get; set; }
+    public string? ServiceName { get; set; }
+    public int Count { get; set; }
+}
+
 
