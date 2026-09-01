@@ -54,6 +54,8 @@ public class UpdateInvoiceStatusHandler(
             updated.VehiclePrice,
             updated.RegistrationFee,
             updated.InsuranceFee,
+            updated.VoucherCode,
+            updated.DepositPercentage,
             updated.TotalAmount,
             updated.PaymentMethod,
             updated.BankName,

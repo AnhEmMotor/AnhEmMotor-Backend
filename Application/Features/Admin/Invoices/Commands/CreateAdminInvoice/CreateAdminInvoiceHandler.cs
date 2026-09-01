@@ -2,8 +2,10 @@ using Application.ApiContracts.Admin.Invoices;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Invoice;
+using Application.Interfaces.Repositories.Voucher;
 using Application.Interfaces.Services;
 using Domain.Entities;
+using Domain.Enums;
 using MediatR;
 
 namespace Application.Features.Admin.Invoices.Commands.CreateAdminInvoice;
@@ -13,6 +15,7 @@ public record CreateAdminInvoiceCommand(CreateAdminInvoiceRequest Request) : IRe
 public class CreateAdminInvoiceHandler(
     IInvoiceWriteRepository writeRepo,
     IInvoiceReadRepository readRepo,
+    IVoucherReadRepository voucherReadRepo,
     ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateAdminInvoiceCommand, Result<AdminInvoiceDetailResponse>>
 {
@@ -23,6 +26,30 @@ public class CreateAdminInvoiceHandler(
         var req = request.Request;
         var invoiceNumber = GenerateInvoiceNumber();
         var userId = currentUserContext.GetUserId();
+
+        decimal discount = 0;
+        if (!string.IsNullOrWhiteSpace(req.VoucherCode))
+        {
+            var voucher = await voucherReadRepo.GetByCodeAsync(req.VoucherCode, cancellationToken);
+            if (voucher != null)
+            {
+                if (voucher.DiscountType == DiscountType.Percent)
+                {
+                    discount = (req.VehiclePrice * voucher.DiscountValue) / 100m;
+                    if (voucher.MaxDiscountAmount.HasValue && discount > voucher.MaxDiscountAmount.Value)
+                    {
+                        discount = voucher.MaxDiscountAmount.Value;
+                    }
+                }
+                else
+                {
+                    discount = voucher.DiscountValue;
+                }
+            }
+        }
+
+        var totalAmount = Math.Max(0, req.VehiclePrice - discount) + req.RegistrationFee + req.InsuranceFee;
+
         var invoice = new Invoice
         {
             InvoiceNumber = invoiceNumber,
@@ -42,7 +69,9 @@ public class CreateAdminInvoiceHandler(
             VehiclePrice = req.VehiclePrice,
             RegistrationFee = req.RegistrationFee,
             InsuranceFee = req.InsuranceFee,
-            TotalAmount = req.VehiclePrice + req.RegistrationFee + req.InsuranceFee,
+            VoucherCode = req.VoucherCode,
+            DepositPercentage = req.DepositPercentage ?? 100,
+            TotalAmount = totalAmount,
             PaymentMethod = req.PaymentMethod,
             BankName = req.BankName ?? string.Empty,
             Status = "pending",
@@ -73,6 +102,8 @@ public class CreateAdminInvoiceHandler(
             created.VehiclePrice,
             created.RegistrationFee,
             created.InsuranceFee,
+            created.VoucherCode,
+            created.DepositPercentage,
             created.TotalAmount,
             created.PaymentMethod,
             created.BankName,

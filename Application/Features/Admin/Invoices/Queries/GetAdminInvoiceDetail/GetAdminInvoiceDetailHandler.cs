@@ -34,6 +34,8 @@ public class GetAdminInvoiceDetailHandler(IInvoiceReadRepository repository) : I
             invoice.VehiclePrice,
             invoice.RegistrationFee,
             invoice.InsuranceFee,
+            invoice.VoucherCode,
+            invoice.DepositPercentage,
             invoice.TotalAmount,
             invoice.PaymentMethod,
             invoice.BankName,

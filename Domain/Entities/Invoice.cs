@@ -51,6 +51,10 @@ namespace Domain.Entities
 
         public decimal InsuranceFee { get; set; }
 
+        public string? VoucherCode { get; set; }
+
+        public int? DepositPercentage { get; set; }
+
         public string PaymentMethod { get; set; } = "transfer";
 
         public string? BankName { get; set; }
