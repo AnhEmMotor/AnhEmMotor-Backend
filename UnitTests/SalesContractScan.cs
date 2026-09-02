@@ -5,10 +5,9 @@ using Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
 using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
-using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.Invoice;
 using Application.Interfaces.Repositories.SalesContract;
 using Domain.Constants;
-using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -19,7 +18,7 @@ public class SalesContractScan
 {
     private readonly Mock<ISalesContractReadRepository> _readRepository = new();
     private readonly Mock<ISalesContractInsertRepository> _insertRepository = new();
-    private readonly Mock<IOutputReadRepository> _orderReadRepository = new();
+    private readonly Mock<IInvoiceReadRepository> _invoiceReadRepository = new();
     private readonly Mock<IFileInsertService> _fileInsertService = new();
     private readonly Mock<IFileReadService> _fileReadService = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
@@ -190,44 +189,44 @@ public class SalesContractScan
     }
 
     [Fact]
-    public async Task CreateContract_RejectsUnconfirmedOrder()
+    public async Task CreateContract_RejectsUncompletedInvoice()
     {
-        const int orderId = 21;
-        _orderReadRepository
-            .Setup(repository => repository.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Output { Id = orderId, StatusId = OrderStatus.Pending });
+        const int invoiceId = 21;
+        _invoiceReadRepository
+            .Setup(repository => repository.GetByIdAsync(invoiceId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Invoice { Id = invoiceId, Status = "pending" });
         var handler = new CreateSalesContractCommandHandler(
             _readRepository.Object,
             _insertRepository.Object,
-            _orderReadRepository.Object,
+            _invoiceReadRepository.Object,
             _unitOfWork.Object);
         var result = await handler.Handle(
-            new CreateSalesContractCommand(new CreateSalesContractRequest { OrderId = orderId }),
+            new CreateSalesContractCommand(new CreateSalesContractRequest { InvoiceId = invoiceId }),
             CancellationToken.None)
             .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-        result.Error?.Message.Should().Contain("đã được xác nhận");
+        result.Error?.Message.Should().Contain("duyệt/hoàn tất");
         _insertRepository.VerifyNoOtherCalls();
         _unitOfWork.VerifyNoOtherCalls();
     }
 
     [Fact]
-    public async Task CreateContract_RejectsOrderAlreadyMappedToContract()
+    public async Task CreateContract_RejectsInvoiceAlreadyMappedToContract()
     {
-        const int orderId = 22;
-        _orderReadRepository
-            .Setup(repository => repository.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Output { Id = orderId, StatusId = OrderStatus.ConfirmedCod });
+        const int invoiceId = 22;
+        _invoiceReadRepository
+            .Setup(repository => repository.GetByIdAsync(invoiceId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Invoice { Id = invoiceId, Status = "completed" });
         _readRepository
-            .Setup(repository => repository.GetByOrderIdAsync(orderId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new SalesContract { OutputId = orderId, ContractNumber = "HDMB-EXISTING", });
+            .Setup(repository => repository.GetByInvoiceIdAsync(invoiceId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SalesContract { InvoiceId = invoiceId, ContractNumber = "HDMB-EXISTING", });
         var handler = new CreateSalesContractCommandHandler(
             _readRepository.Object,
             _insertRepository.Object,
-            _orderReadRepository.Object,
+            _invoiceReadRepository.Object,
             _unitOfWork.Object);
         var result = await handler.Handle(
-            new CreateSalesContractCommand(new CreateSalesContractRequest { OrderId = orderId }),
+            new CreateSalesContractCommand(new CreateSalesContractRequest { InvoiceId = invoiceId }),
             CancellationToken.None)
             .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -237,23 +236,24 @@ public class SalesContractScan
     }
 
     [Fact]
-    public async Task CreateContract_PersistsOrderLink()
+    public async Task CreateContract_PersistsInvoiceLink()
     {
-        const int orderId = 23;
+        const int invoiceId = 23;
         SalesContract? insertedContract = null;
-        var order = new Output
+        var invoice = new Invoice
         {
-            Id = orderId,
-            StatusId = OrderStatus.ConfirmedCod,
+            Id = invoiceId,
+            Status = "completed",
             CustomerName = "Khách kiểm thử",
             CustomerPhone = "0900000023",
-            DepositRatio = 20
+            TotalAmount = 50000000,
+            DepositPercentage = 20
         };
-        _orderReadRepository
-            .Setup(repository => repository.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(order);
+        _invoiceReadRepository
+            .Setup(repository => repository.GetByIdAsync(invoiceId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(invoice);
         _readRepository
-            .Setup(repository => repository.GetByOrderIdAsync(orderId, It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.GetByInvoiceIdAsync(invoiceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((SalesContract?)null);
         _insertRepository
             .Setup(repository => repository.Add(It.IsAny<SalesContract>()))
@@ -268,16 +268,17 @@ public class SalesContractScan
         var handler = new CreateSalesContractCommandHandler(
             _readRepository.Object,
             _insertRepository.Object,
-            _orderReadRepository.Object,
+            _invoiceReadRepository.Object,
             _unitOfWork.Object);
         var result = await handler.Handle(
-            new CreateSalesContractCommand(new CreateSalesContractRequest { OrderId = orderId }),
+            new CreateSalesContractCommand(new CreateSalesContractRequest { InvoiceId = invoiceId }),
             CancellationToken.None)
             .ConfigureAwait(true);
 
         result.IsSuccess.Should().BeTrue();
         insertedContract.Should().NotBeNull();
-        insertedContract!.OutputId.Should().Be(orderId);
+        insertedContract!.InvoiceId.Should().Be(invoiceId);
         _unitOfWork.Verify(repository => repository.SaveChangesAsync(CancellationToken.None), Times.Once);
     }
 }
+

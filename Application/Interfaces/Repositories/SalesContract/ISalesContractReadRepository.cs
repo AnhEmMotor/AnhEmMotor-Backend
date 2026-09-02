@@ -17,8 +17,8 @@ public interface ISalesContractReadRepository
 
     public Task<List<global::Domain.Entities.SalesContract>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    public Task<global::Domain.Entities.SalesContract?> GetByOrderIdAsync(
-        int? orderId,
+    public Task<global::Domain.Entities.SalesContract?> GetByInvoiceIdAsync(
+        int? invoiceId,
         CancellationToken cancellationToken = default);
 
     public Task<bool> IsContractNumberExistsAsync(

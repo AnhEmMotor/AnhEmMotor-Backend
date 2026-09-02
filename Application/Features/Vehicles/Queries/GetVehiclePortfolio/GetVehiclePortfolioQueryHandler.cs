@@ -51,6 +51,8 @@ public class GetVehiclePortfolioQueryHandler(
             ProductVariantColorId = vehicle.ProductVariantColorId,
             VariantName = vehicle.ProductVariant?.VariantName,
             ColorName = vehicle.ProductVariantColor?.ColorName,
+            ProductName = vehicle.Product?.Name,
+            CategoryName = vehicle.Product?.ProductCategory?.Name,
             BrandName = vehicle.Product != null && vehicle.Product.Brand != null ? vehicle.Product.Brand.Name : null,
             WarrantyPeriod = vehicle.Product?.WarrantyPeriod,
             IsActive = vehicle.IsActive,

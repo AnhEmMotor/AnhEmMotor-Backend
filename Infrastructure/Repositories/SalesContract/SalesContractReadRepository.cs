@@ -13,7 +13,7 @@ public class SalesContractReadRepository(ApplicationDBContext context, ISievePag
 {
     internal IQueryable<Domain.Entities.SalesContract> GetQueryable()
     {
-        return context.SalesContracts.AsQueryable();
+        return context.SalesContracts.Include(x => x.Invoice).AsQueryable();
     }
 
     public Task<PagedResult<SalesContractResponse>> GetPagedAsync(
@@ -50,11 +50,11 @@ public class SalesContractReadRepository(ApplicationDBContext context, ISievePag
         return GetQueryable().ToListAsync(cancellationToken);
     }
 
-    public Task<Domain.Entities.SalesContract?> GetByOrderIdAsync(
-        int? orderId,
+    public Task<Domain.Entities.SalesContract?> GetByInvoiceIdAsync(
+        int? invoiceId,
         CancellationToken cancellationToken = default)
     {
-        return GetQueryable().FirstOrDefaultAsync(x => x.OutputId == orderId, cancellationToken);
+        return GetQueryable().FirstOrDefaultAsync(x => x.InvoiceId == invoiceId, cancellationToken);
     }
 
     public Task<bool> IsContractNumberExistsAsync(

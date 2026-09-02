@@ -7,10 +7,11 @@ public static class SalesContractStatus
     public const string Approved = "Approved";
     public const string Signed = "Signed";
     public const string Fulfilled = "Fulfilled";
+    public const string Rejected = "Rejected";
 
-    public static readonly string[] AllowedValues = [Draft, PendingApproval, Approved, Signed, Fulfilled];
+    public static readonly string[] AllowedValues = [Draft, PendingApproval, Approved, Signed, Fulfilled, Rejected];
 
-    public static readonly List<string> All = [Draft, PendingApproval, Approved, Signed, Fulfilled];
+    public static readonly List<string> All = [Draft, PendingApproval, Approved, Signed, Fulfilled, Rejected];
 
     public static bool IsValid(string? value)
     {

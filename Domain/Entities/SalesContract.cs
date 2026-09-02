@@ -13,10 +13,10 @@ namespace Domain.Entities
         [MaxLength(100)]
         public string ContractNumber { get; set; } = string.Empty;
 
-        public int? OutputId { get; set; }
+        public int? InvoiceId { get; set; }
 
-        [ForeignKey("OutputId")]
-        public Output? Output { get; set; }
+        [ForeignKey("InvoiceId")]
+        public Invoice? Invoice { get; set; }
 
         public Guid? CustomerId { get; set; }
 
@@ -73,5 +73,7 @@ namespace Domain.Entities
         public string? ScannedFileUrl { get; set; }
 
         public string? Note { get; set; }
+
+        public string? RejectReason { get; set; }
     }
 }

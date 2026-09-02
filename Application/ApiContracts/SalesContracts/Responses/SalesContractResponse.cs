@@ -6,9 +6,9 @@ public class SalesContractResponse
 
     public string ContractNumber { get; set; } = string.Empty;
 
-    public int? OutputId { get; set; }
+    public int? InvoiceId { get; set; }
 
-    public int OrderId { get; set; }
+    public string? InvoiceNumber { get; set; }
 
     public Guid? CustomerId { get; set; }
 
@@ -25,6 +25,8 @@ public class SalesContractResponse
     public string? WarrantyScope { get; set; }
 
     public string? Note { get; set; }
+
+    public string? RejectReason { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
 

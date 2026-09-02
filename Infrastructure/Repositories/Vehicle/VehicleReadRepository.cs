@@ -231,7 +231,11 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return vehicleQuery
             .Include(v => v.Lead)
             .Include(v => v.ProductVariant)
-            .ThenInclude(pv => pv!.Product)
+                .ThenInclude(pv => pv!.Product)
+                    .ThenInclude(p => p!.Brand)
+            .Include(v => v.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                    .ThenInclude(p => p!.ProductCategory)
             .Include(v => v.ProductVariantColor)
             .FirstOrDefaultAsync(cancellationToken);
     }

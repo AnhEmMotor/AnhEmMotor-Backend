@@ -2,7 +2,7 @@ namespace Application.ApiContracts.SalesContracts.Requests;
 
 public class CreateSalesContractRequest
 {
-    public int OrderId { get; set; }
+    public int InvoiceId { get; set; }
 
     public string? SpecialTerms { get; set; }
 

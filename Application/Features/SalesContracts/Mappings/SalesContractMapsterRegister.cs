@@ -9,9 +9,11 @@ public class SalesContractMapsterRegister : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<SalesContract, SalesContractResponse>().Map(dest => dest.OrderId, src => src.OutputId ?? 0);
+        config.NewConfig<SalesContract, SalesContractResponse>()
+            .Map(dest => dest.InvoiceNumber, src => src.Invoice.InvoiceNumber);
+
         config.NewConfig<CreateSalesContractRequest, SalesContract>()
-            .Map(dest => dest.OutputId, src => src.OrderId)
+            .Map(dest => dest.InvoiceId, src => src.InvoiceId)
             .Ignore(dest => dest.Id)
             .Ignore(dest => dest.ContractNumber)
             .Ignore(dest => dest.Status)

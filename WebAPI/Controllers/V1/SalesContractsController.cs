@@ -35,7 +35,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Lấy danh sách hợp đồng bán hàng (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [HasPermission(Permissions.Order.ContractManagement.View)]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     [ProducesResponseType(typeof(PagedResult<SalesContractResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetSalesContractsAsync(
@@ -126,7 +126,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
         [FromBody] UpdateContractStatusRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateSalesContractStatusCommand(id, request.Status);
+        var command = new UpdateSalesContractStatusCommand(id, request.Status, request.RejectReason);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -155,6 +155,23 @@ public class SalesContractsController(IMediator mediator) : ApiController
     public async Task<IActionResult> ApproveSalesContractAsync(Guid id, CancellationToken cancellationToken)
     {
         var command = new UpdateSalesContractStatusCommand(id, SalesContractStatus.Approved, IsAdminApproval: true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Admin từ chối duyệt hợp đồng.
+    /// </summary>
+    [HttpPost("{id:guid}/reject")]
+    [HasPermission(Permissions.Admin.ContractManagement.Edit)]
+    [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RejectSalesContractAsync(
+        Guid id, 
+        [FromBody] RejectContractRequest request, 
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateSalesContractStatusCommand(id, SalesContractStatus.Rejected, request.RejectReason, IsAdminApproval: true);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

@@ -23,7 +23,7 @@ public class UpdateInvoiceStatusHandler(
         if (invoice == null)
             return Result<AdminInvoiceDetailResponse>.Failure(Error.NotFound("Không tìm thấy hóa đơn", "Id"));
         var newStatus = request.Request.Status;
-        if (newStatus == "completed" && invoice.Status != "completed")
+        if ((newStatus == "completed" || newStatus == "rejected") && invoice.Status != newStatus)
         {
             invoice.ProcessedBy = request.Request.ProcessedBy ?? currentUserContext.GetUserId().ToString();
             invoice.ProcessedAt = DateTime.UtcNow;

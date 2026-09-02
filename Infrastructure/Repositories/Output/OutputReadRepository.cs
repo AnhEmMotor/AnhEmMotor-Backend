@@ -28,10 +28,10 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         {
             query = query.Where(filter);
         }
-        if (withoutContract)
-        {
-            query = query.Where(o => !context.Set<global::Domain.Entities.SalesContract>().Any(c => c.OutputId == o.Id));
-        }
+        // if (withoutContract)
+        // {
+        //     query = query.Where(o => !context.Set<global::Domain.Entities.SalesContract>().Any(c => c.OutputId == o.Id));
+        // }
 
         if (typeof(TResponse) == typeof(OutputItemResponse))
         {

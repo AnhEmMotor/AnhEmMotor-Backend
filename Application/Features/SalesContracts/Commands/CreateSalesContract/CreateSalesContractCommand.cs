@@ -7,7 +7,7 @@ namespace Application.Features.SalesContracts.Commands.CreateSalesContract;
 
 public class CreateSalesContractCommand(CreateSalesContractRequest request) : IRequest<Result<SalesContractResponse>>
 {
-    public int OrderId { get; } = request.OrderId;
+    public int InvoiceId { get; } = request.InvoiceId;
 
     public string? SpecialTerms { get; init; } = request.SpecialTerms;
 

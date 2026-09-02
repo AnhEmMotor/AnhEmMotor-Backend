@@ -26,9 +26,12 @@ public class UpdateSalesContractStatusCommandHandler(ISalesContractReadRepositor
             isSameStatus ||
             (string.Equals(contract.Status, SalesContractStatus.Draft, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(normalizedStatus, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase)) ||
+            (string.Equals(contract.Status, SalesContractStatus.Rejected, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(normalizedStatus, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase)) ||
             (request.IsAdminApproval &&
                 string.Equals(contract.Status, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase)) ||
+                (string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(normalizedStatus, SalesContractStatus.Rejected, StringComparison.OrdinalIgnoreCase))) ||
             (string.Equals(contract.Status, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(normalizedStatus, SalesContractStatus.Signed, StringComparison.OrdinalIgnoreCase)) ||
             (string.Equals(contract.Status, SalesContractStatus.Signed, StringComparison.OrdinalIgnoreCase) &&
@@ -37,6 +40,10 @@ public class UpdateSalesContractStatusCommandHandler(ISalesContractReadRepositor
             return Result<SalesContractResponse>.Failure(
                 $"Không thể chuyển hợp đồng từ {contract.Status} sang {normalizedStatus}.");
         contract.Status = normalizedStatus;
+        if (string.Equals(normalizedStatus, SalesContractStatus.Rejected, StringComparison.OrdinalIgnoreCase))
+        {
+            contract.RejectReason = request.RejectReason;
+        }
         contract.UpdatedAt = DateTimeOffset.UtcNow;
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<SalesContractResponse>.Success(contract.Adapt<SalesContractResponse>());
