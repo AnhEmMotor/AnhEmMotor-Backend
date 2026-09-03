@@ -5039,11 +5039,14 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("FrameNumber")
                         .HasColumnType("text");
 
+                    b.Property<int?>("InvoiceId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<int?>("OutputId")
-                        .HasColumnType("integer");
+                    b.Property<string>("RejectReason")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("RemainingAmount")
                         .HasColumnType("decimal(18, 2)");
@@ -5095,7 +5098,7 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("OutputId");
+                    b.HasIndex("InvoiceId");
 
                     b.ToTable("SalesContracts");
                 });
@@ -7905,13 +7908,13 @@ namespace Infrastructure.PostgreSqlMigrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("Domain.Entities.Output", "Output")
+                    b.HasOne("Domain.Entities.Invoice", "Invoice")
                         .WithMany()
-                        .HasForeignKey("OutputId");
+                        .HasForeignKey("InvoiceId");
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Output");
+                    b.Navigation("Invoice");
                 });
 
             modelBuilder.Entity("Domain.Entities.Service", b =>
