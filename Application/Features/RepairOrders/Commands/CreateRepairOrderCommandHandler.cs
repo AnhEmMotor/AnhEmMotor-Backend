@@ -54,7 +54,7 @@ public class CreateRepairOrderCommandHandler(
             await uow.SaveChangesAsync(ct);
             vehicleId = vehicle.Id;
         }
-        var initialLaborCost = req.LaborCost == 0 ? 200000m : req.LaborCost;
+        var initialLaborCost = req.IsLaborFree ? 0m : (req.LaborCost == 0 ? 200000m : req.LaborCost);
         var totalCost = req.PartsCost + initialLaborCost;
         var dateStr = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
         var number = $"RO-{dateStr}-{Guid.NewGuid().ToString()[..6].ToUpper()}";

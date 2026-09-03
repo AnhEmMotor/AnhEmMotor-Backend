@@ -15,6 +15,31 @@ public class GetWarrantyClaimsListQueryHandler(IWarrantyClaimReadRepository read
         CancellationToken ct)
     {
         var claims = await readRepo.GetAllWithDetailsAsync(req.Mode, ct).ConfigureAwait(false);
+        
+        if (req.Sieve != null && !string.IsNullOrWhiteSpace(req.Sieve.Filters))
+        {
+            var filters = req.Sieve.Filters.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            foreach (var filter in filters)
+            {
+                if (filter.StartsWith("status=="))
+                {
+                    if (int.TryParse(filter.Substring(8), out int status))
+                    {
+                        claims = claims.Where(c => c.Status == status);
+                    }
+                }
+                else if (filter.StartsWith("search=="))
+                {
+                    var search = filter.Substring(8).ToLower();
+                    claims = claims.Where(c => 
+                        (c.ClaimNumber != null && c.ClaimNumber.ToLower().Contains(search)) ||
+                        (c.Vehicle?.LicensePlate != null && c.Vehicle.LicensePlate.ToLower().Contains(search)) ||
+                        (c.Vehicle?.Lead?.FullName != null && c.Vehicle.Lead.FullName.ToLower().Contains(search)) ||
+                        (c.Vehicle?.User?.FullName != null && c.Vehicle.User.FullName.ToLower().Contains(search)));
+                }
+            }
+        }
+
         var totalCount = claims.Count();
         var page = req.Sieve?.Page ?? 1;
         var pageSize = req.Sieve?.PageSize ?? 10;

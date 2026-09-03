@@ -19,5 +19,6 @@ public record CreateRepairOrderCommand(
     decimal LaborCost,
     string? PartsJson,
     DateTimeOffset? NextMaintenanceDate,
-    int? NextMaintenanceOdo
+    int? NextMaintenanceOdo,
+    bool IsLaborFree = false
 ) : IRequest<Result<int>>;
