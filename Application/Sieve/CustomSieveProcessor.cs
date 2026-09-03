@@ -140,6 +140,13 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<WarrantyTerm>(w => w.BrandId).CanSort().CanFilter();
         mapper.Property<WarrantyTerm>(w => w.TermName).CanSort().CanFilter();
         mapper.Property<WarrantyTerm>(w => w.Status).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.Id).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.InvoiceNumber).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.CustomerName).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.CustomerPhone).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.Status).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.IssueDate).CanSort().CanFilter();
+        mapper.Property<Invoice>(i => i.TotalAmount).CanSort().CanFilter();
         return mapper;
     }
 
