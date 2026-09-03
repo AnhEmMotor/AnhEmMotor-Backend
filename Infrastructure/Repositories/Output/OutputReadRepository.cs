@@ -72,6 +72,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariantColor)
             .Include(x => x.Buyer)
+            .Include(x => x.OrderVouchers)
             .AsSplitQuery();
     }
 
@@ -115,18 +116,18 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
                     (item.OutputInfos
                         .Where(info => info.DeletedAt == null)
                         .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) +
-                    (item.ShippingFee ?? 0),
+                    (item.ShippingFee ?? 0) - (item.OrderVouchers.Sum(v => (decimal?)v.DiscountApplied) ?? 0),
                 DepositAmount = item.DepositRatio.HasValue && item.DepositRatio != 0
-                    ? ((item.OutputInfos
+                    ? (((item.OutputInfos
                         .Where(info => info.DeletedAt == null)
-                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) + (item.ShippingFee ?? 0)) *
-                      (item.DepositRatio / 100m)
+                        .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) + (item.ShippingFee ?? 0)) -
+                        (item.OrderVouchers.Sum(v => (decimal?)v.DiscountApplied) ?? 0)) * (item.DepositRatio / 100m)
                     : null,
                 RemainingAmount = item.DepositRatio.HasValue && item.DepositRatio != 0
-                    ? ((item.OutputInfos
+                    ? (((item.OutputInfos
                         .Where(info => info.DeletedAt == null)
                         .Sum(info => (decimal?)((info.Count ?? 0) * (info.Price ?? 0))) ?? 0) +
-                        (item.ShippingFee ?? 0)) * (1 - item.DepositRatio.Value / 100m)
+                        (item.ShippingFee ?? 0)) - (item.OrderVouchers.Sum(v => (decimal?)v.DiscountApplied) ?? 0)) * (1 - item.DepositRatio.Value / 100m)
                     : null,
                 IsInventoryLocked = item.StatusId != null &&
                     item.StatusId != "pending" &&
@@ -263,6 +264,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .Include(o => o.OutputStatus)
             .Include(o => o.Buyer)
             .Include(o => o.FinishedByUser)
+            .Include(o => o.OrderVouchers)
             .AsSplitQuery()
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
