@@ -42,11 +42,16 @@ namespace Application.Features.HR.Commands.CreateEmployee
             {
                 userId = existingUser.Id;
             }
+            var contractDate = request.ContractDate.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(request.ContractDate, DateTimeKind.Utc)
+                : request.ContractDate.ToUniversalTime();
+
             var employee = new EmployeeProfile
             {
                 UserId = userId,
                 IdentityNumber = request.IdentityNumber,
                 Address = request.Address,
+                ContractDate = contractDate,
                 ContractDate = DateTime.SpecifyKind(request.ContractDate, DateTimeKind.Utc),
                 BankName = request.BankName,
                 BankAccountNumber = request.BankAccountNumber,
