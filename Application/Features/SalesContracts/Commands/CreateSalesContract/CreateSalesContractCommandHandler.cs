@@ -27,7 +27,7 @@ public class CreateSalesContractCommandHandler(
         if (invoice == null)
             return Result<SalesContractResponse>.Failure("Không tìm thấy hóa đơn tương ứng.");
 
-        if (invoice.Status != "completed")
+        if (!string.Equals(invoice.Status, "completed", StringComparison.OrdinalIgnoreCase))
             return Result<SalesContractResponse>.Failure(
                 "Chỉ có thể tạo hợp đồng từ hóa đơn đã được duyệt/hoàn tất.");
 

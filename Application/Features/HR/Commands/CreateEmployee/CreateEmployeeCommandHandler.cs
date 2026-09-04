@@ -52,6 +52,7 @@ namespace Application.Features.HR.Commands.CreateEmployee
                 IdentityNumber = request.IdentityNumber,
                 Address = request.Address,
                 ContractDate = contractDate,
+                ContractDate = DateTime.SpecifyKind(request.ContractDate, DateTimeKind.Utc),
                 BankName = request.BankName,
                 BankAccountNumber = request.BankAccountNumber,
                 JobTitle = request.JobTitle,

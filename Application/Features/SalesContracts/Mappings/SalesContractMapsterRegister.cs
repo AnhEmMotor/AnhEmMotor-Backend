@@ -10,7 +10,7 @@ public class SalesContractMapsterRegister : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<SalesContract, SalesContractResponse>()
-            .Map(dest => dest.InvoiceNumber, src => src.Invoice.InvoiceNumber);
+            .Map(dest => dest.InvoiceNumber, src => src.Invoice != null ? src.Invoice.InvoiceNumber : null);
 
         config.NewConfig<CreateSalesContractRequest, SalesContract>()
             .Map(dest => dest.InvoiceId, src => src.InvoiceId)
