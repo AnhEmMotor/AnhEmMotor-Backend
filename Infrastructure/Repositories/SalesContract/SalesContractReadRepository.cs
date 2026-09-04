@@ -33,6 +33,7 @@ public class SalesContractReadRepository(ApplicationDBContext context, ISievePag
                 (contract.FrameNumber != null && contract.FrameNumber.Contains(normalizedKeyword)) ||
                 (contract.EngineNumber != null && contract.EngineNumber.Contains(normalizedKeyword)));
         }
+        query = query.OrderByDescending(x => x.CreatedAt);
         return paginator.ApplyAsync<Domain.Entities.SalesContract, SalesContractResponse>(
             query,
             sieveModel,

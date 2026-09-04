@@ -15,7 +15,9 @@ public class InvoiceReadRepository(ApplicationDBContext context, ISievePaginator
         SieveModel sieveModel,
         CancellationToken cancellationToken = default)
     {
-        var query = context.Set<InvoiceEntity>().Where(x => !x.DeletedAt.HasValue);
+        var query = context.Set<InvoiceEntity>()
+            .Where(x => !x.DeletedAt.HasValue)
+            .OrderByDescending(x => x.CreatedAt);
         return paginator.ApplyAsync<InvoiceEntity, AdminInvoiceSummaryResponse>(
             query,
             sieveModel,

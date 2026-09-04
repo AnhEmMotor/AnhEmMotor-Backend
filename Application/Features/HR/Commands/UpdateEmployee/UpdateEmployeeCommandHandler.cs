@@ -26,7 +26,9 @@ namespace Application.Features.HR.Commands.UpdateEmployee
             employee.User.UserName = request.Email.Trim();
             employee.IdentityNumber = request.IdentityNumber.Trim();
             employee.Address = request.Address.Trim();
-            employee.ContractDate = request.ContractDate;
+            employee.ContractDate = request.ContractDate.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(request.ContractDate, DateTimeKind.Utc)
+                : request.ContractDate.ToUniversalTime();
             employee.BankName = request.BankName.Trim();
             employee.BankAccountNumber = request.BankAccountNumber.Trim();
             employee.JobTitle = request.JobTitle.Trim();
